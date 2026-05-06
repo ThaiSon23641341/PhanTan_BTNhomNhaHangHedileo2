@@ -1,40 +1,110 @@
 package iuh.fit.son23641341.nhahanglau_phantan.entity;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.sql.Timestamp;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
+@Entity
+
+@Table(name = "phieu_dat_ban")
 public class PhieuDatBan {
     // Alias cho DAO: getDanhSachBan/setDanhSachBan (dùng chung cho mọi nơi)
-    public ArrayList<Integer> getDanhSachBan() {
+    public List<Integer> getDanhSachBan() {
         return getDanhSachBanDaChon();
     }
 
-    public void setDanhSachBan(ArrayList<Integer> list) {
-        setDanhSachBanDaChon(list);
+    public void setDanhSachBan(List<Integer> list) {
+        setDanhSachBanDaChon(new ArrayList<>(list));
     }
 
+    @Id
+    @Column(name = "ma_phieu")
     private String maPhieu;
-    private String maKhachHang;
-    private int maBan;
+
+    @ManyToOne
+    @JoinColumn(name = "ma_khach_hang")
+    private KhachHangThanhVien khachHang;
+    
+    @Transient
+    private String maKhachHang; // for compatibility
+
+    @Transient
+    private int maBan; // for compatibility
+
+    @Column(name = "ten_khach_dat")
     private String tenKhachDat;
+
+    @Column(name = "sdt_dat")
     private String sdtDat;
+
+    @Column(name = "email_dat")
     private String emailDat;
+
+    @Column(name = "trang_thai")
     private String trangThai;
+
+    @Transient
     private String maNhanVien;
+
+    @Column(name = "so_nguoi")
     private int soNguoi;
+
+    @ManyToOne
+    @JoinColumn(name = "ma_nhan_vien")
     private NhanVien nhanVien;
+
+    @Column(name = "ngay_dat")
     private String ngayDat;
+
+    @Column(name = "gio_dat")
     private String gioDat; 
-    private String phuongThucThanhToan; // Thêm phương thức thanh toán
-    private Timestamp thoiGianDat; // thời gian mà Nhân viên bấm  cái phiếu đặt đó 
+
+    @Column(name = "phuong_thuc_thanh_toan")
+    private String phuongThucThanhToan;
+
+    @Column(name = "thoi_gian_dat")
+    private Timestamp thoiGianDat; 
 
     // --- CÁC BIẾN TIỀN TỆ (Dùng double cho chính xác) ---
+    @Column(name = "tien_coc")
     private double tienCoc;
+    
+    @Column(name = "giam_gia")
     private double giamGia;
+    
+    @Column(name = "tong_tien")
     private double tongTien; // Tổng tiền cuối cùng (để lưu DB)
 
     // --- CÁC DANH SÁCH ---
-    private ArrayList<ChiTietDatMon> danhSachMonAn;
+    @OneToMany(mappedBy = "phieuDatBan", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ChiTietDatMon> danhSachMonAn;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "phieu_dat_ban_ban_an", 
+        joinColumns = @JoinColumn(name = "ma_phieu"), 
+        inverseJoinColumns = @JoinColumn(name = "ma_ban")
+    )
+    private List<BanAn> danhSachBan;
+
+    @ManyToMany(mappedBy = "danhSachPhieuDat")
+    private List<HoaDon> hoaDons;
+
+    @Transient
     private ArrayList<Integer> danhSachBanDaChon; // Dùng khi đặt nhiều bàn
 
     // ================= CONSTRUCTORS =================
@@ -80,6 +150,17 @@ public class PhieuDatBan {
 
     public void setMaPhieu(String maPhieu) {
         this.maPhieu = maPhieu;
+    }
+
+    public KhachHangThanhVien getKhachHang() {
+        return khachHang;
+    }
+
+    public void setKhachHang(KhachHangThanhVien khachHang) {
+        this.khachHang = khachHang;
+        if (khachHang != null) {
+            this.maKhachHang = khachHang.getMaKhachHang();
+        }
     }
 
     public String getMaKhachHang() {
@@ -244,14 +325,20 @@ public class PhieuDatBan {
     }
 
     // ================= QUẢN LÝ DANH SÁCH =================
-    public ArrayList<Integer> getDanhSachBanDaChon() {
-        if (this.danhSachBanDaChon == null)
+    public List<Integer> getDanhSachBanDaChon() {
+        if (this.danhSachBanDaChon == null) {
             this.danhSachBanDaChon = new ArrayList<>();
+            if (this.danhSachBan != null) {
+                for (BanAn ban : this.danhSachBan) {
+                    this.danhSachBanDaChon.add(ban.getMaBan());
+                }
+            }
+        }
         return this.danhSachBanDaChon;
     }
 
     // Alias để GUI gọi không lỗi
-    public ArrayList<Integer> getDanhSachMaBan() {
+    public List<Integer> getDanhSachMaBan() {
         return getDanhSachBanDaChon();
     }
 
@@ -264,13 +351,29 @@ public class PhieuDatBan {
         setDanhSachBanDaChon(list);
     }
 
-    public ArrayList<ChiTietDatMon> getDanhSachMonAn() {
+    public List<BanAn> getDanhSachBanEntity() {
+        return danhSachBan;
+    }
+
+    public void setDanhSachBanEntity(List<BanAn> danhSachBan) {
+        this.danhSachBan = danhSachBan;
+    }
+
+    public List<HoaDon> getHoaDons() {
+        return hoaDons;
+    }
+
+    public void setHoaDons(List<HoaDon> hoaDons) {
+        this.hoaDons = hoaDons;
+    }
+
+    public List<ChiTietDatMon> getDanhSachMonAn() {
         if (this.danhSachMonAn == null)
             this.danhSachMonAn = new ArrayList<>();
         return this.danhSachMonAn;
     }
 
-    public void setDanhSachMonAn(ArrayList<ChiTietDatMon> danhSachMonAn) {
+    public void setDanhSachMonAn(List<ChiTietDatMon> danhSachMonAn) {
         this.danhSachMonAn = danhSachMonAn;
     }
 
@@ -321,7 +424,7 @@ public class PhieuDatBan {
      * Overload: Tính tiền cọc dựa trên danh sách món truyền vào (Dùng cho GUI tính
      * nháp)
      */
-    public double tinhTienCoc(ArrayList<ChiTietDatMon> dsMonTam) {
+    public double tinhTienCoc(List<ChiTietDatMon> dsMonTam) {
         double tongMon = 0;
         if (dsMonTam != null) {
             for (ChiTietDatMon ct : dsMonTam) {

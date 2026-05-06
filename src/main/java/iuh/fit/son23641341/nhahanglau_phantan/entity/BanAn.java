@@ -1,11 +1,23 @@
 package iuh.fit.son23641341.nhahanglau_phantan.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Builder;
 
+@Entity
+@Table(name = "ban_an")
 @Builder
 public class BanAn {
+    @Id
+    @Column(name = "ma_ban")
     private int maBan;
+    
+    @Column(name = "so_cho")
     private int soCho;
+    
+    @Column(name = "loai_ban")
     private String loaiBan; // Thường, VIP, Deluxe
 
     // Constructor mặc định

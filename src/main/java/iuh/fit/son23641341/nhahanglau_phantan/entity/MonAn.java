@@ -1,11 +1,27 @@
 package iuh.fit.son23641341.nhahanglau_phantan.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "mon_an")
 public class MonAn {
-    // 1. Khai báo thuộc tính
+    @Id
+    @Column(name = "ma_mon")
     private String maMon;    // Khóa chính
+    
+    @Column(name = "ten_mon")
     private String tenMon;
+    
+    @Column(name = "loai_mon")
     private String loaiMon;  // "Khai vị", "Món chính", "Tráng miệng", "Đồ uống"
+    
+    @Column(name = "gia")
     private double gia;      // > 0
+    
+    @Column(name = "mo_ta")
     private String moTa;
 
 

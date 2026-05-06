@@ -2,17 +2,59 @@ package iuh.fit.son23641341.nhahanglau_phantan.entity;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
+@Entity
+@Table(name = "hoa_don")
 public class HoaDon {
+    @Id
+    @Column(name = "ma_hoa_don")
     private String maHoaDon;
+    
+    @Column(name = "ngay_lap")
     private Date ngayLap;
-    private PhieuDatBan phieuDat; 
+    
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "hoa_don_phieu_dat",
+        joinColumns = @JoinColumn(name = "ma_hoa_don"),
+        inverseJoinColumns = @JoinColumn(name = "ma_phieu")
+    )
+    private List<PhieuDatBan> danhSachPhieuDat; 
+    
+    @Column(name = "trang_thai")
     private String trangThai;
+    
+    @Column(name = "tong_tien")
     private double tongTien;
+    
+    @Transient
     private String maKhuyenMai;  
+    
+    @Column(name = "loai_hoa_don")
     private String loaiHoaDon;    
+    
+    @Column(name = "gio_lap_hoa_don")
     private Time gioLapHoaDon;
+    
+    @ManyToOne
+    @JoinColumn(name = "ma_khach_hang")
     private KhachHangThanhVien khachHangThanhVien;
+    
+    @ManyToOne
+    @JoinColumn(name = "ma_khuyen_mai")
     private KhuyenMai khuyenMai;
 
     // ================= CONSTRUCTORS =================
@@ -27,7 +69,10 @@ public class HoaDon {
                   double tongTien, String maKhuyenMai, String loaiHoaDon, Time gioLapHoaDon) {
         this.maHoaDon = maHoaDon;
         this.ngayLap = ngayLap;
-        this.phieuDat = phieuDat;
+        this.danhSachPhieuDat = new ArrayList<>();
+        if (phieuDat != null) {
+            this.danhSachPhieuDat.add(phieuDat);
+        }
         this.trangThai = trangThai;
         this.tongTien = tongTien;
         this.maKhuyenMai = maKhuyenMai;
@@ -39,7 +84,10 @@ public class HoaDon {
     public HoaDon(PhieuDatBan phieuDat) {
         this.maHoaDon = "HD" + System.currentTimeMillis();
         
-        this.phieuDat = phieuDat;
+        this.danhSachPhieuDat = new ArrayList<>();
+        if (phieuDat != null) {
+            this.danhSachPhieuDat.add(phieuDat);
+        }
         
         long now = System.currentTimeMillis();
         this.ngayLap = new Date(now);
@@ -92,11 +140,24 @@ public class HoaDon {
     }
 
     public PhieuDatBan getPhieuDat() {
-        return phieuDat;
+        return (danhSachPhieuDat != null && !danhSachPhieuDat.isEmpty()) ? danhSachPhieuDat.get(0) : null;
     }
 
     public void setPhieuDat(PhieuDatBan phieuDat) {
-        this.phieuDat = phieuDat;
+        if (this.danhSachPhieuDat == null) {
+            this.danhSachPhieuDat = new ArrayList<>();
+        }
+        if (phieuDat != null && !this.danhSachPhieuDat.contains(phieuDat)) {
+            this.danhSachPhieuDat.add(phieuDat);
+        }
+    }
+    
+    public List<PhieuDatBan> getDanhSachPhieuDat() {
+        return danhSachPhieuDat;
+    }
+
+    public void setDanhSachPhieuDat(List<PhieuDatBan> danhSachPhieuDat) {
+        this.danhSachPhieuDat = danhSachPhieuDat;
     }
 
     public String getTrangThai() {

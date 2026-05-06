@@ -48,7 +48,7 @@ public class User_DAO implements IUserDAO {
         if (nv == null) {
             return false;
         }
-        User user = findUserById(nv.getIdUser());
+        User user = findUserById(Integer.parseInt(nv.getIdUser()));
         if (user == null) {
             return false;
         }
@@ -66,7 +66,7 @@ public class User_DAO implements IUserDAO {
         }
         int idUser = parseUserId(user.getiD());
         return MockData.nhanViens().stream()
-            .filter(item -> item.getIdUser() == idUser)
+            .filter(item -> item.getIdUser().equals(idUser))
             .findFirst()
             .orElse(null);
     }

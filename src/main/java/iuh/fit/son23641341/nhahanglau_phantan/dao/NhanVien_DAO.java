@@ -19,7 +19,7 @@ public class NhanVien_DAO {
         }
         int idUser = parseUserId(user.getiD());
         return MockData.nhanViens().stream()
-            .filter(item -> item.getIdUser() == idUser)
+            .filter(item -> item.getIdUser().equals( idUser))
             .findFirst()
             .orElse(null);
     }
@@ -90,7 +90,7 @@ public class NhanVien_DAO {
         }
         try {
             nv = new NhanVien(nv.getManv(), nv.getHoten(), nv.getGioiTinh(), nv.getCaLamViec(), nv.getSdt(),
-                nv.getEmail(), nv.getChucVu(), idUser);
+                nv.getEmail(), nv.getChucVu(), new User(String.valueOf(idUser), "", ""));
         } catch (Exception ignored) {
             return false;
         }
@@ -122,7 +122,7 @@ public class NhanVien_DAO {
             return null;
         }
         User user = MockData.users().stream()
-            .filter(item -> parseUserId(item.getiD()) == nv.getIdUser())
+            .filter(item -> parseUserId(item.getiD()) == parseUserId(nv.getIdUser()))
             .findFirst()
             .orElse(null);
         if (user == null) {

@@ -2,17 +2,46 @@ package iuh.fit.son23641341.nhahanglau_phantan.entity;
 import java.util.Objects;
 
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+
+import java.util.Objects;
+
+@Entity
+@Table(name = "nhan_vien")
 public class NhanVien {
 
     // 1. Khai báo thuộc tính
+    @Id
+    @Column(name = "ma_nv")
     private String manv;
+    
+    @Column(name = "ho_ten")
     private String hoten;
+    
+    @Column(name = "gioi_tinh")
     private String gioiTinh;
+    
+    @Column(name = "ca_lam_viec")
     private String caLamViec;
+    
+    @Column(name = "sdt")
     private String sdt;
+    
+    @Column(name = "email")
     private String email;
+    
+    @Column(name = "chuc_vu")
     private String chucVu;
-    private int idUser ; 
+    
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_user")
+    private User user;
 
     // --- Constructors ---
 
@@ -20,7 +49,7 @@ public class NhanVien {
     public NhanVien() {
     }
 
-    public NhanVien(String manv, String hoten, String gioiTinh, String caLamViec, String sdt, String email, String chucVu, int idUser) throws Exception {
+    public NhanVien(String manv, String hoten, String gioiTinh, String caLamViec, String sdt, String email, String chucVu, User user) throws Exception {
         this.manv = manv;
         this.hoten = hoten;
 		this.gioiTinh = gioiTinh;
@@ -28,7 +57,7 @@ public class NhanVien {
 		this.sdt = sdt;
 		this.email = email;
 		this.chucVu = chucVu;		
-		this.idUser = idUser ;
+		this.user = user ;
     }
 
     // --- 2. Viết các phương thức getter, setter ---
@@ -129,11 +158,19 @@ public class NhanVien {
             throw new Exception("Chức vụ chỉ nhận giá trị: \"Quản lý\" hoặc \"Thu ngân\"");
         }
     }
-    // --- idUser ---
+    // --- user ---
     
-    public int getIdUser() {
-		return idUser;
+    public User getUser() {
+		return user;
 	}
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+    
+    public String getIdUser() {
+        return user != null ? user.getiD() : null;
+    }
 
     // --- Aliases for UML naming ---
     public String getMaNhanVien() {

@@ -97,14 +97,16 @@ public final class MockData {
     }
 
     private static void seedUsersAndNhanVien() {
-        USERS.add(new User("1", "admin", "123456"));
-        USERS.add(new User("2", "thungan", "123456"));
+        User user1 = new User("1", "admin", "123456");
+        User user2 = new  User("2", "thungan", "123456") ;
+        USERS.add(user1);
+        USERS.add(user2);
 
         try {
             NHAN_VIENS.add(new NhanVien("NV001", "Nguyễn Quản Lý", "Nam", "Ca Full", "0912345678",
-                "admin@gmail.com", "Quản lý", 1));
+                "admin@gmail.com", "Quản lý", user1));
             NHAN_VIENS.add(new NhanVien("NV002", "Trần Thu Ngân", "Nữ", "Ca Sáng", "0987654321",
-                "thungan@gmail.com", "Thu ngân", 2));
+                "thungan@gmail.com", "Thu ngân", user2));
         } catch (Exception ignored) {
         }
     }

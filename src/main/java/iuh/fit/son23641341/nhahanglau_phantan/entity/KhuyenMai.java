@@ -6,14 +6,38 @@ import java.time.format.DateTimeParseException;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
+@Entity
+@Table(name = "khuyen_mai")
 public class KhuyenMai {
+    @Transient
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ROOT);
+    @Id
+    @Column(name = "ma_khuyen_mai")
     private String maKhuyenMai;
+    
+    @Column(name = "ten_khuyen_mai")
     private String tenKhuyenMai;
+    
+    @Column(name = "phan_tram_giam")
     private double phanTramGiam;
+    
+    @Column(name = "ngay_bat_dau")
     private LocalDate ngayBatDau;
+    
+    @Column(name = "ngay_ket_thuc")
     private LocalDate ngayKetThuc;
+    
+    @Column(name = "mo_ta")
     private String moTa;
+
+    public KhuyenMai() {
+    }
 
     public KhuyenMai(KhuyenMai km) {
         this(km.maKhuyenMai, km.tenKhuyenMai, km.phanTramGiam, km.ngayBatDau, km.ngayKetThuc, km.moTa);

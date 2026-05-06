@@ -300,7 +300,7 @@ public class ChonBan_GUI extends JFrame {
             int soPhieuDat = 0;
             PhieuDatBan phieuDauTien = null;
             for (PhieuDatBan phieu : danhSachPhieuTheoNgay) {
-                ArrayList<Integer> danhSachBanPhieu = phieu.getDanhSachBan();
+                ArrayList<Integer> danhSachBanPhieu = (ArrayList<Integer>) phieu.getDanhSachBan();
                 if (danhSachBanPhieu != null && danhSachBanPhieu.contains(ban.getMaBan())) {
                     soPhieuDat++;
                     if (phieuDauTien == null) {
@@ -577,7 +577,7 @@ public class ChonBan_GUI extends JFrame {
         ArrayList<PhieuDatBan> phieuTheoNgay = phieuDatDAO.getPhieuDatByNgay(ngayDatDaChon);
         int soPhieuDat = 0;
         for (PhieuDatBan phieu : phieuTheoNgay) {
-            ArrayList<Integer> danhSachBanPhieu = phieu.getDanhSachBan();
+            ArrayList<Integer> danhSachBanPhieu = (ArrayList<Integer>) phieu.getDanhSachBan();
             if (danhSachBanPhieu != null && danhSachBanPhieu.contains(ban.getMaBan())) {
                 soPhieuDat++;
             }

@@ -274,7 +274,7 @@ public class PhieuDat_GUI extends JFrame {
         if (phieuTrongNgay != null) {
             for (PhieuDatBan phieu : phieuTrongNgay) {
                 // Đếm các phiếu chứa bàn này và không bị hủy
-                ArrayList<Integer> dsBan = phieu.getDanhSachBan();
+                ArrayList<Integer> dsBan = (ArrayList<Integer>) phieu.getDanhSachBan();
                 if (dsBan != null && dsBan.contains(soBan) && !"Đã hủy".equals(phieu.getTrangThai())) {
                     soPhieuDat++;
                 }
@@ -1018,7 +1018,7 @@ public class PhieuDat_GUI extends JFrame {
                     System.out.println("  - Phiếu " + phieu.getMaPhieu() + " - Trạng thái: " + trangThai + " - Giờ: " + phieu.getGioDat());
                     
                     if ("Đặt trước".equals(trangThai) || "Đã xác nhận".equals(trangThai)) {
-                        ArrayList<Integer> dsBanPhieu = phieu.getDanhSachBan();
+                        ArrayList<Integer> dsBanPhieu = (ArrayList<Integer>) phieu.getDanhSachBan();
                         System.out.println("  - Danh sách bàn trong phiếu: " + dsBanPhieu);
                         
                         if (dsBanPhieu != null && dsBanPhieu.contains(maBan)) {

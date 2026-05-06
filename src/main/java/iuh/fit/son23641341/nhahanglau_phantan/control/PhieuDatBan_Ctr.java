@@ -248,7 +248,7 @@ public class PhieuDatBan_Ctr {
     public ArrayList<ChiTietDatMon> layDanhSachMonAnChoBan(int maBan) {
         PhieuDatBan phieu = timPhieuTheoMaBan(maBan);
         if (phieu != null) {
-            return phieu.getDanhSachMonAn();
+            return (ArrayList<ChiTietDatMon>) phieu.getDanhSachMonAn();
         }
         // Nếu chưa có phiếu, trả về giỏ hàng tạm thời nếu có
         ArrayList<ChiTietDatMon> gioHang = gioHangTamThoi.get(maBan);

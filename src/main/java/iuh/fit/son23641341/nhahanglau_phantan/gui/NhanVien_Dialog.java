@@ -129,7 +129,7 @@ public class NhanVien_Dialog extends JDialog {
             return;
         }
 
-        this.nhanVienMoi = new NhanVien(ma, ten, gt, ca, sdt, email, cv, -1); // idUser sẽ gán sau
+        this.nhanVienMoi = new NhanVien(ma, ten, gt, ca, sdt, email, cv, null); // idUser sẽ gán sau
 
         if (isEditMode) {
             // Chế độ Sửa: Gọi hàm cập nhật (Transaction)
