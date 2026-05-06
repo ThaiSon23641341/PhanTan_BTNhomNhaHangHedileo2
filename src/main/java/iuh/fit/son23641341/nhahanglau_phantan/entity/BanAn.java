@@ -23,7 +23,7 @@ public class BanAn {
     // Constructor mặc định
     public BanAn() {
         this.maBan = 0;
-        this.soCho = 0;
+        this.soCho = 0; 
         this.loaiBan = "Thường";
     }
 

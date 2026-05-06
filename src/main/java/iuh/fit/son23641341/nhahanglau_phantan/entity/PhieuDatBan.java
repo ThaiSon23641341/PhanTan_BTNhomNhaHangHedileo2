@@ -17,8 +17,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import lombok.ToString;
 
 @Entity
+@ToString (exclude = {"khachHang", "nhanVien"} )
 
 @Table(name = "phieu_dat_ban")
 public class PhieuDatBan {
@@ -450,14 +452,5 @@ public class PhieuDatBan {
         return (phaiTra < 0) ? 0 : phaiTra;
     }
 
-	@Override
-	public String toString() {
-		return "PhieuDatBan [maPhieu=" + maPhieu + ", maKhachHang=" + maKhachHang + ", maBan=" + maBan
-				+ ", tenKhachDat=" + tenKhachDat + ", sdtDat=" + sdtDat + ", emailDat=" + emailDat + ", trangThai="
-				+ trangThai + ", maNhanVien=" + maNhanVien + ", ngayDat=" + ngayDat + ", gioDat=" + gioDat
-				+ ", phuongThucThanhToan=" + phuongThucThanhToan + ", thoiGianDat=" + thoiGianDat + ", tienCoc="
-				+ tienCoc + ", giamGia=" + giamGia + ", tongTien=" + tongTien + ", danhSachMonAn=" + danhSachMonAn
-				+ ", danhSachBanDaChon=" + danhSachBanDaChon + "]";
-	}
 }
 
