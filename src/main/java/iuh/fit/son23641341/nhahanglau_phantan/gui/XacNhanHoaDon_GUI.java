@@ -360,13 +360,7 @@ public class XacNhanHoaDon_GUI extends JFrame {
         
         // 3. Cập nhật Bàn ăn -> Trống
         boolean capNhatThanhCong = true;
-        for (Integer maBan : dsBanCanXoa) {
-            phieuDatCtr.xoaGioHangTamThoi(maBan);
-            phieuDatCtr.xoaKhuyenMaiTamThoi(maBan);
-            boolean kq = banAnCtr.capNhatTrangThai(maBan, "Trống");
-            if (!kq) capNhatThanhCong = false;
-        }
-        
+
         if (capNhatThanhCong) {
             String thongBaoIn = "";
             

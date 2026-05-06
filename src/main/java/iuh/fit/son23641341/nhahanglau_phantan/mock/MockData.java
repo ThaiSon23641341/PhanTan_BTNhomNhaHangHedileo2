@@ -129,10 +129,10 @@ public final class MockData {
     }
 
     private static void seedBanAn() {
-        BAN_ANS.add(new BanAn(1, 4, "Trống", "Thường"));
-        BAN_ANS.add(new BanAn(2, 6, "Đang sử dụng", "VIP"));
-        BAN_ANS.add(new BanAn(3, 2, "Đặt trước", "Thường"));
-        BAN_ANS.add(new BanAn(4, 8, "Trống", "Deluxe"));
+        BAN_ANS.add(new BanAn(1, 4, "Thường"));
+        BAN_ANS.add(new BanAn(2, 6, "VIP"));
+        BAN_ANS.add(new BanAn(3, 2, "Thường"));
+        BAN_ANS.add(new BanAn(4, 8, "Deluxe"));
     }
 
     private static void seedKhuyenMai() {

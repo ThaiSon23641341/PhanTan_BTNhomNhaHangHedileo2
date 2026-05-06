@@ -104,10 +104,5 @@ public class ThongKe_DAO {
             .count();
     }
 
-    public int getTongBanDANGSUDUNG() {
-        return (int) MockData.banAns().stream()
-            .filter(ban -> "Đang sử dụng".equals(ban.getTrangThai()))
-            .count();
-    }
 }
 

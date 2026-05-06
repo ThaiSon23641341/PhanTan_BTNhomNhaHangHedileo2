@@ -238,18 +238,8 @@ public class ThongKe_Ctr {
 		 return 0 ; 
 		}
 	}
-    
-    public int getTongBanDangSuDung() { 
-    	ThongKe_DAO dao = new ThongKe_DAO();
-    	if (dao.getTongBanDANGSUDUNG() != 0) {
-    		System.out.println("Tong ban dang su dung: " + dao.getTongBanDANGSUDUNG());
-			return dao.getTongBanDANGSUDUNG();
-		} 
-		else { 
-		System.out.println("Khong co ban dang su dung");
-		return 0 ;
-    	}
-    }
+
+
     
     public int getTongPhieuDangDat() { 
     	ThongKe_DAO dao = new ThongKe_DAO();

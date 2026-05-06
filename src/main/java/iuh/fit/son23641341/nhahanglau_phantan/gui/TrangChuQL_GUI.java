@@ -446,7 +446,7 @@ public class TrangChuQL_GUI extends JFrame {
                 lblGiaTriSoLieu[0].setText(String.valueOf(data[0])); 
                 lblGiaTriSoLieu[1].setText(String.valueOf(thongKeCtr.getTongPhieuDangDat())); 
                 lblGiaTriSoLieu[2].setText(String.valueOf(data[2])); 
-                lblGiaTriSoLieu[3].setText(String.valueOf(thongKeCtr.getTongBanDangSuDung())); 
+//                lblGiaTriSoLieu[3].setText(String.valueOf(thongKeCtr.getTongBanDangSuDung()));
             }
             
             // --- CẬP NHẬT DOANH THU HÔM NAY ---

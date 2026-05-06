@@ -152,7 +152,6 @@ public class PhieuDatBan_Ctr {
         boolean ketQua = danhSachPhieu.remove(phieu);
         if (ketQua) {
             BanAn_Ctr banAnCtr = BanAn_Ctr.getInstance();
-            banAnCtr.capNhatTrangThai(maBan, "Trống");
         }
         return ketQua;
     }

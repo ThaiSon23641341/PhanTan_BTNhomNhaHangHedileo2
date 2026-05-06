@@ -23,7 +23,6 @@ public class BanAn_DAO {
         if (ban == null) {
             return false;
         }
-        ban.capNhatTrangThai(trangThai);
         return true;
     }
 

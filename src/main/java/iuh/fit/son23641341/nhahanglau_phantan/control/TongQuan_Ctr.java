@@ -21,9 +21,7 @@ public class TongQuan_Ctr {
     /**
      * Lấy số lượng Bàn đang được đặt trước.
      */
-    public int laySoBanDangDat() {
-        return tongQuanDAO.getSoBanDangDat();
-    }
+
     
     /**
      * Lấy tổng số Nhân viên.
@@ -35,10 +33,6 @@ public class TongQuan_Ctr {
     /**
      * Lấy số lượng Bàn đang được sử dụng (Đang phục vụ).
      */
-    public int laySoBanDangSuDung() {
-        return tongQuanDAO.getSoBanDangSuDung();
-    }
-    
     /**
      * Lấy tất cả số liệu thống kê dưới dạng mảng int.
      * Thứ tự: [Số KM, Số Bàn Đang Đặt, Số NV, Số Bàn Đang SD]
@@ -47,9 +41,7 @@ public class TongQuan_Ctr {
     public int[] layTatCaSoLieu() {
         return new int[] {
             laySoKhuyenMaiHienTai(),
-            laySoBanDangDat(),
             laySoNhanVien(),
-            laySoBanDangSuDung()
         };
     }
 }

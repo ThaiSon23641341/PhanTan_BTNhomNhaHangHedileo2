@@ -9,20 +9,11 @@ public class TongQuan_DAO {
         return MockData.khuyenMais().size();
     }
 
-    public int getSoBanDangDat() {
-        return (int) MockData.banAns().stream()
-            .filter(ban -> "Đặt trước".equals(ban.getTrangThai()))
-            .count();
-    }
+
 
     public int getSoNhanVien() {
         return MockData.nhanViens().size();
     }
 
-    public int getSoBanDangSuDung() {
-        return (int) MockData.banAns().stream()
-            .filter(ban -> "Đang sử dụng".equals(ban.getTrangThai()))
-            .count();
-    }
 }
 

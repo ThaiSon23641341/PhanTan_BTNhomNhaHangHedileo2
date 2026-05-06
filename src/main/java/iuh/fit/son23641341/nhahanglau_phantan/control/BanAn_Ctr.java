@@ -13,7 +13,7 @@ public class BanAn_Ctr {
     private BanAn_Ctr() {
         danhSachBan = new ArrayList<>(MockData.banAns());
     }
-    
+
     // Lấy instance duy nhất
     public static BanAn_Ctr getInstance() {
         if (instance == null) {
@@ -23,7 +23,6 @@ public class BanAn_Ctr {
     }
 
     // Load dữ liệu bàn từ database
-    // Public để có thể gọi lại khi cần đồng bộ bộ nhớ với DB
     public void loadBanFromDB() {
         danhSachBan = new ArrayList<>(MockData.banAns());
     }
@@ -40,14 +39,13 @@ public class BanAn_Ctr {
                 return ban;
             }
         }
-        return null; // Không tìm thấy
+        return null;
     }
 
     // 4. Thêm bàn mới
     public boolean themBan(BanAn banMoi) {
-        // Kiểm tra mã bàn đã tồn tại chưa
         if (timBanTheoMa(banMoi.getMaBan()) != null) {
-            return false; // Đã tồn tại
+            return false;
         }
         MockData.banAns().add(banMoi);
         return danhSachBan.add(banMoi);
@@ -57,31 +55,11 @@ public class BanAn_Ctr {
     public boolean capNhatBan(BanAn banCapNhat) {
         BanAn ban = timBanTheoMa(banCapNhat.getMaBan());
         if (ban == null) {
-            return false; // Không tìm thấy bàn
+            return false;
         }
 
         try {
             ban.setSoCho(banCapNhat.getSoCho());
-            ban.setTrangThai(banCapNhat.getTrangThai());
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    // 6. Cập nhật trạng thái bàn
-    public boolean capNhatTrangThai(int maBan, String trangThaiMoi) {
-        System.out.println(trangThaiMoi);
-        BanAn ban = timBanTheoMa(maBan);
-        if (ban == null) {
-            return false;
-        }
-
-        try {
-            // Cập nhật trong memory
-            ban.capNhatTrangThai(trangThaiMoi);
-            
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -99,26 +77,9 @@ public class BanAn_Ctr {
         return danhSachBan.remove(ban);
     }
 
-    // 8. Đếm số bàn theo trạng thái
-    public int demBanTheoTrangThai(String trangThai) {
-        int dem = 0;
-        for (BanAn ban : danhSachBan) {
-            if (ban.getTrangThai().equals(trangThai)) {
-                dem++;
-            }
-        }
-        return dem;
-    }
-
     // 9. Lấy tổng số bàn
     public int layTongSoBan() {
         return danhSachBan.size();
-    }
-
-    // 10. Kiểm tra bàn có trống không
-    public boolean kiemTraBanTrong(int maBan) {
-        BanAn ban = timBanTheoMa(maBan);
-        return ban != null && ban.getTrangThai().equals("Trống");
     }
 
     // 11. Lấy danh sách bàn theo loại
@@ -143,4 +104,3 @@ public class BanAn_Ctr {
         return dem;
     }
 }
-

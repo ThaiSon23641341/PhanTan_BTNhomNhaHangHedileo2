@@ -17,7 +17,6 @@ public class ChonBan_GUI extends JFrame {
 
     private static final Color MAU_CHINH = new Color(0xE44433);
     private static final Color MAU_TRONG = new Color(0x7AB750);
-    private static final Color MAU_DANG_SU_DUNG = new Color(0xEC893E);
     private static final Color MAU_DA_DAT = new Color(0xD94B33);
     private static final Color MAU_NEN = new Color(0xF5F5F5);
     private static final Color MAU_LOAI_THUONG = new Color(0x4A90E2);
@@ -37,7 +36,7 @@ public class ChonBan_GUI extends JFrame {
     private JLabel lblAvatar, lblTieuDeTrang;
 
     // Phần bàn
-    private JPanel pnlChiDanTrangThai, pnlTimKiem, pnlLuoiBan, pnlChonNgay;
+    private JPanel pnlChiDan, pnlTimKiem, pnlLuoiBan, pnlChonNgay;
     private JTextField txtTimKiem;
     private JButton btnIconTimKiem;
     private JPanel[] pnlCacTheBan;
@@ -68,7 +67,7 @@ public class ChonBan_GUI extends JFrame {
         lblTieuDeTrang = new JLabel("CHỌN BÀN");
 
         // Khởi tạo phần bàn
-        pnlChiDanTrangThai = new JPanel();
+        pnlChiDan = new JPanel();
         pnlTimKiem = new JPanel();
         pnlChonNgay = new JPanel();
         txtTimKiem = new JTextField();
@@ -157,26 +156,23 @@ public class ChonBan_GUI extends JFrame {
         pnlPhanBan.setBackground(MAU_NEN);
         pnlPhanBan.setBorder(new EmptyBorder(20, 20, 0, 20));
 
-        // Phần trên (chỉ dẫn trạng thái + tìm kiếm)
+        // Phần trên (chỉ dẫn + tìm kiếm)
         JPanel pnlTren = new JPanel(new BorderLayout());
         pnlTren.setBackground(MAU_NEN);
         pnlTren.setBorder(new EmptyBorder(0, 0, 20, 0));
 
-        pnlChiDanTrangThai.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 15));
-        pnlChiDanTrangThai.setBackground(MAU_NEN);
-        pnlChiDanTrangThai.add(taoChiDanTrangThai("TRỐNG", MAU_TRONG));
-        pnlChiDanTrangThai.add(taoChiDanTrangThai("ĐÃ ĐẶT FULL", MAU_DA_DAT));
-        pnlChiDanTrangThai.add(taoChiDanTrangThai("ĐANG SỬ DỤNG", MAU_DANG_SU_DUNG));
+        pnlChiDan.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 15));
+        pnlChiDan.setBackground(MAU_NEN);
 
         // Thêm chỉ dẫn loại bàn
         JPanel pnlKhoangCach = new JPanel();
         pnlKhoangCach.setPreferredSize(new Dimension(5, 1));
         pnlKhoangCach.setBackground(MAU_NEN);
-        pnlChiDanTrangThai.add(pnlKhoangCach);
+        pnlChiDan.add(pnlKhoangCach);
 
-        pnlChiDanTrangThai.add(taoChiDanTrangThai("THƯỜNG", MAU_LOAI_THUONG));
-        pnlChiDanTrangThai.add(taoChiDanTrangThai("VIP", MAU_LOAI_VIP));
-        pnlChiDanTrangThai.add(taoChiDanTrangThai("DELUXE", MAU_LOAI_DELUXE));
+        pnlChiDan.add(taoChiDan("THƯỜNG", MAU_LOAI_THUONG));
+        pnlChiDan.add(taoChiDan("VIP", MAU_LOAI_VIP));
+        pnlChiDan.add(taoChiDan("DELUXE", MAU_LOAI_DELUXE));
 
         // Setup panel chọn ngày
         pnlChonNgay.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
@@ -254,7 +250,7 @@ public class ChonBan_GUI extends JFrame {
         pnlTimKiem.add(txtTimKiem);
         pnlTimKiem.add(btnIconTimKiem);
 
-        pnlTren.add(pnlChiDanTrangThai, BorderLayout.WEST);
+        pnlTren.add(pnlChiDan, BorderLayout.WEST);
         pnlTren.add(pnlChonNgay, BorderLayout.CENTER); // Thêm panel chọn ngày
         pnlTren.add(pnlTimKiem, BorderLayout.EAST);
 
@@ -286,8 +282,6 @@ public class ChonBan_GUI extends JFrame {
 
         for (int i = 0; i < danhSachBan.size(); i++) {
             BanAn ban = danhSachBan.get(i);
-            // Không cập nhật trạng thái BanAn, chỉ dùng trangThaiHienThi để render màu và
-            // tooltip
             JPanel pnlThe = new JPanel(new BorderLayout());
             pnlThe.setBackground(Color.WHITE);
             pnlThe.setBorder(BorderFactory.createCompoundBorder(
@@ -302,14 +296,16 @@ public class ChonBan_GUI extends JFrame {
             lblSoBan[i].setForeground(Color.BLACK);
             lblSoBan[i].setHorizontalAlignment(SwingConstants.CENTER);
 
-            // Đếm số phiếu đặt của bàn này trong ngày (chỉ phiếu "Đặt trước", không tính
-            // "Đã xác nhận" và "Đã hủy")
+            // Đếm số phiếu đặt của bàn này trong ngày
             int soPhieuDat = 0;
+            PhieuDatBan phieuDauTien = null;
             for (PhieuDatBan phieu : danhSachPhieuTheoNgay) {
                 ArrayList<Integer> danhSachBanPhieu = phieu.getDanhSachBan();
-                if (danhSachBanPhieu != null && danhSachBanPhieu.contains(ban.getMaBan())
-                        && "Đặt trước".equals(phieu.getTrangThai())) {
+                if (danhSachBanPhieu != null && danhSachBanPhieu.contains(ban.getMaBan())) {
                     soPhieuDat++;
+                    if (phieuDauTien == null) {
+                        phieuDauTien = phieu;
+                    }
                 }
             }
 
@@ -330,94 +326,29 @@ public class ChonBan_GUI extends JFrame {
                 pnlSoBan.add(lblSoBan[i]);
             }
 
-            // Hiển thị thông tin bàn (số chỗ + trạng thái)
+            // Hiển thị thông tin bàn (số chỗ)
             String thongTinBan = ban.getSoCho() + " chỗ";
             Color mauTrangThai;
 
-            // Kiểm tra trạng thái bàn theo ngày đã chọn (ưu tiên DB)
-            String trangThaiHienThi = "Trống";
             String tooltip = null;
-            PhieuDatBan phieuDB = null;
-            ArrayList<Integer> danhSachBanPhieu = null;
 
             // Kiểm tra xem bàn có full khung giờ không (6 khung giờ/ngày)
             final int MAX_KHUNG_GIO = 6; // 10:00-12:00, 12:00-14:00, 14:00-16:00, 16:00-18:00, 18:00-20:00, 20:00-22:00
             boolean isFullKhungGio = (soPhieuDat >= MAX_KHUNG_GIO);
 
-            // Nếu là ngày hiện tại, ưu tiên check bàn đang sử dụng hoặc phiếu đã xác nhận
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-            String ngayHienTai = sdf.format(new Date());
-
-            if (ngayDatDaChon.equals(ngayHienTai)) {
-                // Check xem có phiếu "Đã xác nhận" không
-                for (PhieuDatBan phieu : danhSachPhieuTheoNgay) {
-                    danhSachBanPhieu = phieu.getDanhSachBan();
-                    if (danhSachBanPhieu != null && danhSachBanPhieu.contains(ban.getMaBan())
-                            && "Đã xác nhận".equals(phieu.getTrangThai())) {
-                        trangThaiHienThi = "Đang sử dụng";
-                        phieuDB = phieu;
-                        tooltip = "Khách: " + phieu.getTenKhachDat() +
-                                " | SĐT: " + phieu.getSdtDat() +
-                                (phieu.getEmailDat() != null && !phieu.getEmailDat().isEmpty()
-                                        ? " | Email: " + phieu.getEmailDat()
-                                        : "");
-                        break;
-                    }
-                }
-
-                // Nếu chưa tìm thấy phiếu đã xác nhận, check trạng thái bàn
-                if (!"Đang sử dụng".equals(trangThaiHienThi) && ban.getTrangThai().equals("Đang sử dụng")) {
-                    trangThaiHienThi = "Đang sử dụng";
-                }
+            if (phieuDauTien != null) {
+                tooltip = "Khách: " + phieuDauTien.getTenKhachDat() +
+                        " | SĐT: " + phieuDauTien.getSdtDat() +
+                        (phieuDauTien.getEmailDat() != null && !phieuDauTien.getEmailDat().isEmpty()
+                                ? " | Email: " + phieuDauTien.getEmailDat()
+                                : "");
             }
 
-            // Nếu chưa phải "Đang sử dụng", check phiếu "Đặt trước"
-            if (!"Đang sử dụng".equals(trangThaiHienThi)) {
-                for (PhieuDatBan phieu : danhSachPhieuTheoNgay) {
-                    danhSachBanPhieu = phieu.getDanhSachBan();
-                    if (danhSachBanPhieu != null && danhSachBanPhieu.contains(ban.getMaBan())
-                            && "Đặt trước".equals(phieu.getTrangThai())) {
-                        if (!isFullKhungGio) {
-                            // Nếu chưa full khung giờ, chỉ đánh dấu có phiếu đặt (không đổi màu)
-                            trangThaiHienThi = "Có phiếu đặt";
-                        } else {
-                            // Nếu đã full khung giờ, đổi trạng thái thành Đặt trước
-                            trangThaiHienThi = "Đặt trước";
-                        }
-                        phieuDB = phieu;
-                        tooltip = "Khách: " + phieu.getTenKhachDat() +
-                                " | SĐT: " + phieu.getSdtDat() +
-                                (phieu.getEmailDat() != null && !phieu.getEmailDat().isEmpty()
-                                        ? " | Email: " + phieu.getEmailDat()
-                                        : "");
-                        break;
-                    }
-                }
-            }
-
-            // Chọn màu theo trạng thái
-            // - Trống / Có phiếu đặt (chưa full): Màu xanh lá (có chấm đỏ nếu có phiếu)
-            // - Đặt trước (full khung giờ): Màu đỏ
-            // - Đang sử dụng: Màu cam
-            switch (trangThaiHienThi) {
-                case "Trống":
-                case "Có phiếu đặt":
-                    if (isFullKhungGio) {
-                        mauTrangThai = MAU_DA_DAT; // Màu đỏ
-                        tooltip = "Bàn đã đầy (6/6 khung giờ)";
-                    } else {
-                        mauTrangThai = MAU_TRONG; // Xanh lá
-                    }
-                    break;
-                case "Đang sử dụng":
-                    mauTrangThai = MAU_DANG_SU_DUNG; // Cam
-                    break;
-                case "Đặt trước":
-                    mauTrangThai = MAU_DA_DAT; // Đỏ (chỉ khi full khung giờ)
-                    tooltip = "Bàn đã đầy (6/6 khung giờ)";
-                    break;
-                default:
-                    mauTrangThai = MAU_NEN;
+            // Chọn màu theo số phiếu đặt
+            if (isFullKhungGio) {
+                mauTrangThai = MAU_DA_DAT; // Màu đỏ khi full
+            } else {
+                mauTrangThai = MAU_TRONG; // Màu xanh lá mặc định
             }
 
             lblThongTinBan[i].setText(thongTinBan);
@@ -431,25 +362,6 @@ public class ChonBan_GUI extends JFrame {
                 lblThongTinBan[i].setToolTipText(tooltip);
             } else {
                 lblThongTinBan[i].setToolTipText(null);
-            }
-
-            // Cập nhật trạng thái bàn vào database nếu khác trạng thái hiện tại
-            String trangThaiDB = ban.getTrangThai();
-            String trangThaiCanCapNhat;
-            if ("Đang sử dụng".equals(trangThaiHienThi)) {
-                trangThaiCanCapNhat = "Đang sử dụng";
-            } else if ("Đặt trước".equals(trangThaiHienThi) || isFullKhungGio) {
-                trangThaiCanCapNhat = "Đặt trước";
-            } else {
-                trangThaiCanCapNhat = "Trống";
-            }
-            // Debug print trạng thái update DB
-            System.out.println("[" + trangThaiCanCapNhat + "]");
-            System.out.println("[DEBUG] Ban " + ban.getMaBan() + ": DB='" + trangThaiDB + "', UI='" + trangThaiCanCapNhat + "'");
-            if (!trangThaiDB.equals(trangThaiCanCapNhat)) {
-                System.out.println("[DEBUG] -> Gọi update DB cho bàn " + ban.getMaBan() + " sang '" + trangThaiCanCapNhat + "'");
-                banAnCtr.capNhatTrangThai(ban.getMaBan(), trangThaiCanCapNhat);
-                ban.setTrangThai(trangThaiCanCapNhat); // đồng bộ lại trong bộ nhớ
             }
 
             // Hiển thị loại bàn
@@ -481,10 +393,8 @@ public class ChonBan_GUI extends JFrame {
 
             // Thêm sự kiện click vào bàn và label trạng thái
             final int maBan = ban.getMaBan();
-            final PhieuDatBan phieuDatBanDB = phieuDB;
-            final ArrayList<Integer> danhSachBanDaChon = (phieuDB != null) ? phieuDB.getDanhSachBan() : null;
             final boolean isBanFull = isFullKhungGio; // Lưu trạng thái full để dùng trong listener
-            
+
             java.awt.event.MouseListener moListener = new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -515,7 +425,7 @@ public class ChonBan_GUI extends JFrame {
         }
     }
 
-    private JPanel taoChiDanTrangThai(String text, Color mau) {
+    private JPanel taoChiDan(String text, Color mau) {
         JPanel pnl = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         pnl.setBackground(MAU_NEN);
 
@@ -664,22 +574,22 @@ public class ChonBan_GUI extends JFrame {
         String thongTinBan = ban.getSoCho() + " chỗ";
         Color mauTrangThai;
 
-        // Kiểm tra trạng thái bàn theo ngày đã chọn
-        PhieuDatBan_Ctr phieuDatCtr = PhieuDatBan_Ctr.getInstance();
-        String trangThaiHienThi = layTrangThaiBanTheoNgay(ban, ngayDatDaChon, phieuDatCtr);
+        ArrayList<PhieuDatBan> phieuTheoNgay = phieuDatDAO.getPhieuDatByNgay(ngayDatDaChon);
+        int soPhieuDat = 0;
+        for (PhieuDatBan phieu : phieuTheoNgay) {
+            ArrayList<Integer> danhSachBanPhieu = phieu.getDanhSachBan();
+            if (danhSachBanPhieu != null && danhSachBanPhieu.contains(ban.getMaBan())) {
+                soPhieuDat++;
+            }
+        }
 
-        switch (trangThaiHienThi) {
-            case "Trống":
-                mauTrangThai = MAU_TRONG;
-                break;
-            case "Đang sử dụng":
-                mauTrangThai = MAU_DANG_SU_DUNG;
-                break;
-            case "Đặt trước":
-                mauTrangThai = MAU_DA_DAT;
-                break;
-            default:
-                mauTrangThai = MAU_NEN;
+        final int MAX_KHUNG_GIO = 6;
+        boolean isFullKhungGio = (soPhieuDat >= MAX_KHUNG_GIO);
+
+        if (isFullKhungGio) {
+            mauTrangThai = MAU_DA_DAT;
+        } else {
+            mauTrangThai = MAU_TRONG;
         }
 
         JLabel lblThongTinBanTemp = new JLabel(thongTinBan);
@@ -724,18 +634,9 @@ public class ChonBan_GUI extends JFrame {
                 BanAn banDuocChon = banAnCtr.timBanTheoMa(maBan);
                 if (banDuocChon != null) {
                     PhieuDatBan_Ctr phieuDatCtr = PhieuDatBan_Ctr.getInstance();
-
-                    // Lấy trạng thái bàn theo ngày đã chọn
-                    String trangThaiBan = layTrangThaiBanTheoNgay(banDuocChon, ngayDatDaChon, phieuDatCtr);
-
-                    // Chỉ mở form nếu bàn có trạng thái hợp lệ
-                    if (trangThaiBan.equals("Trống") ||
-                            trangThaiBan.equals("Đặt trước") ||
-                            trangThaiBan.equals("Đang sử dụng")) {
-                        dispose();
-                        // Truyền ngày đã chọn vào PhieuDat_GUI
-                        new PhieuDat_GUI(maBan, banAnCtr, phieuDatCtr, ngayDatDaChon).setVisible(true);
-                    }
+                    dispose();
+                    // Truyền ngày đã chọn vào PhieuDat_GUI
+                    new PhieuDat_GUI(maBan, banAnCtr, phieuDatCtr, ngayDatDaChon).setVisible(true);
                 }
             }
 
@@ -801,39 +702,6 @@ public class ChonBan_GUI extends JFrame {
         pnlLuoiBan.repaint();
     }
 
-    /**
-     * Lấy trạng thái bàn theo ngày đã chọn
-     * Kiểm tra xem bàn có phiếu đặt vào ngày cụ thể không
-     */
-    private String layTrangThaiBanTheoNgay(BanAn ban, String ngayKiemTra, PhieuDatBan_Ctr phieuDatCtr) {
-        // Lấy ngày hiện tại (định dạng dd/MM/yyyy)
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        String ngayHienTai = sdf.format(new Date());
-
-        // Chỉ hiển thị trạng thái "Đang sử dụng" nếu ngày kiểm tra là ngày hiện tại
-        if (ngayKiemTra.equals(ngayHienTai) && ban.getTrangThai().equals("Đang sử dụng")) {
-            return "Đang sử dụng";
-        }
-
-        // Kiểm tra xem bàn có phiếu đặt vào ngày này không
-        ArrayList<PhieuDatBan> tatCaPhieu = phieuDatCtr.layTatCaPhieu();
-
-        for (PhieuDatBan phieu : tatCaPhieu) {
-            // Bỏ qua phiếu đã hủy
-            if (phieu.getTrangThai().equals("Đã hủy")) {
-                continue;
-            }
-
-            // Kiểm tra xem phiếu này có chứa bàn cần kiểm tra không
-            if (phieu.getMaBan() == ban.getMaBan() && phieu.getNgayDat().equals(ngayKiemTra)) {
-                return "Đặt trước";
-            }
-        }
-
-        // Nếu không có phiếu nào vào ngày này → Bàn trống
-        return "Trống";
-    }
-
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
@@ -846,5 +714,3 @@ public class ChonBan_GUI extends JFrame {
         });
     }
 }
-
-

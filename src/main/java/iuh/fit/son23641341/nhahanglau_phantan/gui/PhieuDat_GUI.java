@@ -161,15 +161,15 @@ public class PhieuDat_GUI extends JFrame {
         String ngayHienTai = sdf.format(new Date());
         String ngayDangXet = (ngayDatTuChonBan != null) ? ngayDatTuChonBan : ngayHienTai;
         
-        // Kiểm tra nếu bàn đang sử dụng, tìm phiếu đang sử dụng từ DB
-        if (banHienTai.getTrangThai().equals("Đang sử dụng")) {
-            phieuHienTai = phieuDatBanCtr.layPhieuDangSuDungTheoMaBan(soBan);
-        } else {
-            phieuHienTai = phieuDatBanCtr.layPhieuDangSuDungTheoMaBan(soBan);
-            if (phieuHienTai == null) {
-                phieuHienTai = phieuDatBanCtr.timPhieuTheoMaBan(soBan);
-            }
-        }
+//        // Kiểm tra nếu bàn đang sử dụng, tìm phiếu đang sử dụng từ DB
+//        if (banHienTai.getTrangThai().equals("Đang sử dụng")) {
+//            phieuHienTai = phieuDatBanCtr.layPhieuDangSuDungTheoMaBan(soBan);
+//        } else {
+//            phieuHienTai = phieuDatBanCtr.layPhieuDangSuDungTheoMaBan(soBan);
+//            if (phieuHienTai == null) {
+//                phieuHienTai = phieuDatBanCtr.timPhieuTheoMaBan(soBan);
+//            }
+//        }
 
         // Nếu truyền vào danhSachBanKhoiPhuc (tức là click từ bàn đã đặt nhiều bàn), thì hiển thị đúng danh sách này
         // Loại bỏ các bàn đã có phiếu đặt trước cho ngày đó
@@ -195,7 +195,7 @@ public class PhieuDat_GUI extends JFrame {
             }
         }
 
-        if (ngayDangXet.equals(ngayHienTai) && banHienTai.getTrangThai().equals("Đang sử dụng")) {
+        if (ngayDangXet.equals(ngayHienTai)) {
             cheDoHienThi = "DANG_SU_DUNG";
             if (phieuHienTai != null) {
                 this.maPhieuDangXem = phieuHienTai.getMaPhieu();
@@ -1183,7 +1183,6 @@ public class PhieuDat_GUI extends JFrame {
                 int ketQua = JOptionPane.showConfirmDialog(this, "Kết thúc sử dụng bàn?", "Xác nhận", JOptionPane.YES_NO_OPTION);
                 if (ketQua == JOptionPane.YES_OPTION) {
                     if (phieuHienTai != null) phieuDatBanCtr.xoaPhieuDat(banHienTai.getMaBan());
-                    banAnCtr.capNhatTrangThai(banHienTai.getMaBan(), "Trống");
                     GUIManager.getInstance().switchToGUI(ChonBan_GUI.class, PhieuDat_GUI.this);
                 }
             } else if (cheDoHienThi.equals("XEM_PHIEU")) {
@@ -1323,10 +1322,7 @@ public class PhieuDat_GUI extends JFrame {
             if (ketQua == JOptionPane.YES_OPTION) {
                 System.out.println("=== BẮT ĐẦU SỬ DỤNG ===");
                 System.out.println("phieuHienTai: " + (phieuHienTai != null ? phieuHienTai.getMaPhieu() : "null"));
-                
-                // 1. Cập nhật trạng thái BÀN thành "Đang sử dụng"
-                BanAn_Ctr.getInstance().capNhatTrangThai(banHienTai.getMaBan(), "Đang sử dụng");
-                cheDoHienThi = "DANG_SU_DUNG";
+
 
                 // Biến để đánh dấu có phải phiếu đặt trước không
                 boolean coPhieuDatTruoc = false;
@@ -1459,7 +1455,7 @@ public class PhieuDat_GUI extends JFrame {
         btnThanhToan.addActionListener(e -> {
             // Kiểm tra phiếu phải có trạng thái "Đã xác nhận" hoặc bàn "Đang sử dụng"
             BanAn banHienTaiCheck = banAnCtr.timBanTheoMa(soBan);
-            boolean coBanDangSuDung = (banHienTaiCheck != null && banHienTaiCheck.getTrangThai().equals("Đang sử dụng"));
+            boolean coBanDangSuDung = (banHienTaiCheck != null );
             boolean coPhieuDaXacNhan = (phieuHienTai != null && "Đã xác nhận".equals(phieuHienTai.getTrangThai()));
             
             if (!coBanDangSuDung && !coPhieuDaXacNhan) {
@@ -1785,7 +1781,7 @@ public class PhieuDat_GUI extends JFrame {
         for (BanAn ban : danhSachTatCaBan) {
             // Chỉ hiển thị bàn nếu: trạng thái trống + chưa được chọn
             // Kiểm tra trùng lịch sẽ thực hiện trong btnXacNhanChon với giờ hiện tại
-            if (ban.getTrangThai().equals("Trống") && !danhSachBanDaChon.contains(ban.getMaBan())) {
+            if (!danhSachBanDaChon.contains(ban.getMaBan())) {
                 JPanel pnlBan = new JPanel(new BorderLayout());
                 pnlBan.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
                 pnlBan.setBackground(Color.WHITE);
