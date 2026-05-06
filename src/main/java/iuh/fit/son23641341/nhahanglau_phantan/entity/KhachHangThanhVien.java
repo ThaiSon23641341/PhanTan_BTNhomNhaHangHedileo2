@@ -1,11 +1,25 @@
 package iuh.fit.son23641341.nhahanglau_phantan.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 
 /**
  * Lớp KhachHang (Customer) chứa thông tin cơ bản của một khách hàng.
  */
+@NoArgsConstructor
+@Builder
+@Entity
+@Table(name = "khach_hang_thanh_vien")
+
 public class KhachHangThanhVien {
+    @Id
+    @Column(name = "ma_khach_hang", nullable = false, unique = true)
     private String maKhachHang;     
     private String hoTen;           
     private String soDienThoai;     
@@ -14,10 +28,6 @@ public class KhachHangThanhVien {
     private String thanhVien;       
     private int diemTichLuy;
     private LocalDate ngayDangKy;
-
-
-    public KhachHangThanhVien() {
-    }
 
     public KhachHangThanhVien(String maKhachHang, String hoTen, String soDienThoai, String email, String gioiTinh, String thanhVien, int diemTichLuy, LocalDate ngayDangKy) {
         this.maKhachHang = maKhachHang;
