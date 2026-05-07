@@ -131,18 +131,15 @@ public class NhanVien_Dialog extends JDialog {
                 JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
                 dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "Cập nhật thất bại. Kiểm tra lại tên đăng nhập!");
+                JOptionPane.showMessageDialog(this, "Cập nhật thất bại. Kiểm tra lại tên đăng nhập hoặc dữ liệu!");
             }
         } else {
-            String idMoi = nhanVienDAO.themTaiKhoanVaLayId(user, pass);
-            if (idMoi != null) {
-                boolean ok = nhanVienDAO.themNhanVienVoiIdUser(nhanVienMoi, idMoi);
-                if (ok) {
-                    JOptionPane.showMessageDialog(this, "Thêm nhân viên thành công!");
-                    dispose();
-                }
+            boolean ok = nhanVienDAO.themNhanVienVaTaiKhoan(nhanVienMoi, user, pass);
+            if (ok) {
+                JOptionPane.showMessageDialog(this, "Thêm nhân viên thành công!");
+                dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "Tên đăng nhập đã tồn tại!");
+                JOptionPane.showMessageDialog(this, "Thêm nhân viên thất bại!\nLưu ý: Tên đăng nhập hoặc Mã nhân viên có thể đã tồn tại.");
             }
         }
     }

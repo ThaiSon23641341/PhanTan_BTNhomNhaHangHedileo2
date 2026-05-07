@@ -87,40 +87,45 @@ public class NhanVien_DAO {
         }
     }
 
-    public String themTaiKhoanVaLayId(String tenNguoiDung, String matKhau) {
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            // Lấy ID lớn nhất hiện tại
-            String maxIdStr = em.createQuery("SELECT MAX(u.iD) FROM User u", String.class).getSingleResult();
-            int nextId = (maxIdStr == null) ? 1 : Integer.parseInt(maxIdStr) + 1;
-            String newId = String.valueOf(nextId);
-            
-            User user = new User(newId, tenNguoiDung, matKhau);
-            em.persist(user);
-            tx.commit();
-            return newId;
-        } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
-            return null;
+    public boolean themNhanVienVaTaiKhoan(NhanVien nv, String tenNguoiDung, String matKhau) {
+        // 1. Kiểm tra xem tên người dùng đã tồn tại chưa
+        Long count = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.tenNguoiDung = :user", Long.class)
+                .setParameter("user", tenNguoiDung)
+                .getSingleResult();
+        if (count > 0) {
+            System.err.println("Lỗi: Tên đăng nhập " + tenNguoiDung + " đã tồn tại.");
+            return false; 
         }
-    }
 
-    public boolean themNhanVienVoiIdUser(NhanVien nv, String idUser) {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            User user = em.find(User.class, idUser);
-            if (user != null) {
-                nv.setUser(user);
-                em.persist(nv);
-                tx.commit();
-                return true;
+            
+            // 2. Tạo ID cho User mới
+            String maxIdStr = em.createQuery("SELECT MAX(u.iD) FROM User u", String.class).getSingleResult();
+            int nextIdInt = 1;
+            if (maxIdStr != null) {
+                try {
+                    String numericPart = maxIdStr.replaceAll("\\D", ""); 
+                    if (!numericPart.isEmpty()) nextIdInt = Integer.parseInt(numericPart) + 1;
+                } catch (NumberFormatException e) {
+                    nextIdInt = (int) (System.currentTimeMillis() % 1000000);
+                }
             }
-            tx.rollback();
-            return false;
+            String newId = String.valueOf(nextIdInt);
+            
+            // 3. Tạo User và gán cho Nhân viên
+            User newUser = new User(newId, tenNguoiDung, matKhau);
+            em.persist(newUser);
+            
+            nv.setUser(newUser);
+            em.persist(nv);
+            
+            tx.commit();
+            return true;
         } catch (Exception e) {
             if (tx.isActive()) tx.rollback();
+            e.printStackTrace();
             return false;
         }
     }
