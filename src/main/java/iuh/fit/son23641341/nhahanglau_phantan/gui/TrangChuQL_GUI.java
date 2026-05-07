@@ -97,8 +97,9 @@ public class TrangChuQL_GUI extends JFrame {
         // --- CẬP NHẬT PHẦN DOANH THU ---
         pnlDoanhThu = new JPanel();
         lblDoanhThuValue = new JLabel("0 VNĐ"); // Mặc định
-        ThongKe_DAO thongKeDAO = new ThongKe_DAO();
-        double doanhThuHomNay = thongKeDAO.getTongTienHomNay(); // Giá trị mặc định ban đầu
+
+        ThongKe_Ctr thongKeCtr = ThongKe_Ctr.getInstance();
+        double doanhThuHomNay = thongKeCtr.getTongTienHomNay();
         lblDoanhThuValue.setText(String.format("%,.0f VNĐ", doanhThuHomNay));
 
         lblTieuDeSoLieu = new JLabel(""); 
@@ -440,7 +441,7 @@ public class TrangChuQL_GUI extends JFrame {
     private void loadFeaturedData() {
         try {
             int[] data = tongQuanCtr.layTatCaSoLieu();
-            ThongKe_Ctr thongKeCtr = new ThongKe_Ctr();
+            ThongKe_Ctr thongKeCtr = ThongKe_Ctr.getInstance();
             
             if (lblGiaTriSoLieu != null && lblGiaTriSoLieu.length == 4) {
                 lblGiaTriSoLieu[0].setText(String.valueOf(data[0])); 
