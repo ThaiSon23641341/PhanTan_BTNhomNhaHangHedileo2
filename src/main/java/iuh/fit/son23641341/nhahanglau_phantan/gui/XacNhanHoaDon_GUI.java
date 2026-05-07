@@ -59,8 +59,8 @@ public class XacNhanHoaDon_GUI extends JFrame {
         init(hd);
     }
     
-    public void setFrameCha(JFrame frame) {
-        this.frameCha = frame;
+    public void setFrameCha(Component parent) {
+        this.frameCha = (parent instanceof JFrame) ? (JFrame) parent : null;
     }
 
     private void init(HoaDon hoaDon) {
@@ -417,7 +417,7 @@ public class XacNhanHoaDon_GUI extends JFrame {
             this.dispose();
             
             // Sử dụng GUIManager để chuyển mượt mà sang ChonBan_GUI
-            GUIManager.getInstance().switchToGUI(ChonBan_GUI.class, this.frameCha);
+            GUIManager.getInstance().switchToGUI(ChonBan_GUI.class, this);
         } else {
             JOptionPane.showMessageDialog(this, "Lỗi cập nhật trạng thái bàn!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }

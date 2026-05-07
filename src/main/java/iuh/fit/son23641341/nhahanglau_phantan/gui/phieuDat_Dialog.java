@@ -17,10 +17,10 @@ public class phieuDat_Dialog extends JDialog implements ActionListener {
 
     private JButton btnThanhToan, btnThanhToanVaIn, btnHuy;
 
-    public phieuDat_Dialog(Frame owner, String message) {
+    public phieuDat_Dialog(Window owner, String message) {
         // Gọi constructor của JDialog
         // true: để làm cho nó modal (chặn tương tác với cửa sổ cha)
-        super(owner, "Xác nhận phiếu đặt", true); 
+        super(owner, "Xác nhận phiếu đặt", ModalityType.APPLICATION_MODAL); 
                                                 
         setSize(800, 350);
         setLocationRelativeTo(owner);

@@ -28,12 +28,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import iuh.fit.son23641341.nhahanglau_phantan.control.KhuyenMai_Ctr;
 import iuh.fit.son23641341.nhahanglau_phantan.control.User_Ctr;
 import iuh.fit.son23641341.nhahanglau_phantan.entity.KhuyenMai;
 import iuh.fit.son23641341.nhahanglau_phantan.entity.NhanVien;
 
-public class QuanLiDuLieu_GUI extends JFrame {
+public class QuanLiDuLieu_GUI extends JPanel {
     // Khai báo các button làm biến instance
     private JButton btnTaiKhoan;
     private JButton btnThemKM;
@@ -51,12 +52,7 @@ public class QuanLiDuLieu_GUI extends JFrame {
     private JButton btnSuaNV;
 
     public QuanLiDuLieu_GUI() {
-
         setLayout(new BorderLayout());
-        // Chèn SideBoar_GUI vào vidu_GUI
-        SideBar_GUI sideBar = new SideBar_GUI();
-        add(sideBar, BorderLayout.WEST);
-        sideBar.setMauNutKhiChon("Quản Lý Dữ Liệu");
 
         // Thêm các thành phần khác vào vidu_GUI nếu cần
         JPanel pnlPhanChinh = new JPanel();
@@ -288,7 +284,7 @@ public class QuanLiDuLieu_GUI extends JFrame {
         btnThemKM.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ThemKhuyenMai_Dialog dlg = new ThemKhuyenMai_Dialog(QuanLiDuLieu_GUI.this, khuyenMaiCtr);
+                ThemKhuyenMai_Dialog dlg = new ThemKhuyenMai_Dialog((JFrame) SwingUtilities.getWindowAncestor(QuanLiDuLieu_GUI.this), khuyenMaiCtr);
                 dlg.setVisible(true);
                 KhuyenMai created = dlg.getKhuyenMaiMoi();
                 if (created != null) {
@@ -347,7 +343,7 @@ public class QuanLiDuLieu_GUI extends JFrame {
         // Xử lý thêm nhân viên và tài khoản
         btnThemNhanVien.addActionListener(evt -> {
 
-            NhanVien_Dialog dlg = new NhanVien_Dialog(QuanLiDuLieu_GUI.this);
+            NhanVien_Dialog dlg = new NhanVien_Dialog((JFrame) SwingUtilities.getWindowAncestor(QuanLiDuLieu_GUI.this));
             dlg.setVisible(true);
             NhanVien created = dlg.getNhanVienMoi();
 
@@ -389,7 +385,7 @@ public class QuanLiDuLieu_GUI extends JFrame {
                 String idUser = (String) data[3];
 
                 // 3. Hiển thị Dialog ở chế độ SỬA
-                NhanVien_Dialog dlg = new NhanVien_Dialog(QuanLiDuLieu_GUI.this, nv, user, pass, idUser);
+                NhanVien_Dialog dlg = new NhanVien_Dialog((JFrame) SwingUtilities.getWindowAncestor(QuanLiDuLieu_GUI.this), nv, user, pass, idUser);
                 dlg.setVisible(true);
 
                 // 4. Nếu sửa thành công, làm mới bảng và giữ nguyên lựa chọn tại dòng đó
@@ -400,10 +396,7 @@ public class QuanLiDuLieu_GUI extends JFrame {
             }
         });
 
-        setTitle("QUẢN Lý Dữ Liệu");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-
+        // Thẻ tiêu đề và các thiết lập khác đã được chuyển vào Main_GUI quản lý
     }
 
     // Nạp lại dữ liệu từ controller vào model bảng khuyến mãi

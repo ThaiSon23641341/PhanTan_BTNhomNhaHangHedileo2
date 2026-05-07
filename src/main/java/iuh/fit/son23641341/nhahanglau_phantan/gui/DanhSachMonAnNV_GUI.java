@@ -22,6 +22,7 @@ import javax.swing.border.EmptyBorder;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 
@@ -32,7 +33,7 @@ import iuh.fit.son23641341.nhahanglau_phantan.entity.ChiTietDatMon;
 import iuh.fit.son23641341.nhahanglau_phantan.entity.MonAn;
 import iuh.fit.son23641341.nhahanglau_phantan.entity.PhieuDatBan;
 
-public class DanhSachMonAnNV_GUI extends JFrame {
+public class DanhSachMonAnNV_GUI extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 
@@ -63,12 +64,36 @@ public class DanhSachMonAnNV_GUI extends JFrame {
 	private String cheDoHienThi; 
 
 	// ======================= KHỐI KHỞI TẠO ICON =======================
-	{
-		URL iconURL = getClass().getResource("/images/icon/logo.png");
-		if (iconURL != null) {
-			ImageIcon icon = new ImageIcon(iconURL);
-			setIconImage(icon.getImage());
-		}
+	/**
+	 * Constructor mặc định cho GUIManager
+	 */
+	public DanhSachMonAnNV_GUI() {
+		this.monAnCtr = new MonAn_Ctr();
+		this.phieuDatBanCtr = PhieuDatBan_Ctr.getInstance();
+		this.danhSachBanDaChon = new ArrayList<>();
+		this.chiTietDonHangHienTai = new ArrayList<>();
+		
+		initUI();
+	}
+	
+	/**
+	 * Nạp dữ liệu từ bên ngoài
+	 */
+	public void setData(int soBan, ArrayList<Integer> danhSachBanDaChon, String ngayDat, PhieuDatBan phieuTamThoi, boolean isThanhVienTamThoi, boolean isCheckboxThanhVienTamThoi) {
+		this.soBan = soBan;
+		this.danhSachBanDaChon = (danhSachBanDaChon != null) ? danhSachBanDaChon : new ArrayList<>();
+		if (this.danhSachBanDaChon.isEmpty()) this.danhSachBanDaChon.add(soBan);
+		
+		this.ngayDat = ngayDat;
+		this.phieuTamThoi = phieuTamThoi;
+		this.isThanhVienTamThoi = isThanhVienTamThoi;
+		this.isCheckboxThanhVienTamThoi = isCheckboxThanhVienTamThoi;
+		
+		// Reload giỏ hàng
+		this.chiTietDonHangHienTai = phieuDatBanCtr.layDanhSachMonAnChoBan(soBan);
+		if (this.chiTietDonHangHienTai == null) this.chiTietDonHangHienTai = new ArrayList<>();
+		
+		capNhatGiaoDienDonHang();
 	}
 
 	// ======================= CONSTRUCTORS =======================
@@ -114,14 +139,7 @@ public class DanhSachMonAnNV_GUI extends JFrame {
 
 	// ======================= KHỞI TẠO GIAO DIỆN =======================
 	private void initUI() {
-		setTitle("Danh sách món ăn - Nhân viên");
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Chỉ đóng cửa sổ này, không tắt app
-		setSize(1200, 800);
-		setLocationRelativeTo(null);
-		setExtendedState(JFrame.MAXIMIZED_BOTH);
-
-		Container contentPane = getContentPane();
-		contentPane.setLayout(new BorderLayout());
+		setLayout(new BorderLayout());
 
 		// --- MAIN PANEL (TRÁI) ---
 		JPanel mainPanel = new JPanel(new BorderLayout());
@@ -130,10 +148,7 @@ public class DanhSachMonAnNV_GUI extends JFrame {
 		JPanel headerPanel = createHeaderPanel();
 		mainPanel.add(headerPanel, BorderLayout.NORTH);
 		
-		// Sidebar
-		SideBar_GUI sidebar = new SideBar_GUI();
-		sidebar.setMauNutKhiChon("Quản Lý Món");
-		mainPanel.add(sidebar, BorderLayout.WEST);
+		// Bỏ sidebar cục bộ vì đã có trong Main_GUI
 
 		// Content (Menu + List món)
 		JPanel contentContainerPanel = new JPanel(new BorderLayout());
@@ -153,9 +168,9 @@ public class DanhSachMonAnNV_GUI extends JFrame {
 		// --- ORDER PANEL (PHẢI) ---
 		JPanel orderPanel = createOrderPanel();
 
-		// Add vào ContentPane
-		contentPane.add(mainPanel, BorderLayout.CENTER);
-		contentPane.add(orderPanel, BorderLayout.EAST);
+		// Add vào JPanel
+		add(mainPanel, BorderLayout.CENTER);
+		add(orderPanel, BorderLayout.EAST);
 
 		capNhatGiaoDienDonHang();
 	}
@@ -361,24 +376,11 @@ public class DanhSachMonAnNV_GUI extends JFrame {
 				phieuTamThoi.setDanhSachMonAn(new ArrayList<>(this.chiTietDonHangHienTai));
 			}
 			
-			// 3. Đóng cửa sổ hiện tại
-			dispose(); 
-			
-			// 4. Mở lại PhieuDat_GUI (chỉ mở 1 lần ở đây)
-			BanAn_Ctr banAnCtr = BanAn_Ctr.getInstance();
-			PhieuDatBan_Ctr phieuCtr = PhieuDatBan_Ctr.getInstance();
-			
-			PhieuDat_GUI guiPhieu = new PhieuDat_GUI(
-				this.soBan,
-				banAnCtr,
-				phieuCtr,
-				ngayDat,
-				danhSachBanDaChon,
-				phieuTamThoi,
-				isThanhVienTamThoi,
-				isCheckboxThanhVienTamThoi
-			);
-			guiPhieu.setVisible(true);
+			// 3. Chuyển về PhieuDat_GUI thông qua GUIManager
+			Component gui = GUIManager.getInstance().switchToGUI(PhieuDat_GUI.class, this);
+			if (gui instanceof PhieuDat_GUI) {
+				((PhieuDat_GUI) gui).nạpDuLieuTuPhieu(this.soBan, this.ngayDat, this.phieuTamThoi);
+			}
 		});
 
 		JButton backButton = new JButton("Quay lại");
@@ -387,22 +389,11 @@ public class DanhSachMonAnNV_GUI extends JFrame {
 		backButton.setFocusPainted(false);
 		backButton.setFont(new Font("Arial", Font.BOLD, 14));
 		backButton.addActionListener(e -> {
-			// Quay lại mà không lưu thay đổi món ăn mới thêm (nếu muốn)
-			// Hoặc lưu luôn tùy logic. Ở đây ta chọn không lưu.
-			dispose();
-			BanAn_Ctr banAnCtr = BanAn_Ctr.getInstance();
-			PhieuDatBan_Ctr phieuCtr = PhieuDatBan_Ctr.getInstance();
-			
-			new PhieuDat_GUI(
-				this.soBan,
-				banAnCtr,
-				phieuCtr,
-				ngayDat,
-				danhSachBanDaChon,
-				phieuTamThoi,
-				isThanhVienTamThoi,
-				isCheckboxThanhVienTamThoi
-			).setVisible(true);
+			// 3. Chuyển về PhieuDat_GUI thông qua GUIManager
+			Component gui = GUIManager.getInstance().switchToGUI(PhieuDat_GUI.class, this);
+			if (gui instanceof PhieuDat_GUI) {
+				((PhieuDat_GUI) gui).nạpDuLieuTuPhieu(this.soBan, this.ngayDat, this.phieuTamThoi);
+			}
 		});
 
 		buttonPanel.add(backButton);

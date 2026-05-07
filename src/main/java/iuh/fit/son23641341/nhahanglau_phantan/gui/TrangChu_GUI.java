@@ -8,13 +8,11 @@ import iuh.fit.son23641341.nhahanglau_phantan.util.ImageLoader;
 
 import java.awt.*;
 
-public class TrangChu_GUI extends JFrame {
+public class TrangChu_GUI extends JPanel {
     // Hằng màu
     private static final Color PRIMARY_COLOR = new Color(0xDC4332);
 
     // Các panel chính
-    private JPanel pnlMain;
-    private SideBar_GUI sidebar;
     private JPanel pnlContent;
     private JPanel pnlBanner;
     private JPanel pnlFeaturedMenu;
@@ -22,7 +20,6 @@ public class TrangChu_GUI extends JFrame {
 
     // Phần header
     private JPanel pnlHeader;
-    private JLabel lblAvatar;
     private JLabel lblLogoHeader;
 
     // Phần banner
@@ -46,13 +43,6 @@ public class TrangChu_GUI extends JFrame {
     // Lưu ý: Các lớp ngoài (User_Ctr, DangNhap_GUI, ChonBan_GUI, SideBar_GUI) cần phải tồn tại.
 
     public TrangChu_GUI() {
-        // Kiểm tra đăng nhập
-        if (!User_Ctr.getInstance().isDangNhap()) {
-            // new DangNhap_GUI().setVisible(true);
-            // dispose();
-            // return;
-        }
-        
         initializeComponents();
         setupLayout();
         setupEventHandlers();
@@ -61,7 +51,6 @@ public class TrangChu_GUI extends JFrame {
 
     private void initializeComponents() {
         // Khởi tạo panels
-        pnlMain = new JPanel(new BorderLayout());
         pnlContent = new JPanel();
         pnlHeader = new JPanel();
         pnlBanner = new JPanel();
@@ -69,7 +58,6 @@ public class TrangChu_GUI extends JFrame {
         pnlOurStory = new JPanel();
 
         // Khởi tạo header
-        lblAvatar = new JLabel();
         lblLogoHeader = new JLabel();
 
         // Khởi tạo banner
@@ -99,17 +87,7 @@ public class TrangChu_GUI extends JFrame {
     }
 
     private void setupLayout() {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setTitle("HÈ DÌ LEO Restaurant Management");
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setLocationRelativeTo(null);
-
         setLayout(new BorderLayout());
-        add(pnlMain, BorderLayout.CENTER);
-        
-        // Khởi tạo sidebar và đánh dấu Trang Chủ
-        sidebar = new SideBar_GUI();
-        sidebar.setMauNutKhiChon("Trang Chủ");
 
         setupHeader();
         setupContent();
@@ -119,8 +97,7 @@ public class TrangChu_GUI extends JFrame {
         pnlContentWrapper.add(pnlHeader, BorderLayout.NORTH);
         pnlContentWrapper.add(pnlContent, BorderLayout.CENTER);
 
-        pnlMain.add(sidebar, BorderLayout.WEST);
-        pnlMain.add(pnlContentWrapper, BorderLayout.CENTER);
+        add(pnlContentWrapper, BorderLayout.CENTER);
     }
     
     private void setupHeader() {

@@ -24,7 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TimKiem_GUI extends JFrame {
+public class TimKiem_GUI extends JPanel {
 
     // --- HẰNG SỐ MÀU SẮC GIAO DIỆN ---
     private static final Color PRIMARY_COLOR = new Color(0xDC4332);
@@ -93,17 +93,7 @@ public class TimKiem_GUI extends JFrame {
     }
 
     private void setupLayout() {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setTitle("HÈ DÌ LEO - Tra Cứu Thông Tin");
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setLocationRelativeTo(null);
-
         setLayout(new BorderLayout());
-
-        SideBar_GUI sidebar = new SideBar_GUI();
-        sidebar.setMauNutKhiChon("Tìm Kiếm");
-        add(sidebar, BorderLayout.WEST);
-
         add(pnlMain, BorderLayout.CENTER);
         pnlMain.add(pnlContent, BorderLayout.CENTER);
     }

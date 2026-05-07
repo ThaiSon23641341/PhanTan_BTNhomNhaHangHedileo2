@@ -6,7 +6,6 @@ import iuh.fit.son23641341.nhahanglau_phantan.entity.KhachHangThanhVien;
 import iuh.fit.son23641341.nhahanglau_phantan.entity.PhieuDatBan;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 // NOTE: Controller now uses mock DAO data; database logic removed.

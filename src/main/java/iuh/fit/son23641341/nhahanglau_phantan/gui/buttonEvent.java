@@ -2,6 +2,7 @@ package iuh.fit.son23641341.nhahanglau_phantan.gui;
 
 import javax.swing.JPanel;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -41,14 +42,13 @@ public class buttonEvent {
 			
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				// Lấy parent frame (PhieuDat_GUI)
-				java.awt.Window window = javax.swing.SwingUtilities.getWindowAncestor(panel);
-				if (window instanceof PhieuDat_GUI) {
-					PhieuDat_GUI phieuDatGUI = (PhieuDat_GUI) window;
-					// Gọi logic giống nút Hủy: xóa giỏ hàng tạm
-					phieuDatGUI.handleThoatButton();
+				// Tìm instance của PhieuDat_GUI thông qua GUIManager
+				Component gui = GUIManager.getInstance().getGUI(PhieuDat_GUI.class);
+				if (gui instanceof PhieuDat_GUI) {
+					((PhieuDat_GUI) gui).handleThoatButton();
 				} else {
-					// Fallback: chỉ mở ChonBan_GUI - Sử dụng GUIManager để chuyển mượt mà
+					// Fallback: quay về màn hình Chọn Bàn
+					java.awt.Window window = javax.swing.SwingUtilities.getWindowAncestor(panel);
 					GUIManager.getInstance().switchToGUI(ChonBan_GUI.class, window);
 				}
 			}

@@ -12,13 +12,11 @@ import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class TrangChuQL_GUI extends JFrame {
+public class TrangChuQL_GUI extends JPanel {
     // Hằng màu
     private static final Color PRIMARY_COLOR = new Color(0xDC4332);
 
     // Các panel chính
-    private JPanel pnlMain;
-    private SideBar_GUI sidebar; 
     private JPanel pnlContent;
     private JPanel pnlBanner;
     private JPanel pnlFeaturedMenu;
@@ -79,7 +77,6 @@ public class TrangChuQL_GUI extends JFrame {
     }
 
     private void initializeComponents() {
-        pnlMain = new JPanel(new BorderLayout());
         pnlContent = new JPanel();
         pnlHeader = new JPanel();
         pnlBanner = new JPanel();
@@ -122,25 +119,8 @@ public class TrangChuQL_GUI extends JFrame {
     }
 
     private void setupLayout() {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setTitle("HÈ DÌ LEO Restaurant Management - Trang Chủ Quản Lý");
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setLocationRelativeTo(null);
-
         setLayout(new BorderLayout());
-        add(pnlMain, BorderLayout.CENTER);
         
-        JPanel pnlSidebarToUse;
-        try {
-            sidebar = new SideBar_GUI();
-            sidebar.setMauNutKhiChon("Tổng Quan"); 
-            pnlSidebarToUse = sidebar;
-        } catch (NoClassDefFoundError e) {
-            System.err.println("Không tìm thấy SideBar_GUI. Sử dụng JPanel thay thế.");
-            pnlSidebarToUse = new JPanel();
-            sidebar = null; 
-        }
-
         setupHeader();
         setupContent();
 
@@ -148,8 +128,7 @@ public class TrangChuQL_GUI extends JFrame {
         pnlContentWrapper.add(pnlHeader, BorderLayout.NORTH);
         pnlContentWrapper.add(pnlContent, BorderLayout.CENTER);
 
-        pnlMain.add(pnlSidebarToUse, BorderLayout.WEST); 
-        pnlMain.add(pnlContentWrapper, BorderLayout.CENTER);
+        add(pnlContentWrapper, BorderLayout.CENTER);
     }
     
     private void setupHeader() {

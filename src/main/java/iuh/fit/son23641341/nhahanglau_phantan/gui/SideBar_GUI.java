@@ -30,6 +30,18 @@ import javax.swing.Box;
 import javax.swing.border.EmptyBorder; 
 import java.awt.Component;
 
+// Import các lớp GUI để chắc chắn trình biên dịch tìm thấy
+import iuh.fit.son23641341.nhahanglau_phantan.gui.TrangChu_GUI;
+import iuh.fit.son23641341.nhahanglau_phantan.gui.TrangChuQL_GUI;
+import iuh.fit.son23641341.nhahanglau_phantan.gui.ChonBan_GUI;
+import iuh.fit.son23641341.nhahanglau_phantan.gui.TimKiem_GUI;
+import iuh.fit.son23641341.nhahanglau_phantan.gui.DanhSachMonAnQL_GUI;
+import iuh.fit.son23641341.nhahanglau_phantan.gui.QuanLyKhachHang_GUI;
+import iuh.fit.son23641341.nhahanglau_phantan.gui.ThongKe_GUI;
+import iuh.fit.son23641341.nhahanglau_phantan.gui.QuanLiDuLieu_GUI;
+import iuh.fit.son23641341.nhahanglau_phantan.gui.TroGiup_GUI;
+import iuh.fit.son23641341.nhahanglau_phantan.gui.DangNhap_GUI;
+
 
 public class SideBar_GUI extends JPanel implements ActionListener {
     private JButton btnTrangChu;
@@ -42,7 +54,13 @@ public class SideBar_GUI extends JPanel implements ActionListener {
     private JButton btnTroGiup;
     private JButton btnTongQuan; 
     
+    private Main_GUI mainGUI; // Đổi tên thành mainGUI
+    private GUIManager guiManager;
     private Map<String, JButton> buttonMap;
+    
+    public void setMainGui(Main_GUI mainGUI) {
+        this.mainGUI = mainGUI;
+    }
     
     // Giả định các lớp GUI khác đã được import hoặc nằm cùng package.
     // VD: TrangChuQL_GUI, TrangChu_GUI, TimKiem_GUI, ChonBan_GUI, DanhSachMonAnQL_GUI, QuanLyKhachHang_GUI, ThongKe_GUI, QuanLiDuLieu_GUI, DangNhap_GUI
@@ -132,19 +150,17 @@ public class SideBar_GUI extends JPanel implements ActionListener {
         btnTroGiup = createButton("Hướng Dẫn Sử Dụng", "/imgs/sidebar_dn/trogiup.png");
 
         // Cho button vào map
-        buttonMap = new HashMap<>() {
-            {
-                put("Tổng Quan", btnTongQuan); 
-                put("Trang Chủ", btnTrangChu);
-                put("Tìm Kiếm", btnTimKiem);
-                put("Đặt Bàn", btnDatBan);
-                put("Quản Lý Món", btnQuanLyMon);
-                put("Khách Hàng", btnKhachHang);
-                put("Thống Kê", btnThongKe);
-                put("Quản Lý Dữ Liệu", btnQuanLyDuLieu);
-                put("Trợ Giúp", btnTroGiup);
-            }
-        };
+        buttonMap = new HashMap<>();
+        this.guiManager = GUIManager.getInstance();
+        buttonMap.put("Tổng Quan", btnTongQuan); 
+        buttonMap.put("Trang Chủ", btnTrangChu);
+        buttonMap.put("Tìm Kiếm", btnTimKiem);
+        buttonMap.put("Đặt Bàn", btnDatBan);
+        buttonMap.put("Quản Lý Món", btnQuanLyMon);
+        buttonMap.put("Khách Hàng", btnKhachHang);
+        buttonMap.put("Thống Kê", btnThongKe);
+        buttonMap.put("Quản Lý Dữ Liệu", btnQuanLyDuLieu);
+        buttonMap.put("Trợ Giúp", btnTroGiup);
         
         // add button vào center
         pnlCenter.add(btnTongQuan);
@@ -265,92 +281,74 @@ public class SideBar_GUI extends JPanel implements ActionListener {
         Window window = SwingUtilities.getWindowAncestor(this);
         GUIManager guiManager = GUIManager.getInstance();
 
-        if (source == btnTongQuan) {
-            try {
-                guiManager.switchToGUI(TrangChuQL_GUI.class, window);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Không tìm thấy TrangChuQL_GUI. Đảm bảo file class tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
-            }
-        } else if (source == btnTrangChu) {
-            try {
-                guiManager.switchToGUI(TrangChu_GUI.class, window);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Không tìm thấy TrangChu_GUI. Đảm bảo file class tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
-            }
-        } else if (source == btnTimKiem) {
-            try {
-                guiManager.switchToGUI(TimKiem_GUI.class, window);
-            } catch (Exception ex) {
-                 JOptionPane.showMessageDialog(this, "Không tìm thấy TimKiem_GUI. Đảm bảo file class tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                 ex.printStackTrace();
-            }
-        } else if (source == btnDatBan) {
-            try {
-                guiManager.switchToGUI(ChonBan_GUI.class, window);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Không tìm thấy ChonBan_GUI. Đảm bảo file class tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
-            }
-        } else if (source == btnQuanLyMon) {
-            try {
-                guiManager.switchToGUI(DanhSachMonAnQL_GUI.class, window);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Không tìm thấy DanhSachMonAnQL_GUI. Đảm bảo file class tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
-            }
-        } else if (source == btnKhachHang) {
-            try {
-                guiManager.switchToGUI(QuanLyKhachHang_GUI.class, window);
-            } catch (Exception ex) {
-                 JOptionPane.showMessageDialog(this, "Không tìm thấy QuanLyKhachHang_GUI. Đảm bảo file class tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                 ex.printStackTrace();
-            }
-        } else if (source == btnThongKe) { 
-            try {
-                guiManager.switchToGUI(ThongKe_GUI.class, window);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Không tìm thấy ThongKe_GUI. Đảm bảo file class tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
-            }
-        } else if (source == btnQuanLyDuLieu) {
-            try {
-                guiManager.switchToGUI(QuanLiDuLieu_GUI.class, window);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Không tìm thấy QuanLiDuLieu_GUI. Đảm bảo file class tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
-            }
-        } else if (source == btnTroGiup) {
-            // TroGiup_GUI có thể là dialog, mở bình thường
-            Window parent = SwingUtilities.getWindowAncestor(this);
-            if (parent != null) {
-                new TroGiup_GUI().setVisible(true);
+        // Ưu tiên sử dụng field mainGUI nếu đã được set, nếu không thì lấy từ window
+        Main_GUI targetMain = (this.mainGUI != null) ? this.mainGUI : 
+                             (window instanceof Main_GUI ? (Main_GUI) window : null);
+
+        if (targetMain != null) {
+            if (source == btnTongQuan) {
+                targetMain.showCard("Tổng Quan", (Class<? extends Component>) TrangChuQL_GUI.class);
+            } else if (source == btnTrangChu) {
+                targetMain.showCard("Trang Chủ", (Class<? extends Component>) TrangChu_GUI.class);
+            } else if (source == btnTimKiem) {
+                targetMain.showCard("Tìm Kiếm", (Class<? extends Component>) TimKiem_GUI.class);
+            } else if (source == btnDatBan) {
+                targetMain.showCard("Đặt Bàn", (Class<? extends Component>) ChonBan_GUI.class);
+            } else if (source == btnQuanLyMon) {
+                targetMain.showCard("Quản Lý Món", (Class<? extends Component>) DanhSachMonAnQL_GUI.class);
+            } else if (source == btnKhachHang) {
+                targetMain.showCard("Khách Hàng", (Class<? extends Component>) QuanLyKhachHang_GUI.class);
+            } else if (source == btnThongKe) {
+                targetMain.showCard("Thống Kê", (Class<? extends Component>) ThongKe_GUI.class);
+            } else if (source == btnQuanLyDuLieu) {
+                targetMain.showCard("Quản Lý Dữ Liệu", (Class<? extends Component>) QuanLiDuLieu_GUI.class);
+            } else if (source == btnTroGiup) {
+                targetMain.showCard("Trợ Giúp", (Class<? extends Component>) TroGiup_GUI.class);
             } else {
-                new TroGiup_GUI().setVisible(true);
+                xuLyDangXuat(window);
             }
         } else {
-            // Xử lý đăng xuất - Dispose tất cả GUI đã cache
-            int choice = JOptionPane.showConfirmDialog(this,
-                    "Bạn có chắc muốn đăng xuất?",
-                    "Xác nhận đăng xuất",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE);
-            if (choice == JOptionPane.YES_OPTION) {
-                // Reset trạng thái đăng nhập trong Controller
-                User_Ctr.getInstance().dangXuat();
-                
-                // Dispose tất cả GUI đã cache
-                guiManager.disposeAll();
-                
-                if (window != null) {
-                    window.dispose();
-                }
-                try {
-                    new DangNhap_GUI().setVisible(true);
-                } catch (NoClassDefFoundError ex) {
-                     JOptionPane.showMessageDialog(this, "Không tìm thấy DangNhap_GUI. Đảm bảo file class tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                }
+            // Fallback nếu không tìm thấy Main_GUI
+            if (source == btnTongQuan) {
+                guiManager.switchToGUI((Class<? extends Component>) TrangChuQL_GUI.class, window);
+            } else if (source == btnTrangChu) {
+                guiManager.switchToGUI((Class<? extends Component>) TrangChu_GUI.class, window);
+            } else if (source == btnTimKiem) {
+                guiManager.switchToGUI((Class<? extends Component>) TimKiem_GUI.class, window);
+            } else if (source == btnDatBan) {
+                guiManager.switchToGUI((Class<? extends Component>) ChonBan_GUI.class, window);
+            } else if (source == btnQuanLyMon) {
+                guiManager.switchToGUI((Class<? extends Component>) DanhSachMonAnQL_GUI.class, window);
+            } else if (source == btnKhachHang) {
+                guiManager.switchToGUI((Class<? extends Component>) QuanLyKhachHang_GUI.class, window);
+            } else if (source == btnThongKe) {
+                guiManager.switchToGUI((Class<? extends Component>) ThongKe_GUI.class, window);
+            } else if (source == btnQuanLyDuLieu) {
+                guiManager.switchToGUI((Class<? extends Component>) QuanLiDuLieu_GUI.class, window);
+            } else if (source == btnTroGiup) {
+                guiManager.switchToGUI((Class<? extends Component>) TroGiup_GUI.class, window);
+            } else {
+                xuLyDangXuat(window);
+            }
+        }
+    }
+
+    private void xuLyDangXuat(Window window) {
+        int choice = JOptionPane.showConfirmDialog(window,
+                "Bạn có chắc muốn đăng xuất?",
+                "Xác nhận đăng xuất",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+        if (choice == JOptionPane.YES_OPTION) {
+            User_Ctr.getInstance().dangXuat();
+            GUIManager.getInstance().disposeAll();
+            if (window != null) {
+                window.dispose();
+            }
+            try {
+                new DangNhap_GUI().setVisible(true);
+            } catch (NoClassDefFoundError ex) {
+                JOptionPane.showMessageDialog(window, "Không tìm thấy DangNhap_GUI.", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

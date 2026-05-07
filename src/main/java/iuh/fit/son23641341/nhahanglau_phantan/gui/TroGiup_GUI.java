@@ -4,19 +4,10 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-public class TroGiup_GUI extends JFrame {
-    private SideBar_GUI sidebar;
+public class TroGiup_GUI extends JPanel {
 
     public TroGiup_GUI() {
-        setTitle("Trợ Giúp - Hướng Dẫn Sử Dụng Hệ Thống");
-        setExtendedState(JFrame.MAXIMIZED_BOTH); // Full màn hình
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
-
-        // Sidebar
-        sidebar = new SideBar_GUI();
-        sidebar.setMauNutKhiChon("Trợ Giúp");
-        add(sidebar, BorderLayout.WEST);
 
         // Panel chứa nội dung hướng dẫn
         JPanel pnlContent = new JPanel(new BorderLayout());
