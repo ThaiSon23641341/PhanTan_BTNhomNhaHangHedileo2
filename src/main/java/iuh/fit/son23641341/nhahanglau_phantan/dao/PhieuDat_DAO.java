@@ -2,109 +2,135 @@ package iuh.fit.son23641341.nhahanglau_phantan.dao;
 
 import iuh.fit.son23641341.nhahanglau_phantan.entity.PhieuDatBan;
 import iuh.fit.son23641341.nhahanglau_phantan.entity.ChiTietDatMon;
-import iuh.fit.son23641341.nhahanglau_phantan.mock.MockData;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 
 import java.util.ArrayList;
+import java.util.List;
 
-// NOTE: Database logic removed; DAO now uses in-memory mock data.
 public class PhieuDat_DAO {
+    private EntityManager em;
 
-    public boolean insertPhieuDat(PhieuDatBan p) {
-        if (p == null) {
-            return false;
-        }
-        return MockData.phieuDats().add(p);
+    public PhieuDat_DAO() {
+        this.em = iuh.fit.son23641341.nhahanglau_phantan.util.EntityManagerFactoryUtil.getEntityManager();
     }
 
-    public ArrayList<PhieuDatBan> getAllPhieuDat() {
-        return new ArrayList<>(MockData.phieuDats());
+    public PhieuDat_DAO(EntityManager em) {
+        this.em = em;
+    }
+
+    public boolean insertPhieuDat(PhieuDatBan p) {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(p);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<PhieuDatBan> getAllPhieuDat() {
+        return em.createQuery("SELECT p FROM PhieuDatBan p", PhieuDatBan.class).getResultList();
     }
 
     public ArrayList<PhieuDatBan> timKiemPhieuDat(String keyword) {
-        ArrayList<PhieuDatBan> ds = new ArrayList<>();
-        String query = keyword == null ? "" : keyword.trim();
-        for (PhieuDatBan phieu : MockData.phieuDats()) {
-            if (query.isEmpty()
-                || (phieu.getMaPhieu() != null && phieu.getMaPhieu().contains(query))
-                || (phieu.getTenKhachDat() != null && phieu.getTenKhachDat().contains(query))
-                || (phieu.getSdtDat() != null && phieu.getSdtDat().contains(query))) {
-                ds.add(phieu);
-            }
-        }
-        return ds;
+        String jpql = "SELECT p FROM PhieuDatBan p WHERE " +
+                      "p.maPhieu LIKE :kw OR " +
+                      "p.tenKhachDat LIKE :kw OR " +
+                      "p.sdtDat LIKE :kw";
+        List<PhieuDatBan> list = em.createQuery(jpql, PhieuDatBan.class)
+                .setParameter("kw", "%" + keyword + "%")
+                .getResultList();
+        return new ArrayList<>(list);
     }
 
     public ArrayList<PhieuDatBan> getPhieuDatByNgay(String ngayDat) {
-        ArrayList<PhieuDatBan> ds = new ArrayList<>();
-        if (ngayDat == null) {
-            return ds;
-        }
-        for (PhieuDatBan phieu : MockData.phieuDats()) {
-            if (ngayDat.equals(phieu.getNgayDat())) {
-                ds.add(phieu);
-            }
-        }
-        return ds;
+        List<PhieuDatBan> list = em.createQuery("SELECT p FROM PhieuDatBan p WHERE p.ngayDat = :ngay", PhieuDatBan.class)
+                .setParameter("ngay", ngayDat)
+                .getResultList();
+        return new ArrayList<>(list);
     }
 
     public ArrayList<PhieuDatBan> getPhieuDatByBanVaNgay(int maBan, String ngayDat) {
-        ArrayList<PhieuDatBan> ds = new ArrayList<>();
-        for (PhieuDatBan phieu : MockData.phieuDats()) {
-            boolean matchNgay = ngayDat == null || ngayDat.equals(phieu.getNgayDat());
-            boolean matchBan = phieu.getDanhSachBanDaChon().contains(maBan) || phieu.getMaBan() == maBan;
-            if (matchNgay && matchBan) {
-                ds.add(phieu);
-            }
-        }
-        return ds;
+        // Lưu ý: maBan có thể là maBan chính hoặc nằm trong danh sách bàn đã chọn
+        String jpql = "SELECT p FROM PhieuDatBan p WHERE p.ngayDat = :ngay AND (p.maBan = :ma OR :ma MEMBER OF p.danhSachBanDaChon)";
+        List<PhieuDatBan> list = em.createQuery(jpql, PhieuDatBan.class)
+                .setParameter("ngay", ngayDat)
+                .setParameter("ma", maBan)
+                .getResultList();
+        return new ArrayList<>(list);
     }
 
     public boolean capNhatTrangThai(String maPhieu, String trangThai) {
-        PhieuDatBan phieu = timPhieuDatBangMa(maPhieu);
-        if (phieu == null) {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            PhieuDatBan p = em.find(PhieuDatBan.class, maPhieu);
+            if (p != null) {
+                p.setTrangThai(trangThai);
+                em.merge(p);
+            }
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
             return false;
         }
-        phieu.setTrangThai(trangThai);
-        return true;
     }
 
     public boolean capNhatThongTinKhachHang(String maPhieu, String tenKhach, String sdt, String email) {
-        PhieuDatBan phieu = timPhieuDatBangMa(maPhieu);
-        if (phieu == null) {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            PhieuDatBan p = em.find(PhieuDatBan.class, maPhieu);
+            if (p != null) {
+                p.setTenKhachDat(tenKhach);
+                p.setSdtDat(sdt);
+                p.setEmailDat(email);
+                em.merge(p);
+            }
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
             return false;
         }
-        phieu.setTenKhachDat(tenKhach);
-        phieu.setSdtDat(sdt);
-        phieu.setEmailDat(email);
-        return true;
     }
 
-    public boolean capNhatMonAnCuaPhieu(String maPhieu, ArrayList<ChiTietDatMon> danhSachMon) {
-        PhieuDatBan phieu = timPhieuDatBangMa(maPhieu);
-        if (phieu == null) {
+    public boolean capNhatMonAnCuaPhieu(String maPhieu, List<ChiTietDatMon> danhSachMon) {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            PhieuDatBan p = em.find(PhieuDatBan.class, maPhieu);
+            if (p != null) {
+                p.setDanhSachMonAn(new ArrayList<>(danhSachMon));
+                em.merge(p);
+            }
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
             return false;
         }
-        phieu.setDanhSachMonAn(danhSachMon);
-        return true;
     }
 
     public PhieuDatBan getPhieuDangSuDungTheoMaBan(int maBan) {
-        for (PhieuDatBan phieu : MockData.phieuDats()) {
-            if (phieu.getMaBan() == maBan || phieu.getDanhSachBanDaChon().contains(maBan)) {
-                return phieu;
-            }
+        try {
+            String jpql = "SELECT p FROM PhieuDatBan p WHERE (p.maBan = :ma OR :ma MEMBER OF p.danhSachBanDaChon) AND p.trangThai = 'Đang sử dụng'";
+            return em.createQuery(jpql, PhieuDatBan.class)
+                    .setParameter("ma", maBan)
+                    .getSingleResult();
+        } catch (Exception e) {
+            return null;
         }
-        return null;
     }
 
     public PhieuDatBan timPhieuDatBangMa(String maPhieu) {
-        if (maPhieu == null) {
-            return null;
-        }
-        return MockData.phieuDats().stream()
-            .filter(item -> maPhieu.equals(item.getMaPhieu()))
-            .findFirst()
-            .orElse(null);
+        return em.find(PhieuDatBan.class, maPhieu);
     }
 }
 

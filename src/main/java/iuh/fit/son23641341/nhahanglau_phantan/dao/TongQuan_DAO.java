@@ -1,19 +1,32 @@
 package iuh.fit.son23641341.nhahanglau_phantan.dao;
 
-import iuh.fit.son23641341.nhahanglau_phantan.mock.MockData;
+import jakarta.persistence.EntityManager;
 
-// NOTE: Database logic removed; DAO now uses in-memory mock data.
 public class TongQuan_DAO {
+    private EntityManager em;
+
+    public TongQuan_DAO() {
+        this.em = iuh.fit.son23641341.nhahanglau_phantan.util.EntityManagerFactoryUtil.getEntityManager();
+    }
+
+    public TongQuan_DAO(EntityManager em) {
+        this.em = em;
+    }
 
     public int getSoKhuyenMai() {
-        return MockData.khuyenMais().size();
+        try {
+            return ((Number) em.createQuery("SELECT COUNT(k.maKhuyenMai) FROM KhuyenMai k").getSingleResult()).intValue();
+        } catch (Exception e) {
+            return 0;
+        }
     }
-
-
 
     public int getSoNhanVien() {
-        return MockData.nhanViens().size();
+        try {
+            return ((Number) em.createQuery("SELECT COUNT(n.manv) FROM NhanVien n").getSingleResult()).intValue();
+        } catch (Exception e) {
+            return 0;
+        }
     }
-
 }
 

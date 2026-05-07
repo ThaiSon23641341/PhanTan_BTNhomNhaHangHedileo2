@@ -7,19 +7,20 @@ import iuh.fit.son23641341.nhahanglau_phantan.entity.PhieuDatBan;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 // NOTE: Controller now uses mock DAO data; database logic removed.
 public class KhachHang_Ctr {
 
     private KhachHang_DAO khachHangDAO;
-    private ArrayList<KhachHangThanhVien> danhSachKhachHangThanhVien;
+    private List<KhachHangThanhVien> danhSachKhachHangThanhVien;
 
     public KhachHang_Ctr() {
         khachHangDAO = new KhachHang_DAO();
         danhSachKhachHangThanhVien = khachHangDAO.getAllKhachHang();
     }
 
-    public ArrayList<KhachHangThanhVien> getDanhSachKhachHang() {
+    public List<KhachHangThanhVien> getDanhSachKhachHang() {
         this.danhSachKhachHangThanhVien = khachHangDAO.getAllKhachHang();
         return danhSachKhachHangThanhVien;
     }
@@ -67,7 +68,7 @@ public class KhachHang_Ctr {
     }
 
 
-    public ArrayList<KhachHangThanhVien> timKhachHangTheoSDT(String query) {
+    public List<KhachHangThanhVien> timKhachHangTheoSDT(String query) {
         if (query == null || query.trim().isEmpty()) {
             return khachHangDAO.getAllKhachHang();
         }

@@ -41,7 +41,9 @@ public class TongQuan_Ctr {
     public int[] layTatCaSoLieu() {
         return new int[] {
             laySoKhuyenMaiHienTai(),
+            0, // Placeholder cho Số Bàn Đang Đặt (sẽ được tính ở GUI)
             laySoNhanVien(),
+            0  // Placeholder cho Số Bàn Đang SD
         };
     }
 }

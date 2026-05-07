@@ -1,29 +1,37 @@
 package iuh.fit.son23641341.nhahanglau_phantan.dao;
 
 import iuh.fit.son23641341.nhahanglau_phantan.entity.MonAn;
-import iuh.fit.son23641341.nhahanglau_phantan.mock.MockData;
+import jakarta.persistence.EntityManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
-// NOTE: Database logic removed; DAO now uses in-memory mock data.
 public class TimKiemChung_DAO {
+    private EntityManager em;
+
+    public TimKiemChung_DAO() {
+        this.em = iuh.fit.son23641341.nhahanglau_phantan.util.EntityManagerFactoryUtil.getEntityManager();
+    }
+
+    public TimKiemChung_DAO(EntityManager em) {
+        this.em = em;
+    }
 
     public List<MonAn> getAllMonAn() {
-        return new ArrayList<>(MockData.monAns());
+        return em.createQuery("SELECT m FROM MonAn m", MonAn.class).getResultList();
     }
 
     public List<MonAn> timKiemMonAn(String keyword, boolean searchByCode, boolean searchByOrder, boolean searchByBill,
                                     boolean searchByCustomer, boolean searchByTable) {
-        List<MonAn> list = new ArrayList<>();
-        String query = keyword == null ? "" : keyword.trim().toLowerCase();
-        for (MonAn mon : MockData.monAns()) {
-            String target = searchByCode ? mon.getMaMon() : mon.getTenMon();
-            if (query.isEmpty() || (target != null && target.toLowerCase().contains(query))) {
-                list.add(mon);
-            }
+        String jpql = "SELECT m FROM MonAn m WHERE ";
+        if (searchByCode) {
+            jpql += "m.maMon LIKE :keyword";
+        } else {
+            jpql += "LOWER(m.tenMon) LIKE LOWER(:keyword)";
         }
-        return list;
+        
+        return em.createQuery(jpql, MonAn.class)
+                .setParameter("keyword", "%" + keyword + "%")
+                .getResultList();
     }
 }
 
