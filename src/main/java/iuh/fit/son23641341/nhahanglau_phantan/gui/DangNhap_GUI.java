@@ -157,13 +157,12 @@ public class DangNhap_GUI extends JFrame {
                 JOptionPane.showMessageDialog(this, "Xin chào: " + nhanVienLogin.getHoten());
             }
 
-            // Chuyển sang trang chủ
+            // Chuyển sang khung giao diện chính (Single Frame)
             try {
-                GUIManager.getInstance().switchToGUI(TrangChu_GUI.class, this);
+                GUIManager.getInstance().openMainGUI(this);
             } catch (Exception ex) {
-                // Đảm bảo chương trình không sập nếu TrangChu_GUI chưa được config đúng
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Lỗi khi chuyển trang chủ!");
+                JOptionPane.showMessageDialog(this, "Lỗi khi khởi chạy giao diện chính!");
             }
         } else {
             JOptionPane.showMessageDialog(this, "Tên đăng nhập hoặc mật khẩu không đúng!\n\n", "Đăng nhập thất bại", JOptionPane.ERROR_MESSAGE);

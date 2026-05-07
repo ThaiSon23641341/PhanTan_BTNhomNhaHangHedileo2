@@ -23,11 +23,24 @@ public class PhieuDat_DAO {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
+            // Đảm bảo danh sách bàn được nạp đầy đủ trước khi persist (nếu chưa có)
+            if ((p.getDanhSachBanPersist() == null || p.getDanhSachBanPersist().isEmpty()) &&
+                    p.getDanhSachBan() != null && !p.getDanhSachBan().isEmpty()) {
+                List<iuh.fit.son23641341.nhahanglau_phantan.entity.BanAn> dsBanEntities = new ArrayList<>();
+                for (Integer maBan : p.getDanhSachBan()) {
+                    iuh.fit.son23641341.nhahanglau_phantan.entity.BanAn b = em
+                            .find(iuh.fit.son23641341.nhahanglau_phantan.entity.BanAn.class, maBan);
+                    if (b != null)
+                        dsBanEntities.add(b);
+                }
+                p.setDanhSachBanPersist(dsBanEntities);
+            }
             em.persist(p);
             tx.commit();
             return true;
         } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
+            if (tx.isActive())
+                tx.rollback();
             e.printStackTrace();
             return false;
         }
@@ -39,30 +52,47 @@ public class PhieuDat_DAO {
 
     public ArrayList<PhieuDatBan> timKiemPhieuDat(String keyword) {
         String jpql = "SELECT p FROM PhieuDatBan p WHERE " +
-                      "p.maPhieu LIKE :kw OR " +
-                      "p.tenKhachDat LIKE :kw OR " +
-                      "p.sdtDat LIKE :kw";
+                "p.maPhieu LIKE :kw OR " +
+                "p.tenKhachDat LIKE :kw OR " +
+                "p.sdtDat LIKE :kw";
         List<PhieuDatBan> list = em.createQuery(jpql, PhieuDatBan.class)
                 .setParameter("kw", "%" + keyword + "%")
                 .getResultList();
         return new ArrayList<>(list);
     }
 
-    public ArrayList<PhieuDatBan> getPhieuDatByNgay(String ngayDat) {
-        List<PhieuDatBan> list = em.createQuery("SELECT p FROM PhieuDatBan p WHERE p.ngayDat = :ngay", PhieuDatBan.class)
-                .setParameter("ngay", ngayDat)
-                .getResultList();
-        return new ArrayList<>(list);
+    public ArrayList<PhieuDatBan> getPhieuDatByNgay(String ngayDatStr) {
+        // Xóa cache để đảm bảo lấy dữ liệu mới nhất từ DB (Real-time)
+        em.clear();
+        try {
+            java.util.Date d = new java.text.SimpleDateFormat("dd/MM/yyyy").parse(ngayDatStr);
+            java.sql.Date sqlDate = new java.sql.Date(d.getTime());
+
+            String jpql = "SELECT DISTINCT p FROM PhieuDatBan p LEFT JOIN FETCH p.danhSachBan WHERE p.ngayDat = :ngay";
+            List<PhieuDatBan> list = em.createQuery(jpql, PhieuDatBan.class)
+                    .setParameter("ngay", sqlDate)
+                    .getResultList();
+            return new ArrayList<>(list);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
-    public ArrayList<PhieuDatBan> getPhieuDatByBanVaNgay(int maBan, String ngayDat) {
-        // Lưu ý: maBan có thể là maBan chính hoặc nằm trong danh sách bàn đã chọn
-        String jpql = "SELECT p FROM PhieuDatBan p WHERE p.ngayDat = :ngay AND (p.maBan = :ma OR :ma MEMBER OF p.danhSachBanDaChon)";
-        List<PhieuDatBan> list = em.createQuery(jpql, PhieuDatBan.class)
-                .setParameter("ngay", ngayDat)
-                .setParameter("ma", maBan)
-                .getResultList();
-        return new ArrayList<>(list);
+    public ArrayList<PhieuDatBan> getPhieuDatByBanVaNgay(int maBan, String ngayDatStr) {
+        try {
+            java.util.Date d = new java.text.SimpleDateFormat("dd/MM/yyyy").parse(ngayDatStr);
+            java.sql.Date sqlDate = new java.sql.Date(d.getTime());
+
+            String jpql = "SELECT DISTINCT p FROM PhieuDatBan p JOIN p.danhSachBan b WHERE b.maBan = :ma AND p.ngayDat = :ngay";
+            List<PhieuDatBan> list = em.createQuery(jpql, PhieuDatBan.class)
+                    .setParameter("ma", maBan)
+                    .setParameter("ngay", sqlDate)
+                    .getResultList();
+            return new ArrayList<>(list);
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
 
     public boolean capNhatTrangThai(String maPhieu, String trangThai) {
@@ -77,7 +107,8 @@ public class PhieuDat_DAO {
             tx.commit();
             return true;
         } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
+            if (tx.isActive())
+                tx.rollback();
             return false;
         }
     }
@@ -96,7 +127,8 @@ public class PhieuDat_DAO {
             tx.commit();
             return true;
         } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
+            if (tx.isActive())
+                tx.rollback();
             return false;
         }
     }
@@ -113,14 +145,15 @@ public class PhieuDat_DAO {
             tx.commit();
             return true;
         } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
+            if (tx.isActive())
+                tx.rollback();
             return false;
         }
     }
 
     public PhieuDatBan getPhieuDangSuDungTheoMaBan(int maBan) {
         try {
-            String jpql = "SELECT p FROM PhieuDatBan p WHERE (p.maBan = :ma OR :ma MEMBER OF p.danhSachBanDaChon) AND p.trangThai = 'Đang sử dụng'";
+            String jpql = "SELECT DISTINCT p FROM PhieuDatBan p JOIN p.danhSachBan b WHERE b.maBan = :ma AND p.trangThai = 'Đang sử dụng'";
             return em.createQuery(jpql, PhieuDatBan.class)
                     .setParameter("ma", maBan)
                     .getSingleResult();
@@ -133,4 +166,3 @@ public class PhieuDat_DAO {
         return em.find(PhieuDatBan.class, maPhieu);
     }
 }
-

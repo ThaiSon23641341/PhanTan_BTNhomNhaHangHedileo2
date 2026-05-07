@@ -59,8 +59,8 @@ public class XacNhanHoaDon_GUI extends JFrame {
         init(hd);
     }
     
-    public void setFrameCha(JFrame frame) {
-        this.frameCha = frame;
+    public void setFrameCha(Component parent) {
+        this.frameCha = (parent instanceof JFrame) ? (JFrame) parent : null;
     }
 
     private void init(HoaDon hoaDon) {
@@ -308,9 +308,12 @@ public class XacNhanHoaDon_GUI extends JFrame {
             String thongTinTV = (giamGiaThanhVien > 0) ? String.format("<br>Thành viên: -%,.0f VNĐ", giamGiaThanhVien) : "";
             String thongTinCoc = (tienCoc > 0) ? String.format("<br>Đã đặt cọc: -%,.0f VNĐ", tienCoc) : "";
             
-            ArrayList<Integer> maBans = new ArrayList<>(hoaDonHienTai.getPhieuDat().getDanhSachBanDaChon());
-            int maBanChinh = !maBans.isEmpty() ? maBans.get(0) : 0;
-            ArrayList<ChiTietDatMon> dsMonAn = new ArrayList<>(hoaDonHienTai.getPhieuDat().getDanhSachMonAn());
+            List<Integer> dsBanP = hoaDonHienTai.getPhieuDat().getDanhSachBanDaChon();
+            ArrayList<Integer> maBans = (dsBanP != null) ? new ArrayList<>(dsBanP) : new ArrayList<>();
+            int maBanChinh = !maBans.isEmpty() ? maBans.get(0) : (hoaDonHienTai.getPhieuDat() != null ? hoaDonHienTai.getPhieuDat().getMaBan() : 0);
+            
+            List<ChiTietDatMon> dsMonP = hoaDonHienTai.getPhieuDat().getDanhSachMonAn();
+            ArrayList<ChiTietDatMon> dsMonAn = (dsMonP != null) ? new ArrayList<>(dsMonP) : new ArrayList<>();
 
             String noiDungDialog = String.format("<html><body style='width: 300px;'>"
                     + "<h3>XÁC NHẬN THANH TOÁN</h3>"
@@ -414,7 +417,7 @@ public class XacNhanHoaDon_GUI extends JFrame {
             this.dispose();
             
             // Sử dụng GUIManager để chuyển mượt mà sang ChonBan_GUI
-            GUIManager.getInstance().switchToGUI(ChonBan_GUI.class, this.frameCha);
+            GUIManager.getInstance().switchToGUI(ChonBan_GUI.class, this);
         } else {
             JOptionPane.showMessageDialog(this, "Lỗi cập nhật trạng thái bàn!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }

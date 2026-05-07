@@ -218,6 +218,23 @@ public class ThongTinNhanVien_GUI extends JFrame {
         logoutButton.setForeground(Color.WHITE);
         logoutButton.setPreferredSize(new Dimension(120, 40));
 
+        logoutButton.addActionListener(e -> {
+            Window window = SwingUtilities.getWindowAncestor(logoutButton);
+            int choice = JOptionPane.showConfirmDialog(window,
+                    "Bạn có chắc muốn đăng xuất?",
+                    "Xác nhận đăng xuất",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+            if (choice == JOptionPane.YES_OPTION) {
+                User_Ctr.getInstance().dangXuat();
+                GUIManager.getInstance().disposeAll();
+                if (window != null) {
+                    window.dispose();
+                }
+                new DangNhap_GUI().setVisible(true);
+            }
+        });
+
         panel.add(logoutButton);
         
         return panel;

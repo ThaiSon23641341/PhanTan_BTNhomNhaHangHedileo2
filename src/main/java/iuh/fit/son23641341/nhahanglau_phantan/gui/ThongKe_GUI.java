@@ -18,7 +18,7 @@ import iuh.fit.son23641341.nhahanglau_phantan.control.ThongKe_Ctr.ThongKeCardDat
 import iuh.fit.son23641341.nhahanglau_phantan.dao.ThongKe_DAO.ThongKeThang;
 import iuh.fit.son23641341.nhahanglau_phantan.dao.ThongKe_DAO.TopMonAn;
 
-public class ThongKe_GUI extends JFrame {
+public class ThongKe_GUI extends JPanel {
 
     private final ThongKe_Ctr thongKeCtr = ThongKe_Ctr.getInstance();
     private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
@@ -41,21 +41,8 @@ public class ThongKe_GUI extends JFrame {
     private int maxLuotGoi = 1;
 
     public ThongKe_GUI() {
-        if (!User_Ctr.getInstance().isDangNhap()) {
-            dispose();
-            return;
-        }
-
-        setTitle("Hệ thống Thống kê - Nhà hàng Hẻ Di Leo");
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        getContentPane().setBackground(COLOR_BACKGROUND);
-
-        // Sidebar
-        SideBar_GUI sidebar = new SideBar_GUI();
-        sidebar.setMauNutKhiChon("Thống Kê");
-        add(sidebar, BorderLayout.WEST);
+        setBackground(COLOR_BACKGROUND);
 
         // Content Wrapper
         JPanel contentWrapper = new JPanel(new BorderLayout());

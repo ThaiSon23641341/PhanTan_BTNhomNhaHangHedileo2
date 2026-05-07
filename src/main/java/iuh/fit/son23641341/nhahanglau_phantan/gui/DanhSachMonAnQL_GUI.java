@@ -16,6 +16,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -33,7 +34,7 @@ import iuh.fit.son23641341.nhahanglau_phantan.entity.MonAn;
 
 // Lưu ý: Cần giả định rằng SideBar_GUI và ThemMonAn_Dialog tồn tại để code chạy được.
 
-public class DanhSachMonAnQL_GUI extends JFrame {
+public class DanhSachMonAnQL_GUI extends JPanel {
 
     private static final long serialVersionUID = 1L;
     private static final Color PRIMARY_COLOR = new Color(0xDC4332);
@@ -60,18 +61,6 @@ public class DanhSachMonAnQL_GUI extends JFrame {
     // Field cho tìm kiếm
     private JTextField txtSearch;
 
-    /**
-     * Launch the application.
-     */
-    {
-        // Khi cửa sổ được mở, chuyển sang trạng thái toàn màn hình (maximized)
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowOpened(java.awt.event.WindowEvent e) {
-                setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
-            }
-        });
-    }
 
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
@@ -90,22 +79,15 @@ public class DanhSachMonAnQL_GUI extends JFrame {
      * Create the frame.
      */
     public DanhSachMonAnQL_GUI() {
-        setTitle("Quản lý món ăn - Quản lý");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1200, 800);
-        setLocationRelativeTo(null);
-
         // Khởi tạo controller dữ liệu
         monAnCtr = new MonAn_Ctr();
 
-        // Sử dụng BorderLayout cho content pane của JFrame
-        Container contentPane = getContentPane();
-        contentPane.setLayout(new BorderLayout());
+        setLayout(new BorderLayout());
 
-        // === KHU VỰC BÊN TRÁI (MAIN PANEL) ===
+        // === KHU VỰC CHÍNH (MAIN PANEL) ===
         JPanel mainPanel = new JPanel(new BorderLayout());
 
-        // 1. Tim kiem
+        // 1. Header
         JPanel headerPanel = createHeaderPanel();
 
         // 3. Content Container Panel (Chứa menu vàng và danh sách món ăn)
@@ -115,29 +97,21 @@ public class DanhSachMonAnQL_GUI extends JFrame {
         JPanel menuPanel = createMenuPanel();
 
         // 3b. Dishes Panel (Khu vực hiển thị món ăn)
-        dishesPanel = createDishesPanel(monAnCtr.getDanhSachMonAn()); // Truyền danh sách mặc định
+        dishesPanel = createDishesPanel(monAnCtr.getDanhSachMonAn());
 
         // Thêm menu panel và dishes panel vào content container
         contentContainerPanel.add(menuPanel, BorderLayout.NORTH);
-        contentContainerPanel.add(new JScrollPane(dishesPanel), BorderLayout.CENTER); // Bọc trong JScrollPane để có thể
-                                                                                      // cuộn
+        contentContainerPanel.add(new JScrollPane(dishesPanel), BorderLayout.CENTER);
 
         // Thêm các panel con vào mainPanel
         mainPanel.add(headerPanel, BorderLayout.NORTH);
-
-        // Cần lớp SideBar_GUI
-        // Giả định: SideBar_GUI sidebar = new SideBar_GUI();
-        // sidebar.setMauNutKhiChon("Quản Lý Món");
-        mainPanel.add(new SideBar_GUI(), BorderLayout.WEST); // Dùng constructor mặc định nếu có
         mainPanel.add(contentContainerPanel, BorderLayout.CENTER);
 
         // === KHU VỰC BÊN PHẢI (EDIT PANEL) ===
-        // 4. Edit Panel - Form chỉnh sửa món ăn
         JPanel editPanel = createEditPanel();
 
-        // Thêm mainPanel và editPanel vào cửa sổ chính (JFrame)
-        contentPane.add(mainPanel, BorderLayout.CENTER);
-        contentPane.add(editPanel, BorderLayout.EAST);
+        add(mainPanel, BorderLayout.CENTER);
+        add(editPanel, BorderLayout.EAST);
     }
 
     // ======================= START TIM KIEM ĐÃ SỬA LỖI ======================
@@ -294,7 +268,7 @@ public class DanhSachMonAnQL_GUI extends JFrame {
         btnAddDish.setToolTipText("Thêm món ăn mới");
         btnAddDish.addActionListener(e -> {
             // Cần lớp ThemMonAn_Dialog
-            ThemMonAn_Dialog dialog = new ThemMonAn_Dialog(this);
+            ThemMonAn_Dialog dialog = new ThemMonAn_Dialog((JFrame) SwingUtilities.getWindowAncestor(this));
             dialog.setVisible(true);
             MonAn monMoi = dialog.getMonAnMoi();
             if (monMoi != null) {

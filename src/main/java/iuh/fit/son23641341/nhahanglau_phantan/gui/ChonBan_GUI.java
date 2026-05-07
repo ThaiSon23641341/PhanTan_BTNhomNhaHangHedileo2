@@ -13,7 +13,7 @@
     import java.text.SimpleDateFormat;
     import com.toedter.calendar.JDateChooser;
     
-    public class ChonBan_GUI extends JFrame {
+    public class ChonBan_GUI extends JPanel {
     
         private static final Color MAU_CHINH = new Color(0xE44433);
         private static final Color MAU_TRONG = new Color(0x7AB750);
@@ -29,11 +29,10 @@
         private BanAn_Ctr banAnCtr;
     
         // Panels chính
-        private JPanel pnlMain, pnlHeader, pnlPhanBan;
-        private SideBar_GUI sidebar;
+        private JPanel pnlHeader, pnlPhanBan;
     
         // Phần header
-        private JLabel lblAvatar, lblTieuDeTrang;
+        private JLabel lblTieuDeTrang;
     
         // Phần bàn
         private JPanel pnlChiDan, pnlTimKiem, pnlLuoiBan, pnlChonNgay;
@@ -57,13 +56,11 @@
         }
     
         private void initializeComponents() {
-            pnlMain = new JPanel(new BorderLayout());
             pnlHeader = new JPanel();
             pnlPhanBan = new JPanel();
     
             // Khởi tạo header
     
-            lblAvatar = new JLabel();
             lblTieuDeTrang = new JLabel("CHỌN BÀN");
     
             // Khởi tạo phần bàn
@@ -112,26 +109,16 @@
         }
     
         private void setupLayout() {
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            setTitle("HÈ DÌ LEO - Chọn Bàn");
-            setExtendedState(JFrame.MAXIMIZED_BOTH);
-            setLocationRelativeTo(null);
             setLayout(new BorderLayout());
-            add(pnlMain, BorderLayout.CENTER);
-    
-            // Khởi tạo sidebar và đánh dấu Đặt Bàn
-            sidebar = new SideBar_GUI();
-            sidebar.setMauNutKhiChon("Đặt Bàn");
-    
+
             setupHeader();
             setupTableSection();
-    
+
             JPanel pnlContentWrapper = new JPanel(new BorderLayout());
             pnlContentWrapper.add(pnlHeader, BorderLayout.NORTH);
             pnlContentWrapper.add(pnlPhanBan, BorderLayout.CENTER);
-    
-            pnlMain.add(sidebar, BorderLayout.WEST);
-            pnlMain.add(pnlContentWrapper, BorderLayout.CENTER);
+
+            add(pnlContentWrapper, BorderLayout.CENTER);
         }
     
         private void setupHeader() {
@@ -282,149 +269,10 @@
     
             for (int i = 0; i < danhSachBan.size(); i++) {
                 BanAn ban = danhSachBan.get(i);
-                JPanel pnlThe = new JPanel(new BorderLayout());
-                pnlThe.setBackground(Color.WHITE);
-                pnlThe.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
-                        new EmptyBorder(10, 10, 10, 10)));
-    
-                // Hiển thị số bàn (format 001, 002...)
-                JPanel pnlSoBan = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-                pnlSoBan.setBackground(Color.WHITE);
-                lblSoBan[i].setText("Bàn " + ban.getMaBanFormatted());
-                lblSoBan[i].setFont(new Font("Arial", Font.BOLD, 14));
-                lblSoBan[i].setForeground(Color.BLACK);
-                lblSoBan[i].setHorizontalAlignment(SwingConstants.CENTER);
-    
-                // Đếm số phiếu đặt của bàn này trong ngày
-                int soPhieuDat = 0;
-                PhieuDatBan phieuDauTien = null;
-                for (PhieuDatBan phieu : danhSachPhieuTheoNgay) {
-                    ArrayList<Integer> danhSachBanPhieu = (ArrayList<Integer>) phieu.getDanhSachBan();
-                    if (danhSachBanPhieu != null && danhSachBanPhieu.contains(ban.getMaBan())) {
-                        soPhieuDat++;
-                        if (phieuDauTien == null) {
-                            phieuDauTien = phieu;
-                        }
-                    }
-                }
-    
-                // Thêm chấm đỏ (số lượng = số phiếu đặt)
-                if (soPhieuDat > 0) {
-                    // Tạo chuỗi chấm đỏ theo số phiếu (tối đa 6)
-                    StringBuilder chamDo = new StringBuilder();
-                    for (int j = 0; j < Math.min(soPhieuDat, 6); j++) {
-                        chamDo.append("●");
-                    }
-    
-                    JLabel lblChamDo = new JLabel(chamDo.toString());
-                    lblChamDo.setFont(new Font("Arial", Font.BOLD, 16));
-                    lblChamDo.setForeground(Color.RED);
-                    pnlSoBan.add(lblSoBan[i]);
-                    pnlSoBan.add(lblChamDo);
-                } else {
-                    pnlSoBan.add(lblSoBan[i]);
-                }
-    
-                // Hiển thị thông tin bàn (số chỗ)
-                String thongTinBan = ban.getSoCho() + " chỗ";
-                Color mauTrangThai;
-    
-                String tooltip = null;
-    
-                // Kiểm tra xem bàn có full khung giờ không (6 khung giờ/ngày)
-                final int MAX_KHUNG_GIO = 6; // 10:00-12:00, 12:00-14:00, 14:00-16:00, 16:00-18:00, 18:00-20:00, 20:00-22:00
-                boolean isFullKhungGio = (soPhieuDat >= MAX_KHUNG_GIO);
-    
-                if (phieuDauTien != null) {
-                    tooltip = "Khách: " + phieuDauTien.getTenKhachDat() +
-                            " | SĐT: " + phieuDauTien.getSdtDat() +
-                            (phieuDauTien.getEmailDat() != null && !phieuDauTien.getEmailDat().isEmpty()
-                                    ? " | Email: " + phieuDauTien.getEmailDat()
-                                    : "");
-                }
-    
-                // Chọn màu theo số phiếu đặt
-                if (isFullKhungGio) {
-                    mauTrangThai = MAU_DA_DAT; // Màu đỏ khi full
-                } else {
-                    mauTrangThai = MAU_TRONG; // Màu xanh lá mặc định
-                }
-    
-                lblThongTinBan[i].setText(thongTinBan);
-                lblThongTinBan[i].setFont(new Font("Arial", Font.BOLD, 12));
-                lblThongTinBan[i].setForeground(Color.WHITE);
-                lblThongTinBan[i].setHorizontalAlignment(SwingConstants.CENTER);
-                lblThongTinBan[i].setOpaque(true);
-                lblThongTinBan[i].setBackground(mauTrangThai);
-                lblThongTinBan[i].setBorder(new EmptyBorder(8, 5, 8, 5));
-                if (tooltip != null) {
-                    lblThongTinBan[i].setToolTipText(tooltip);
-                } else {
-                    lblThongTinBan[i].setToolTipText(null);
-                }
-    
-                // Hiển thị loại bàn
-                Color mauLoaiBan;
-                switch (ban.getLoaiBan()) {
-                    case "VIP":
-                        mauLoaiBan = MAU_LOAI_VIP;
-                        break;
-                    case "Deluxe":
-                        mauLoaiBan = MAU_LOAI_DELUXE;
-                        break;
-                    default:
-                        mauLoaiBan = MAU_LOAI_THUONG;
-                }
-    
-                lblLoaiBan[i].setText(ban.getLoaiBan());
-                lblLoaiBan[i].setFont(new Font("Arial", Font.BOLD, 11));
-                lblLoaiBan[i].setForeground(Color.WHITE);
-                lblLoaiBan[i].setHorizontalAlignment(SwingConstants.CENTER);
-                lblLoaiBan[i].setOpaque(true);
-                lblLoaiBan[i].setBackground(mauLoaiBan);
-                lblLoaiBan[i].setBorder(new EmptyBorder(5, 5, 5, 5));
-    
-                pnlThe.add(pnlSoBan, BorderLayout.NORTH);
-                pnlThe.add(lblThongTinBan[i], BorderLayout.CENTER);
-                pnlThe.add(lblLoaiBan[i], BorderLayout.SOUTH);
-    
-                pnlCacTheBan[i] = pnlThe;
-    
-                // Thêm sự kiện click vào bàn và label trạng thái
-                final int maBan = ban.getMaBan();
-                final boolean isBanFull = isFullKhungGio; // Lưu trạng thái full để dùng trong listener
-    
-                java.awt.event.MouseListener moListener = new java.awt.event.MouseAdapter() {
-                    @Override
-                    public void mouseClicked(java.awt.event.MouseEvent evt) {
-                        BanAn banDuocChon = banAnCtr.timBanTheoMa(maBan);
-                        if (banDuocChon != null) {
-                            PhieuDatBan_Ctr phieuDatCtr = PhieuDatBan_Ctr.getInstance();
-                            dispose();
-                            // Mở form - Truyền thêm isBanFull để disable nút "Xác nhận đặt" nếu full
-                            new PhieuDat_GUI(maBan, banAnCtr, phieuDatCtr, ngayDatDaChon, isBanFull).setVisible(true);
-                        }
-                    }
-    
-                    @Override
-                    public void mouseEntered(java.awt.event.MouseEvent evt) {
-                        pnlThe.setBackground(new Color(245, 245, 245));
-                    }
-    
-                    @Override
-                    public void mouseExited(java.awt.event.MouseEvent evt) {
-                        pnlThe.setBackground(Color.WHITE);
-                    }
-                };
-                pnlThe.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                pnlThe.addMouseListener(moListener);
-                lblThongTinBan[i].addMouseListener(moListener);
-    
-                pnlLuoiBan.add(pnlThe);
+                pnlLuoiBan.add(taoTheBan(ban));
             }
         }
-    
+
         private JPanel taoChiDan(String text, Color mau) {
             JPanel pnl = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
             pnl.setBackground(MAU_NEN);
@@ -586,7 +434,7 @@
             final int MAX_KHUNG_GIO = 6;
             boolean isFullKhungGio = (soPhieuDat >= MAX_KHUNG_GIO);
     
-            if (isFullKhungGio) {
+            if (soPhieuDat > 0) {
                 mauTrangThai = MAU_DA_DAT;
             } else {
                 mauTrangThai = MAU_TRONG;
@@ -628,15 +476,17 @@
             // Thêm sự kiện click
             final int maBan = ban.getMaBan();
             pnlThe.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            pnlThe.addMouseListener(new java.awt.event.MouseAdapter() {
+            
+            java.awt.event.MouseAdapter mouseAdapter = new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseClicked(java.awt.event.MouseEvent evt) {
                     BanAn banDuocChon = banAnCtr.timBanTheoMa(maBan);
                     if (banDuocChon != null) {
-                        PhieuDatBan_Ctr phieuDatCtr = PhieuDatBan_Ctr.getInstance();
-                        dispose();
-                        // Truyền ngày đã chọn vào PhieuDat_GUI
-                        new PhieuDat_GUI(maBan, banAnCtr, phieuDatCtr, ngayDatDaChon).setVisible(true);
+                        Window window = SwingUtilities.getWindowAncestor(ChonBan_GUI.this);
+                        Component gui = GUIManager.getInstance().switchToGUI(PhieuDat_GUI.class, window);
+                        if (gui instanceof PhieuDat_GUI) {
+                            ((PhieuDat_GUI) gui).setData(maBan, ngayDatDaChon, null);
+                        }
                     }
                 }
     
@@ -649,7 +499,18 @@
                 public void mouseExited(java.awt.event.MouseEvent evt) {
                     pnlThe.setBackground(Color.WHITE);
                 }
-            });
+            };
+            
+            pnlThe.addMouseListener(mouseAdapter);
+            // Quan trọng: Thêm listener vào tất cả component con để không bị chặn click
+            for (Component c : pnlThe.getComponents()) {
+                c.addMouseListener(mouseAdapter);
+                if (c instanceof Container) {
+                    for (Component cc : ((Container) c).getComponents()) {
+                        cc.addMouseListener(mouseAdapter);
+                    }
+                }
+            }
     
             return pnlThe;
         }
@@ -667,7 +528,7 @@
             // Lấy danh sách bàn theo loại
             ArrayList<BanAn> danhSachBanLoc = new ArrayList<>();
             ArrayList<BanAn> tatCaBan = banAnCtr.layTatCaBan();
-    
+
             for (BanAn ban : tatCaBan) {
                 if (ban.getLoaiBan().equals(loaiBan)) {
                     danhSachBanLoc.add(ban);
@@ -702,7 +563,24 @@
             pnlLuoiBan.repaint();
         }
     
-        public static void main(String[] args) {
+        @Override
+    public void setVisible(boolean b) {
+        if (b) {
+            lamMoiDuLieu();
+        }
+        super.setVisible(b);
+    }
+
+    public void lamMoiDuLieu() {
+        if (pnlLuoiBan != null) {
+            pnlLuoiBan.removeAll();
+            setupTableGrid();
+            pnlLuoiBan.revalidate();
+            pnlLuoiBan.repaint();
+        }
+    }
+
+    public static void main(String[] args) {
             SwingUtilities.invokeLater(() -> {
                 try {
                     UIManager.setLookAndFeel(UIManager.getLookAndFeel());

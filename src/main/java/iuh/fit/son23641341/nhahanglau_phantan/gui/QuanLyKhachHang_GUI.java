@@ -20,7 +20,7 @@ import iuh.fit.son23641341.nhahanglau_phantan.control.KhachHang_Ctr;
 import iuh.fit.son23641341.nhahanglau_phantan.entity.KhachHangThanhVien;
 
 // Triển khai giao diện ActionListener
-public class QuanLyKhachHang_GUI extends JFrame implements ActionListener {
+public class QuanLyKhachHang_GUI extends JPanel implements ActionListener {
 
     // --- Components và Control ---
     private DefaultTableModel model;
@@ -40,17 +40,8 @@ public class QuanLyKhachHang_GUI extends JFrame implements ActionListener {
         // KHỞI TẠO CONTROL
         khControl = new KhachHang_Ctr();
         
-        setTitle("Quản Lý Khách Hàng");
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-        getContentPane().setBackground(BACKGROUND_COLOR);
-
-        // SIDEBAR
-        SideBar_GUI sidebar = new SideBar_GUI(); // Giả định SideBar_GUI tồn tại
-        sidebar.setMauNutKhiChon("Khách Hàng");
-        add(sidebar, BorderLayout.WEST);
+        setBackground(BACKGROUND_COLOR);
 
         JPanel contentWrapperPanel = new JPanel(new BorderLayout());
         contentWrapperPanel.setOpaque(false);
@@ -172,7 +163,7 @@ public class QuanLyKhachHang_GUI extends JFrame implements ActionListener {
 // ---------------------------------------------------------------------------------------------------
 
     private void xuLyNutThem() {
-        ThemKhachHang_Dialog dialog = new ThemKhachHang_Dialog(this);
+        ThemKhachHang_Dialog dialog = new ThemKhachHang_Dialog((JFrame) SwingUtilities.getWindowAncestor(this));
         dialog.setVisible(true);
 
         KhachHangThanhVien khachHangThanhVienMoi = dialog.getKhachHangMoi();
@@ -207,7 +198,7 @@ public class QuanLyKhachHang_GUI extends JFrame implements ActionListener {
         }
 
         // Mở dialog sửa, truyền Khách hàng gốc vào
-        SuaKhachHang_Dialog dialogSua = new SuaKhachHang_Dialog(this, khachHangThanhVienGoc);
+        SuaKhachHang_Dialog dialogSua = new SuaKhachHang_Dialog((JFrame) SwingUtilities.getWindowAncestor(this), khachHangThanhVienGoc);
         dialogSua.setVisible(true);
         
         KhachHangThanhVien khachHangThanhVienCapNhat = dialogSua.getKhachHangCapNhat();

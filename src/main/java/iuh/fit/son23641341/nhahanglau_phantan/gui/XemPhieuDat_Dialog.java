@@ -9,7 +9,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.ArrayList;
 
 public class XemPhieuDat_Dialog extends JDialog {
     private static final Color MAU_CHINH = new Color(0xDC4332);
@@ -18,14 +17,16 @@ public class XemPhieuDat_Dialog extends JDialog {
     private JTable tblPhieuDat;
     private DefaultTableModel tableModel;
     private PhieuDat_DAO phieuDatDAO;
+    private Component parentComponent;
     private int maBan;
     private String ngayDat;
     
-    public XemPhieuDat_Dialog(JFrame parent, int maBan, String ngayDat) {
-        super(parent, "Danh Sách Phiếu Đặt - Bàn " + String.format("%03d", maBan), true);
+    public XemPhieuDat_Dialog(Window parent, int maBan, String ngayDat, Component parentComponent) {
+        super(parent, "Danh Sách Phiếu Đặt - Bàn " + String.format("%03d", maBan), ModalityType.APPLICATION_MODAL);
         this.maBan = maBan;
         this.ngayDat = ngayDat;
         this.phieuDatDAO = new PhieuDat_DAO();
+        this.parentComponent = parentComponent;
         
         initComponents();
         loadData();
@@ -82,20 +83,27 @@ public class XemPhieuDat_Dialog extends JDialog {
                         // Tìm phiếu trong database
                         ArrayList<PhieuDatBan> dsPhieu = phieuDatDAO.getPhieuDatByBanVaNgay(maBan, ngayDat);
                         PhieuDatBan phieuCanLoad = null;
-                        for (PhieuDatBan p : dsPhieu) {
-                            if (p.getMaPhieu().equals(maPhieu)) {
-                                phieuCanLoad = p;
-                                break;
+                        if (dsPhieu != null) {
+                            for (PhieuDatBan p : dsPhieu) {
+                                if (p.getMaPhieu().equals(maPhieu)) {
+                                    phieuCanLoad = p;
+                                    break;
+                                }
                             }
                         }
                         
                         if (phieuCanLoad != null) {
                             // Đóng dialog này
                             dispose();
-                            // Load dữ liệu lên PhieuDat_GUI (parent của dialog này)
-                            Window owner = getOwner();
-                            if (owner instanceof PhieuDat_GUI) {
-                                ((PhieuDat_GUI) owner).loadPhieuDatFromDB(phieuCanLoad);
+                            // Load dữ liệu lên PhieuDat_GUI (parentComponent)
+                            if (parentComponent instanceof PhieuDat_GUI) {
+                                ((PhieuDat_GUI) parentComponent).loadPhieuDatFromDB(phieuCanLoad);
+                            } else {
+                                // Fallback: tìm qua GUIManager
+                                Component gui = GUIManager.getInstance().getGUI(PhieuDat_GUI.class);
+                                if (gui instanceof PhieuDat_GUI) {
+                                    ((PhieuDat_GUI) gui).loadPhieuDatFromDB(phieuCanLoad);
+                                }
                             }
                         }
                     }
@@ -186,4 +194,3 @@ public class XemPhieuDat_Dialog extends JDialog {
         return dsGio;
     }
 }
-
