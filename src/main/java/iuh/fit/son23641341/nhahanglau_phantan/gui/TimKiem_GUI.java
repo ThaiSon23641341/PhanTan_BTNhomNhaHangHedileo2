@@ -81,7 +81,10 @@ public class TimKiem_GUI extends JFrame {
 
         try {
             loadFoodDataToGrid(timKiemDao.getAllMonAn());
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi khi tải dữ liệu món ăn: " + e.getMessage());
+        }
     }
 
     private void initializeComponents() {
@@ -187,7 +190,7 @@ public class TimKiem_GUI extends JFrame {
 
         // 1. TÌM KHÁCH HÀNG
         try {
-            ArrayList<KhachHangThanhVien> listKH = khachHangDao.timKhachHangTheoSDT(keyword);
+            List<KhachHangThanhVien> listKH = khachHangDao.timKhachHangTheoSDT(keyword);
             if (listKH != null && !listKH.isEmpty()) {
                 for (KhachHangThanhVien kh : listKH) foodGrid.add(taoTheKhachHang(kh));
                 found = true;
@@ -196,7 +199,7 @@ public class TimKiem_GUI extends JFrame {
 
         // 2. TÌM PHIẾU ĐẶT
         try {
-            ArrayList<PhieuDatBan> listPhieu = phieuDatDao.timKiemPhieuDat(keyword);
+            List<PhieuDatBan> listPhieu = phieuDatDao.timKiemPhieuDat(keyword);
             if (listPhieu != null && !listPhieu.isEmpty()) {
                 for (PhieuDatBan pd : listPhieu) foodGrid.add(taoThePhieuDat(pd));
                 found = true;
@@ -237,7 +240,7 @@ public class TimKiem_GUI extends JFrame {
 
     private void timKiemPhieuDat(String keyword) {
         foodGrid.removeAll();
-        ArrayList<PhieuDatBan> ketQua = phieuDatDao.timKiemPhieuDat(keyword);
+        List<PhieuDatBan> ketQua = phieuDatDao.timKiemPhieuDat(keyword);
 
         if (ketQua == null || ketQua.isEmpty()) {
             hienThiThongBaoRong("Không tìm thấy phiếu đặt: " + keyword);
@@ -268,7 +271,7 @@ public class TimKiem_GUI extends JFrame {
 
     private void timKiemKhachHang(String keyword) {
         foodGrid.removeAll();
-        ArrayList<KhachHangThanhVien> ketQua = khachHangDao.timKhachHangTheoSDT(keyword);
+        List<KhachHangThanhVien> ketQua = khachHangDao.timKhachHangTheoSDT(keyword);
         if (ketQua.isEmpty()) hienThiThongBaoRong("Không tìm thấy khách hàng: " + keyword);
         else {
             setupGridLayout(ketQua.size());

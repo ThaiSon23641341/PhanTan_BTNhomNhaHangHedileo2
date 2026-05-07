@@ -2,147 +2,162 @@ package iuh.fit.son23641341.nhahanglau_phantan.dao;
 
 import iuh.fit.son23641341.nhahanglau_phantan.entity.NhanVien;
 import iuh.fit.son23641341.nhahanglau_phantan.entity.User;
-import iuh.fit.son23641341.nhahanglau_phantan.mock.MockData;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 
 import java.util.ArrayList;
+import java.util.List;
 
-// NOTE: Database logic removed; DAO now uses in-memory mock data.
 public class NhanVien_DAO {
+    private EntityManager em;
 
-    public static NhanVien timNhanVienTheoDangNhap(String username, String password) {
-        User user = MockData.users().stream()
-            .filter(item -> item.getTenNguoiDung().equals(username) && item.getMatKhau().equals(password))
-            .findFirst()
-            .orElse(null);
-        if (user == null) {
+    public NhanVien_DAO() {
+        this.em = iuh.fit.son23641341.nhahanglau_phantan.util.EntityManagerFactoryUtil.getEntityManager();
+    }
+
+    public NhanVien_DAO(EntityManager em) {
+        this.em = em;
+    }
+
+    public NhanVien timNhanVienTheoDangNhap(String username, String password) {
+        String jpql = "SELECT nv FROM NhanVien nv WHERE nv.user.tenNguoiDung = :username AND nv.user.matKhau = :password";
+        try {
+            return em.createQuery(jpql, NhanVien.class)
+                    .setParameter("username", username)
+                    .setParameter("password", password)
+                    .getSingleResult();
+        } catch (Exception e) {
             return null;
         }
-        int idUser = parseUserId(user.getiD());
-        return MockData.nhanViens().stream()
-            .filter(item -> item.getIdUser().equals( idUser))
-            .findFirst()
-            .orElse(null);
     }
 
     public String getTenNhanVienByMa(String maNhanVien) {
-        return MockData.nhanViens().stream()
-            .filter(item -> item.getManv().equals(maNhanVien))
-            .map(NhanVien::getHoten)
-            .findFirst()
-            .orElse(null);
+        try {
+            return em.createQuery("SELECT nv.hoten FROM NhanVien nv WHERE nv.manv = :ma", String.class)
+                    .setParameter("ma", maNhanVien)
+                    .getSingleResult();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    public ArrayList<NhanVien> getAllNhanVien() {
-        return new ArrayList<>(MockData.nhanViens());
+    public List<NhanVien> getAllNhanVien() {
+        return em.createQuery("SELECT nv FROM NhanVien nv", NhanVien.class).getResultList();
     }
 
     public boolean themNhanVien(NhanVien nv) {
-        if (nv == null || timTheoMa(nv.getManv()) != null) {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(nv);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
             return false;
         }
-        return MockData.nhanViens().add(nv);
     }
 
     public boolean capNhatNhanVien(NhanVien nv) {
-        if (nv == null) {
-            return false;
-        }
-        NhanVien existing = timTheoMa(nv.getManv());
-        if (existing == null) {
-            return false;
-        }
+        EntityTransaction tx = em.getTransaction();
         try {
-            existing.setHoten(nv.getHoten());
-            existing.setGioiTinh(nv.getGioiTinh());
-            existing.setCaLamViec(nv.getCaLamViec());
-            existing.setSdt(nv.getSdt());
-            existing.setEmail(nv.getEmail());
-            existing.setChucVu(nv.getChucVu());
-        } catch (Exception ignored) {
+            tx.begin();
+            em.merge(nv);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
             return false;
         }
-        return true;
     }
 
     public boolean xoaNhanVien(String maNV, String idUser) {
-        NhanVien existing = timTheoMa(maNV);
-        if (existing == null) {
-            return false;
-        }
-        MockData.nhanViens().remove(existing);
-        MockData.users().removeIf(user -> user.getiD().equals(idUser));
-        return true;
-    }
-
-    public int themTaiKhoanVaLayId(String tenNguoiDung, String matKhau) {
-        int newId = MockData.users().stream()
-            .map(User::getiD)
-            .mapToInt(NhanVien_DAO::parseUserId)
-            .max()
-            .orElse(0) + 1;
-        MockData.users().add(new User(String.valueOf(newId), tenNguoiDung, matKhau));
-        return newId;
-    }
-
-    public boolean themNhanVienVoiIdUser(NhanVien nv, int idUser) {
-        if (nv == null || timTheoMa(nv.getManv()) != null) {
-            return false;
-        }
+        EntityTransaction tx = em.getTransaction();
         try {
-            nv = new NhanVien(nv.getManv(), nv.getHoten(), nv.getGioiTinh(), nv.getCaLamViec(), nv.getSdt(),
-                nv.getEmail(), nv.getChucVu(), new User(String.valueOf(idUser), "", ""));
-        } catch (Exception ignored) {
+            tx.begin();
+            NhanVien nv = em.find(NhanVien.class, maNV);
+            if (nv != null) {
+                em.remove(nv);
+            }
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
             return false;
         }
-        return MockData.nhanViens().add(nv);
     }
 
-    public boolean capNhatNhanVienVaTaiKhoan(NhanVien nv, int idUser, String user, String pass) {
-        if (!capNhatNhanVien(nv)) {
-            return false;
+    public boolean themNhanVienVaTaiKhoan(NhanVien nv, String tenNguoiDung, String matKhau) {
+        // 1. Kiểm tra xem tên người dùng đã tồn tại chưa
+        Long count = em.createQuery("SELECT COUNT(u) FROM User u WHERE u.tenNguoiDung = :user", Long.class)
+                .setParameter("user", tenNguoiDung)
+                .getSingleResult();
+        if (count > 0) {
+            System.err.println("Lỗi: Tên đăng nhập " + tenNguoiDung + " đã tồn tại.");
+            return false; 
         }
-        User existingUser = MockData.users().stream()
-            .filter(item -> parseUserId(item.getiD()) == idUser)
-            .findFirst()
-            .orElse(null);
-        if (existingUser == null) {
-            return false;
-        }
-        existingUser.setTenNguoiDung(user);
-        existingUser.setMatKhau(pass);
-        return true;
-    }
 
-    public static Object[] getThongTinSua(String maNV) throws Exception {
-        NhanVien nv = MockData.nhanViens().stream()
-            .filter(item -> item.getManv().equals(maNV))
-            .findFirst()
-            .orElse(null);
-        if (nv == null) {
-            return null;
-        }
-        User user = MockData.users().stream()
-            .filter(item -> parseUserId(item.getiD()) == parseUserId(nv.getIdUser()))
-            .findFirst()
-            .orElse(null);
-        if (user == null) {
-            return null;
-        }
-        return new Object[] { nv, user.getTenNguoiDung(), user.getMatKhau(), nv.getIdUser() };
-    }
-
-    private NhanVien timTheoMa(String maNV) {
-        return MockData.nhanViens().stream()
-            .filter(item -> item.getManv().equals(maNV))
-            .findFirst()
-            .orElse(null);
-    }
-
-    private static int parseUserId(String id) {
+        EntityTransaction tx = em.getTransaction();
         try {
-            return Integer.parseInt(id);
-        } catch (NumberFormatException ignored) {
-            return -1;
+            tx.begin();
+            
+            // 2. Tạo ID cho User mới
+            String maxIdStr = em.createQuery("SELECT MAX(u.iD) FROM User u", String.class).getSingleResult();
+            int nextIdInt = 1;
+            if (maxIdStr != null) {
+                try {
+                    String numericPart = maxIdStr.replaceAll("\\D", ""); 
+                    if (!numericPart.isEmpty()) nextIdInt = Integer.parseInt(numericPart) + 1;
+                } catch (NumberFormatException e) {
+                    nextIdInt = (int) (System.currentTimeMillis() % 1000000);
+                }
+            }
+            String newId = String.valueOf(nextIdInt);
+            
+            // 3. Tạo User và gán cho Nhân viên
+            User newUser = new User(newId, tenNguoiDung, matKhau);
+            em.persist(newUser);
+            
+            nv.setUser(newUser);
+            em.persist(nv);
+            
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean capNhatNhanVienVaTaiKhoan(NhanVien nv, String idUser, String user, String pass) {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            User existingUser = em.find(User.class, idUser);
+            if (existingUser != null) {
+                existingUser.setTenNguoiDung(user);
+                existingUser.setMatKhau(pass);
+                em.merge(existingUser);
+            }
+            em.merge(nv);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            return false;
+        }
+    }
+
+    public Object[] getThongTinSua(String maNV) {
+        try {
+            NhanVien nv = em.find(NhanVien.class, maNV);
+            if (nv != null && nv.getUser() != null) {
+                return new Object[] { nv, nv.getUser().getTenNguoiDung(), nv.getUser().getMatKhau(), nv.getUser().getiD() };
+            }
+            return null;
+        } catch (Exception e) {
+            return null;
         }
     }
 }

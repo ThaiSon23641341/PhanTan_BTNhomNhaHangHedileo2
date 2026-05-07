@@ -12,8 +12,8 @@ public class NhanVien_Dialog extends JDialog {
     
     private NhanVien_DAO nhanVienDAO = new NhanVien_DAO();
     private boolean isEditMode = false;
-    private int idUserUpdate = -1; // Lưu id tài khoản khi sửa
-    private NhanVien nhanVienMoi; // Dùng để trả về cho màn hình chính sau khi thêm/sửa
+    private String idUserUpdate = null; // Đổi sang String để khớp với DAO/Entity
+    private NhanVien nhanVienMoi; 
 
     // Constructor cho THÊM MỚI
     public NhanVien_Dialog(Frame parent) {
@@ -23,7 +23,7 @@ public class NhanVien_Dialog extends JDialog {
     }
 
     // Constructor cho SỬA
-    public NhanVien_Dialog(Frame parent, NhanVien nv, String user, String pass, int idUser) {
+    public NhanVien_Dialog(Frame parent, NhanVien nv, String user, String pass, String idUser) {
         super(parent, "Cập Nhật Thông Tin Nhân Viên", true);
         this.isEditMode = true;
         this.idUserUpdate = idUser;
@@ -31,7 +31,7 @@ public class NhanVien_Dialog extends JDialog {
         
         // Đổ dữ liệu cũ vào các ô nhập
         txtMaNV.setText(nv.getManv());
-        txtMaNV.setEditable(false); // Không cho sửa Mã (Khóa chính)
+        txtMaNV.setEditable(false); 
         txtHoTen.setText(nv.getHoten());
         cbGioiTinh.setSelectedItem(nv.getGioiTinh());
         cbCaLam.setSelectedItem(nv.getCaLamViec());
@@ -97,22 +97,17 @@ public class NhanVien_Dialog extends JDialog {
         add(pnMain, BorderLayout.CENTER);
         add(pnSouth, BorderLayout.SOUTH);
 
-        // Sự kiện nút Hủy
         btnHuy.addActionListener(e -> dispose());
-
-        // Sự kiện nút Thêm/Lưu
         btnAction.addActionListener(e -> {
 			try {
 				xuLyXacNhan();
 			} catch (Exception e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		});
     }
 
     private void xuLyXacNhan() throws Exception {
-        // 1. Lấy dữ liệu từ giao diện
         String ma = txtMaNV.getText().trim();
         String ten = txtHoTen.getText().trim();
         String gt = cbGioiTinh.getSelectedItem().toString();
@@ -123,34 +118,28 @@ public class NhanVien_Dialog extends JDialog {
         String user = txtUser.getText().trim();
         String pass = txtPass.getText().trim();
 
-        // 2. Validate cơ bản
         if (ma.isEmpty() || ten.isEmpty() || user.isEmpty() || pass.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ các trường bắt buộc!");
             return;
         }
 
-        this.nhanVienMoi = new NhanVien(ma, ten, gt, ca, sdt, email, cv, null); // idUser sẽ gán sau
+        this.nhanVienMoi = new NhanVien(ma, ten, gt, ca, sdt, email, cv, null);
 
         if (isEditMode) {
-            // Chế độ Sửa: Gọi hàm cập nhật (Transaction)
             boolean ok = nhanVienDAO.capNhatNhanVienVaTaiKhoan(nhanVienMoi, idUserUpdate, user, pass);
             if (ok) {
                 JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
                 dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "Cập nhật thất bại. Kiểm tra lại tên đăng nhập!");
+                JOptionPane.showMessageDialog(this, "Cập nhật thất bại. Kiểm tra lại tên đăng nhập hoặc dữ liệu!");
             }
         } else {
-            // Chế độ Thêm: Gọi hàm thêm mới
-            int idMoi = nhanVienDAO.themTaiKhoanVaLayId(user, pass);
-            if (idMoi != -1) {
-                boolean ok = nhanVienDAO.themNhanVienVoiIdUser(nhanVienMoi, idMoi);
-                if (ok) {
-                    JOptionPane.showMessageDialog(this, "Thêm nhân viên thành công!");
-                    dispose();
-                }
+            boolean ok = nhanVienDAO.themNhanVienVaTaiKhoan(nhanVienMoi, user, pass);
+            if (ok) {
+                JOptionPane.showMessageDialog(this, "Thêm nhân viên thành công!");
+                dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "Tên đăng nhập đã tồn tại!");
+                JOptionPane.showMessageDialog(this, "Thêm nhân viên thất bại!\nLưu ý: Tên đăng nhập hoặc Mã nhân viên có thể đã tồn tại.");
             }
         }
     }

@@ -14,6 +14,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 import iuh.fit.son23641341.nhahanglau_phantan.control.KhachHang_Ctr; 
 import iuh.fit.son23641341.nhahanglau_phantan.entity.KhachHangThanhVien;
@@ -298,7 +299,7 @@ public class QuanLyKhachHang_GUI extends JFrame implements ActionListener {
                     if (text.isEmpty() || isPlaceholder) {
                         loadTableData(model, khControl.getDanhSachKhachHang());
                     } else {
-                        ArrayList<KhachHangThanhVien> filtered = khControl.timKhachHangTheoSDT(text);
+                        List<KhachHangThanhVien> filtered = khControl.timKhachHangTheoSDT(text);
                         loadTableData(model, filtered);
                     }
                 });
@@ -315,7 +316,7 @@ public class QuanLyKhachHang_GUI extends JFrame implements ActionListener {
      * Nạp dữ liệu từ ArrayList<KhachHang> lên JTable.
      */
 
-    private void loadTableData(DefaultTableModel model, ArrayList<KhachHangThanhVien> list) {
+    private void loadTableData(DefaultTableModel model, List<KhachHangThanhVien> list) {
         model.setRowCount(0); // Xóa dữ liệu cũ
         if (list == null) return;
 

@@ -2,42 +2,55 @@ package iuh.fit.son23641341.nhahanglau_phantan.dao;
 
 import iuh.fit.son23641341.nhahanglau_phantan.entity.HoaDon;
 import iuh.fit.son23641341.nhahanglau_phantan.entity.PhieuDatBan;
-import iuh.fit.son23641341.nhahanglau_phantan.mock.MockData;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 
 import java.util.ArrayList;
 import java.util.List;
 
-// NOTE: Database logic removed; DAO now uses in-memory mock data.
 public class HoaDon_DAO {
+    private EntityManager em;
+
+    public HoaDon_DAO() {
+        this.em = iuh.fit.son23641341.nhahanglau_phantan.util.EntityManagerFactoryUtil.getEntityManager();
+    }
+
+    public HoaDon_DAO(EntityManager em) {
+        this.em = em;
+    }
 
     public List<HoaDon> timKiemHoaDon(String keyword) {
-        List<HoaDon> dsHoaDon = new ArrayList<>();
-        String query = keyword == null ? "" : keyword.trim();
-        for (HoaDon hd : MockData.hoaDons()) {
-            if (query.isEmpty()
-                || hd.getMaHoaDon().contains(query)
-                || (hd.getTrangThai() != null && hd.getTrangThai().contains(query))
-                || (hd.getPhieuDat() != null && hd.getPhieuDat().getSdtDat() != null
-                    && hd.getPhieuDat().getSdtDat().contains(query))) {
-                dsHoaDon.add(hd);
-            }
-        }
-        return dsHoaDon;
+        String jpql = "SELECT h FROM HoaDon h WHERE h.maHoaDon LIKE :kw OR h.trangThai LIKE :kw OR h.phieuDat.sdtDat LIKE :kw";
+        return em.createQuery(jpql, HoaDon.class)
+                .setParameter("kw", "%" + keyword + "%")
+                .getResultList();
     }
 
     public boolean addHoaDon(HoaDon hd) {
-        if (hd == null) {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(hd);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
             return false;
         }
-        return MockData.hoaDons().add(hd);
     }
 
     public boolean taoHoaDonMoi(PhieuDatBan phieuDat) {
-        if (phieuDat == null) {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            HoaDon hd = new HoaDon(phieuDat);
+            em.persist(hd);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
             return false;
         }
-        HoaDon hd = new HoaDon(phieuDat);
-        return MockData.hoaDons().add(hd);
     }
 }
 

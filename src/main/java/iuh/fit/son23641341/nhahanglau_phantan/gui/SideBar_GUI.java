@@ -113,7 +113,6 @@ public class SideBar_GUI extends JPanel implements ActionListener {
 
         add(pnlAdminInfo, BorderLayout.NORTH);
         
-        buttonEvent.addAdminPanelListener(pnlAdminDetails); 
         // ===============================================
 
         // Danh mục nằm ở center (MENU ITEMS)

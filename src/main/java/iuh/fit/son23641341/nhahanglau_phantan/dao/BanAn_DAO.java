@@ -8,6 +8,10 @@ import java.util.List;
 public class BanAn_DAO {
     private EntityManager em;
 
+    public BanAn_DAO() {
+        this.em = iuh.fit.son23641341.nhahanglau_phantan.util.EntityManagerFactoryUtil.getEntityManager();
+    }
+
     public BanAn_DAO(EntityManager em) {
         this.em = em;
     }
