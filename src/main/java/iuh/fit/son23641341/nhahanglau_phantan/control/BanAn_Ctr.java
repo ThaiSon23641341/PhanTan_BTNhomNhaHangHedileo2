@@ -1,106 +1,60 @@
 package iuh.fit.son23641341.nhahanglau_phantan.control;
 
+import iuh.fit.son23641341.nhahanglau_phantan.dao.BanAn_DAO;
 import iuh.fit.son23641341.nhahanglau_phantan.entity.BanAn;
-import iuh.fit.son23641341.nhahanglau_phantan.mock.MockData;
+import iuh.fit.son23641341.nhahanglau_phantan.util.EntityManagerFactoryUtil;
+import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
+import java.util.List;
 
-// NOTE: Controller now uses mock data; database logic removed.
 public class BanAn_Ctr {
-    private static BanAn_Ctr instance; // Singleton instance
-    private ArrayList<BanAn> danhSachBan;
+    private static BanAn_Ctr instance;
+    private BanAn_DAO banAnDAO;
+    private EntityManager em;
 
-    // Private constructor để ngăn tạo instance từ bên ngoài
     private BanAn_Ctr() {
-        danhSachBan = new ArrayList<>(MockData.banAns());
+        this.em = EntityManagerFactoryUtil.getEntityManager();
+        this.banAnDAO = new BanAn_DAO(this.em);
     }
 
-    // Lấy instance duy nhất
-    public static BanAn_Ctr getInstance() {
-        if (instance == null) {
-            instance = new BanAn_Ctr();
-        }
+    public static synchronized BanAn_Ctr getInstance() {
+        if (instance == null) instance = new BanAn_Ctr();
         return instance;
     }
 
-    // Load dữ liệu bàn từ database
-    public void loadBanFromDB() {
-        danhSachBan = new ArrayList<>(MockData.banAns());
-    }
-
-    // 1. Lấy tất cả bàn
+    // Lấy dữ liệu tươi từ Database
     public ArrayList<BanAn> layTatCaBan() {
-        return danhSachBan;
+        return new ArrayList<>(banAnDAO.getAllBanAn());
     }
 
-    // 2. Tìm bàn theo mã
     public BanAn timBanTheoMa(int maBan) {
-        for (BanAn ban : danhSachBan) {
-            if (ban.getMaBan() == maBan) {
-                return ban;
-            }
-        }
-        return null;
+        return banAnDAO.findById(maBan);
     }
 
-    // 4. Thêm bàn mới
     public boolean themBan(BanAn banMoi) {
-        if (timBanTheoMa(banMoi.getMaBan()) != null) {
-            return false;
-        }
-        MockData.banAns().add(banMoi);
-        return danhSachBan.add(banMoi);
+        // Kiểm tra tồn tại trước khi thêm
+        if (timBanTheoMa(banMoi.getMaBan()) != null) return false;
+        return banAnDAO.mergeBanAn(banMoi);
     }
 
-    // 5. Cập nhật thông tin bàn
     public boolean capNhatBan(BanAn banCapNhat) {
-        BanAn ban = timBanTheoMa(banCapNhat.getMaBan());
-        if (ban == null) {
-            return false;
-        }
-
-        try {
-            ban.setSoCho(banCapNhat.getSoCho());
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        return banAnDAO.mergeBanAn(banCapNhat);
     }
 
-    // 7. Xóa bàn
     public boolean xoaBan(int maBan) {
-        BanAn ban = timBanTheoMa(maBan);
-        if (ban == null) {
-            return false;
-        }
-        MockData.banAns().remove(ban);
-        return danhSachBan.remove(ban);
+        return banAnDAO.deleteBanAn(maBan);
     }
 
-    // 9. Lấy tổng số bàn
-    public int layTongSoBan() {
-        return danhSachBan.size();
-    }
-
-    // 11. Lấy danh sách bàn theo loại
     public ArrayList<BanAn> layBanTheoLoai(String loaiBan) {
-        ArrayList<BanAn> ketQua = new ArrayList<>();
-        for (BanAn ban : danhSachBan) {
-            if (ban.getLoaiBan().equals(loaiBan)) {
-                ketQua.add(ban);
-            }
-        }
-        return ketQua;
+        // Có thể viết thêm JPQL trong DAO để tối ưu, hoặc lọc tại stream như dưới đây
+        return (ArrayList<BanAn>) banAnDAO.getAllBanAn().stream()
+                .filter(b -> b.getLoaiBan().equalsIgnoreCase(loaiBan))
+                .toList();
     }
 
-    // 12. Đếm số bàn theo loại
-    public int demBanTheoLoai(String loaiBan) {
-        int dem = 0;
-        for (BanAn ban : danhSachBan) {
-            if (ban.getLoaiBan().equals(loaiBan)) {
-                dem++;
-            }
-        }
-        return dem;
+    // Tương thích với GUI cũ
+    public void loadBanFromDB() {
+        // Với JPA, dữ liệu được query trực tiếp mỗi khi gọi layTatCaBan()
+        // nên hàm này không cần thiết phải giữ list local nữa.
     }
 }

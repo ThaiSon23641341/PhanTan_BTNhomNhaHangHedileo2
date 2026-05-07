@@ -1,33 +1,54 @@
-
 package iuh.fit.son23641341.nhahanglau_phantan.dao;
 
 import iuh.fit.son23641341.nhahanglau_phantan.entity.BanAn;
-import iuh.fit.son23641341.nhahanglau_phantan.entity.KhuyenMai;
-import iuh.fit.son23641341.nhahanglau_phantan.mock.MockData;
-
-import java.util.ArrayList;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 import java.util.List;
 
-// NOTE: Database logic removed; DAO now uses in-memory mock data.
 public class BanAn_DAO {
+    private EntityManager em;
+
+    public BanAn_DAO(EntityManager em) {
+        this.em = em;
+    }
 
     public List<BanAn> getAllBanAn() {
-        return new ArrayList<>(MockData.banAns());
+        return em.createQuery("SELECT b FROM BanAn b", BanAn.class).getResultList();
     }
 
-    public boolean capNhatTrangThaiBan(int maBan, String trangThai) {
-        BanAn ban = MockData.banAns().stream()
-            .filter(item -> item.getMaBan() == maBan)
-            .findFirst()
-            .orElse(null);
-        if (ban == null) {
+    public BanAn findById(int maBan) {
+        return em.find(BanAn.class, maBan);
+    }
+
+    public boolean mergeBanAn(BanAn banAn) {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.merge(banAn);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            e.printStackTrace();
             return false;
         }
-        return true;
     }
 
-    public KhuyenMai timTheoMa(String maKhuyenMai) {
-        return null;
+    public boolean deleteBanAn(int maBan) {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            BanAn ban = em.find(BanAn.class, maBan);
+            if (ban != null) {
+                em.remove(ban);
+                tx.commit();
+                return true;
+            }
+            tx.rollback();
+            return false;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            return false;
+        }
     }
 }
-
