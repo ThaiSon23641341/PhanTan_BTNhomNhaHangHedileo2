@@ -26,11 +26,14 @@ import lombok.ToString;
 public class PhieuDatBan {
     // Alias cho DAO: getDanhSachBan/setDanhSachBan (dùng chung cho mọi nơi)
     public List<Integer> getDanhSachBan() {
-        return getDanhSachBanDaChon();
+        if (this.danhSachBan != null && !this.danhSachBan.isEmpty()) {
+            return this.danhSachBan.stream().map(BanAn::getMaBan).collect(Collectors.toList());
+        }
+        return this.danhSachBanDaChon;
     }
 
     public void setDanhSachBan(List<Integer> list) {
-        setDanhSachBanDaChon(new ArrayList<>(list));
+        this.danhSachBanDaChon = new ArrayList<>(list);
     }
 
     @Id
@@ -70,7 +73,7 @@ public class PhieuDatBan {
     private NhanVien nhanVien;
 
     @Column(name = "ngay_dat")
-    private String ngayDat;
+    private java.sql.Date ngayDat;
 
     @Column(name = "gio_dat")
     private String gioDat; 
@@ -103,6 +106,14 @@ public class PhieuDatBan {
     )
     private List<BanAn> danhSachBan;
 
+    public void setDanhSachBanPersist(List<BanAn> list) {
+        this.danhSachBan = list;
+    }
+    
+    public List<BanAn> getDanhSachBanPersist() {
+        return danhSachBan;
+    }
+
     @ManyToMany(mappedBy = "danhSachPhieuDat")
     private List<HoaDon> hoaDons;
 
@@ -134,7 +145,7 @@ public class PhieuDatBan {
 		this.emailDat = emailDat;
 		this.trangThai = trangThai;
 		this.maNhanVien = maNhanVien;
-		this.ngayDat = ngayDat;
+		setNgayDat(ngayDat); // Sử dụng setter để parse String -> java.sql.Date
 		this.gioDat = gioDat;
 		this.thoiGianDat = thoiGianDat;
 		this.giamGia = giamGia;
@@ -271,10 +282,29 @@ public class PhieuDatBan {
     }
 
     public String getNgayDat() {
+        if (ngayDat == null) return null;
+        return new java.text.SimpleDateFormat("dd/MM/yyyy").format(ngayDat);
+    }
+
+    public void setNgayDat(String ngayDatStr) {
+        try {
+            if (ngayDatStr != null && !ngayDatStr.isEmpty()) {
+                java.util.Date d = new java.text.SimpleDateFormat("dd/MM/yyyy").parse(ngayDatStr);
+                this.ngayDat = new java.sql.Date(d.getTime());
+            } else {
+                this.ngayDat = null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            this.ngayDat = null;
+        }
+    }
+
+    public java.sql.Date getNgayDatSQL() {
         return ngayDat;
     }
 
-    public void setNgayDat(String ngayDat) {
+    public void setNgayDatSQL(java.sql.Date ngayDat) {
         this.ngayDat = ngayDat;
     }
 

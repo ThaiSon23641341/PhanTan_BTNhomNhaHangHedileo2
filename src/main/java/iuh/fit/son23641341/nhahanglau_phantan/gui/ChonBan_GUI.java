@@ -299,12 +299,17 @@
                 // Đếm số phiếu đặt của bàn này trong ngày
                 int soPhieuDat = 0;
                 PhieuDatBan phieuDauTien = null;
+                boolean dangSuDung = false;
                 for (PhieuDatBan phieu : danhSachPhieuTheoNgay) {
                     ArrayList<Integer> danhSachBanPhieu = (ArrayList<Integer>) phieu.getDanhSachBan();
                     if (danhSachBanPhieu != null && danhSachBanPhieu.contains(ban.getMaBan())) {
                         soPhieuDat++;
                         if (phieuDauTien == null) {
                             phieuDauTien = phieu;
+                        }
+                        // Nếu bàn đang có khách ngồi (Đang sử dụng/Đã xác nhận) -> Đánh dấu để đổi màu đỏ
+                        if ("Đang sử dụng".equals(phieu.getTrangThai()) || "Đã xác nhận".equals(phieu.getTrangThai())) {
+                            dangSuDung = true;
                         }
                     }
                 }
@@ -344,11 +349,11 @@
                                     : "");
                 }
     
-                // Chọn màu theo số phiếu đặt
-                if (isFullKhungGio) {
-                    mauTrangThai = MAU_DA_DAT; // Màu đỏ khi full
+                // Chọn màu: Đỏ nếu có bất kỳ phiếu đặt nào (đã đặt hoặc đang dùng), Xanh nếu hoàn toàn trống
+                if (soPhieuDat > 0) {
+                    mauTrangThai = MAU_DA_DAT;
                 } else {
-                    mauTrangThai = MAU_TRONG; // Màu xanh lá mặc định
+                    mauTrangThai = MAU_TRONG;
                 }
     
                 lblThongTinBan[i].setText(thongTinBan);
@@ -576,17 +581,21 @@
     
             ArrayList<PhieuDatBan> phieuTheoNgay = phieuDatDAO.getPhieuDatByNgay(ngayDatDaChon);
             int soPhieuDat = 0;
+            boolean dangSuDung = false;
             for (PhieuDatBan phieu : phieuTheoNgay) {
                 ArrayList<Integer> danhSachBanPhieu = (ArrayList<Integer>) phieu.getDanhSachBan();
                 if (danhSachBanPhieu != null && danhSachBanPhieu.contains(ban.getMaBan())) {
                     soPhieuDat++;
+                    if ("Đang sử dụng".equals(phieu.getTrangThai()) || "Đã xác nhận".equals(phieu.getTrangThai())) {
+                        dangSuDung = true;
+                    }
                 }
             }
     
             final int MAX_KHUNG_GIO = 6;
             boolean isFullKhungGio = (soPhieuDat >= MAX_KHUNG_GIO);
     
-            if (isFullKhungGio) {
+            if (soPhieuDat > 0) {
                 mauTrangThai = MAU_DA_DAT;
             } else {
                 mauTrangThai = MAU_TRONG;
@@ -702,7 +711,24 @@
             pnlLuoiBan.repaint();
         }
     
-        public static void main(String[] args) {
+        @Override
+    public void setVisible(boolean b) {
+        if (b) {
+            lamMoiDuLieu();
+        }
+        super.setVisible(b);
+    }
+
+    public void lamMoiDuLieu() {
+        if (pnlLuoiBan != null) {
+            pnlLuoiBan.removeAll();
+            setupTableGrid();
+            pnlLuoiBan.revalidate();
+            pnlLuoiBan.repaint();
+        }
+    }
+
+    public static void main(String[] args) {
             SwingUtilities.invokeLater(() -> {
                 try {
                     UIManager.setLookAndFeel(UIManager.getLookAndFeel());

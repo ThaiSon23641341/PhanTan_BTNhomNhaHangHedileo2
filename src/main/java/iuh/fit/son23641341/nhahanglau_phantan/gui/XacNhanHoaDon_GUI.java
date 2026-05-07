@@ -308,9 +308,12 @@ public class XacNhanHoaDon_GUI extends JFrame {
             String thongTinTV = (giamGiaThanhVien > 0) ? String.format("<br>Thành viên: -%,.0f VNĐ", giamGiaThanhVien) : "";
             String thongTinCoc = (tienCoc > 0) ? String.format("<br>Đã đặt cọc: -%,.0f VNĐ", tienCoc) : "";
             
-            ArrayList<Integer> maBans = new ArrayList<>(hoaDonHienTai.getPhieuDat().getDanhSachBanDaChon());
-            int maBanChinh = !maBans.isEmpty() ? maBans.get(0) : 0;
-            ArrayList<ChiTietDatMon> dsMonAn = new ArrayList<>(hoaDonHienTai.getPhieuDat().getDanhSachMonAn());
+            List<Integer> dsBanP = hoaDonHienTai.getPhieuDat().getDanhSachBanDaChon();
+            ArrayList<Integer> maBans = (dsBanP != null) ? new ArrayList<>(dsBanP) : new ArrayList<>();
+            int maBanChinh = !maBans.isEmpty() ? maBans.get(0) : (hoaDonHienTai.getPhieuDat() != null ? hoaDonHienTai.getPhieuDat().getMaBan() : 0);
+            
+            List<ChiTietDatMon> dsMonP = hoaDonHienTai.getPhieuDat().getDanhSachMonAn();
+            ArrayList<ChiTietDatMon> dsMonAn = (dsMonP != null) ? new ArrayList<>(dsMonP) : new ArrayList<>();
 
             String noiDungDialog = String.format("<html><body style='width: 300px;'>"
                     + "<h3>XÁC NHẬN THANH TOÁN</h3>"

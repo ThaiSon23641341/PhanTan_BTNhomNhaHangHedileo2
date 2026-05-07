@@ -64,8 +64,19 @@ public class PhieuDatBan_Ctr {
     }
 
     public PhieuDatBan timPhieuTheoMaBan(int maBan) {
-        // Tìm phiếu đang sử dụng tại bàn này
-        return phieuDatDao.getPhieuDangSuDungTheoMaBan(maBan);
+        // Ưu tiên tìm phiếu đang sử dụng
+        PhieuDatBan p = phieuDatDao.getPhieuDangSuDungTheoMaBan(maBan);
+        if (p != null) return p;
+        
+        // Nếu không có, tìm phiếu đặt trước trong ngày hôm nay
+        String ngayHômNay = new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date());
+        ArrayList<PhieuDatBan> list = phieuDatDao.getPhieuDatByBanVaNgay(maBan, ngayHômNay);
+        for (PhieuDatBan phieu : list) {
+            if ("Đặt trước".equals(phieu.getTrangThai()) || "Đã xác nhận".equals(phieu.getTrangThai())) {
+                return phieu;
+            }
+        }
+        return null;
     }
 
     public PhieuDatBan timPhieuTheoMaPhieu(String maPhieu) {
