@@ -134,6 +134,7 @@ public class NhanVien_Dialog extends JDialog {
                 JOptionPane.showMessageDialog(this, "Cập nhật thất bại. Kiểm tra lại tên đăng nhập hoặc dữ liệu!");
             }
         } else {
+            // Truyền thông tin user, pass xuống DAO
             boolean ok = nhanVienDAO.themNhanVienVaTaiKhoan(nhanVienMoi, user, pass);
             if (ok) {
                 JOptionPane.showMessageDialog(this, "Thêm nhân viên thành công!");

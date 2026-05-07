@@ -94,33 +94,44 @@ public class NhanVien_DAO {
                 .getSingleResult();
         if (count > 0) {
             System.err.println("Lỗi: Tên đăng nhập " + tenNguoiDung + " đã tồn tại.");
-            return false; 
+            return false;
         }
 
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            
-            // 2. Tạo ID cho User mới
-            String maxIdStr = em.createQuery("SELECT MAX(u.iD) FROM User u", String.class).getSingleResult();
+
+            // 2. Tạo ID cho User mới với định dạng U001, U002...
+            // Thêm LIKE 'U%' để bỏ qua các ID bị lỗi định dạng trước đó trong DB
+            String maxIdStr = null;
+            try {
+                maxIdStr = em.createQuery("SELECT MAX(u.id) FROM User u WHERE u.id LIKE 'U%'", String.class).getSingleResult();
+            } catch (Exception e) {
+                // Bỏ qua nếu bảng chưa có dữ liệu
+            }
+
             int nextIdInt = 1;
             if (maxIdStr != null) {
                 try {
-                    String numericPart = maxIdStr.replaceAll("\\D", ""); 
-                    if (!numericPart.isEmpty()) nextIdInt = Integer.parseInt(numericPart) + 1;
+                    String numericPart = maxIdStr.replaceAll("\\D", "");
+                    if (!numericPart.isEmpty()) {
+                        nextIdInt = Integer.parseInt(numericPart) + 1;
+                    }
                 } catch (NumberFormatException e) {
-                    nextIdInt = (int) (System.currentTimeMillis() % 1000000);
+                    nextIdInt = 1;
                 }
             }
-            String newId = String.valueOf(nextIdInt);
-            
-            // 3. Tạo User và gán cho Nhân viên
+            // Format ra chuỗi U001, U002...
+            String newId = String.format("U%03d", nextIdInt);
+
+            // 3. Tạo User và gán tự động cho Nhân viên
             User newUser = new User(newId, tenNguoiDung, matKhau);
             em.persist(newUser);
-            
+
+            // Gán đối tượng User vừa tạo vào NhanVien
             nv.setUser(newUser);
             em.persist(nv);
-            
+
             tx.commit();
             return true;
         } catch (Exception e) {
