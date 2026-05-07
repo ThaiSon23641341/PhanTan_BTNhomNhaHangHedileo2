@@ -157,8 +157,6 @@ public class ThemMonAn_Dialog extends JDialog implements ActionListener {
                     String maMon = "MA00";
                   
                     monAnMoi = new MonAn(maMon, tenMon, loaiMon, gia, moTa);
-                    MonAn_Ctr ctr = new MonAn_Ctr();
-                    Boolean themMon = ctr.themMonAn(monAnMoi);
                     dispose();
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, "Dữ liệu không hợp lệ: " + ex.getMessage(), "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
