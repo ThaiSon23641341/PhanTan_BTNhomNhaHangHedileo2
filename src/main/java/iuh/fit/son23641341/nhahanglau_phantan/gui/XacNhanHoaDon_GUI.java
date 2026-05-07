@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.io.File;
 
 import iuh.fit.son23641341.nhahanglau_phantan.control.KhuyenMai_Ctr;
@@ -162,8 +163,8 @@ public class XacNhanHoaDon_GUI extends JFrame {
         
         String dsBanStr = "";
         if (hoaDonHienTai.getPhieuDat() != null) {
-            ArrayList<Integer> list1 = (ArrayList<Integer>) hoaDonHienTai.getPhieuDat().getDanhSachBanDaChon();
-            ArrayList<Integer> list2 = (ArrayList<Integer>) hoaDonHienTai.getPhieuDat().getDanhSachMaBan();
+            List<Integer> list1 = hoaDonHienTai.getPhieuDat().getDanhSachBanDaChon();
+            List<Integer> list2 = hoaDonHienTai.getPhieuDat().getDanhSachMaBan();
             if (list1 != null && !list1.isEmpty()) dsBanStr = list1.toString();
             else if (list2 != null && !list2.isEmpty()) dsBanStr = list2.toString();
             else dsBanStr = String.valueOf(hoaDonHienTai.getPhieuDat().getMaBan());
@@ -307,8 +308,9 @@ public class XacNhanHoaDon_GUI extends JFrame {
             String thongTinTV = (giamGiaThanhVien > 0) ? String.format("<br>Thành viên: -%,.0f VNĐ", giamGiaThanhVien) : "";
             String thongTinCoc = (tienCoc > 0) ? String.format("<br>Đã đặt cọc: -%,.0f VNĐ", tienCoc) : "";
             
-            int maBanChinh = (hoaDonHienTai.getPhieuDat() != null) ? hoaDonHienTai.getPhieuDat().getMaBan() : 0;
-            ArrayList<ChiTietDatMon> dsMonAn = (hoaDonHienTai.getPhieuDat() != null) ? (ArrayList<ChiTietDatMon>) hoaDonHienTai.getPhieuDat().getDanhSachMonAn() : null;
+            ArrayList<Integer> maBans = new ArrayList<>(hoaDonHienTai.getPhieuDat().getDanhSachBanDaChon());
+            int maBanChinh = !maBans.isEmpty() ? maBans.get(0) : 0;
+            ArrayList<ChiTietDatMon> dsMonAn = new ArrayList<>(hoaDonHienTai.getPhieuDat().getDanhSachMonAn());
 
             String noiDungDialog = String.format("<html><body style='width: 300px;'>"
                     + "<h3>XÁC NHẬN THANH TOÁN</h3>"
@@ -341,8 +343,8 @@ public class XacNhanHoaDon_GUI extends JFrame {
         
         if (hoaDonHienTai.getPhieuDat() != null) {
             maBanChinh = hoaDonHienTai.getPhieuDat().getMaBan();
-            ArrayList<Integer> list1 = (ArrayList<Integer>) hoaDonHienTai.getPhieuDat().getDanhSachBanDaChon();
-            ArrayList<Integer> list2 = (ArrayList<Integer>) hoaDonHienTai.getPhieuDat().getDanhSachMaBan();
+            List<Integer> list1 = hoaDonHienTai.getPhieuDat().getDanhSachBanDaChon();
+            List<Integer> list2 = hoaDonHienTai.getPhieuDat().getDanhSachMaBan();
             
             if (list1 != null && !list1.isEmpty()) dsBanCanXoa.addAll(list1);
             else if (list2 != null && !list2.isEmpty()) dsBanCanXoa.addAll(list2);
@@ -420,7 +422,7 @@ public class XacNhanHoaDon_GUI extends JFrame {
 
     private void napDuLieuMonAnTuEntity() {
         pnlDanhSachMonAn.removeAll();
-        ArrayList<ChiTietDatMon> dsMon = (hoaDonHienTai.getPhieuDat() != null) ? (ArrayList<ChiTietDatMon>) hoaDonHienTai.getPhieuDat().getDanhSachMonAn() : null;
+        List<ChiTietDatMon> dsMon = (hoaDonHienTai.getPhieuDat() != null) ? hoaDonHienTai.getPhieuDat().getDanhSachMonAn() : null;
         if (dsMon != null) {
             for (ChiTietDatMon ct : dsMon) {
                 JPanel row = new JPanel(new BorderLayout());

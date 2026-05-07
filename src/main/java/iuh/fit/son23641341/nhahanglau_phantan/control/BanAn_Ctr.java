@@ -5,7 +5,6 @@ import iuh.fit.son23641341.nhahanglau_phantan.entity.BanAn;
 import iuh.fit.son23641341.nhahanglau_phantan.util.EntityManagerFactoryUtil;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
-import java.util.List;
 
 public class BanAn_Ctr {
     private static BanAn_Ctr instance;

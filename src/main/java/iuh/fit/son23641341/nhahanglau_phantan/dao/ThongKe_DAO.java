@@ -33,6 +33,7 @@ public class ThongKe_DAO {
                 "FROM HoaDon h WHERE FUNCTION('YEAR', h.ngayLap) = :nam " +
                 "GROUP BY FUNCTION('MONTH', h.ngayLap)";
 
+        @SuppressWarnings("unchecked")
         List<Object[]> results = em.createQuery(jpql).setParameter("nam", nam).getResultList();
         for (Object[] row : results) {
             int thang = (int) row[0];
@@ -52,6 +53,7 @@ public class ThongKe_DAO {
                 "AND FUNCTION('YEAR', h.ngayLap) = :nam " +
                 "GROUP BY m.tenMon " +
                 "ORDER BY SUM(ct.soLuong) DESC";
+        @SuppressWarnings("unchecked")
         List<Object[]> results = em.createQuery(jpql)
                 .setParameter("thang", thang).setParameter("nam", nam)
                 .setMaxResults(limit).getResultList();
@@ -104,6 +106,7 @@ public class ThongKe_DAO {
                 "GROUP BY m.tenMon " +
                 "ORDER BY SUM(ct.soLuong) DESC";
 
+        @SuppressWarnings("unchecked")
         List<Object[]> results = em.createQuery(jpql)
                 .setParameter("ngay", java.sql.Date.valueOf(ngay))
                 .setMaxResults(limit)

@@ -1501,7 +1501,7 @@ public class PhieuDat_GUI extends JFrame {
         });
     }
     
-    private ArrayList rawDanhSachMon(ArrayList<ChiTietDatMon> danhSachMon) {
+    private ArrayList<ChiTietDatMon> rawDanhSachMon(ArrayList<ChiTietDatMon> danhSachMon) {
         return danhSachMon;
     }
 
