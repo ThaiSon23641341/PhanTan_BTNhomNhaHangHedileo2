@@ -64,6 +64,11 @@ public class GUIManager {
         if (mainGUI != null && cardName != null) {
             Component card = mainGUI.showCard(cardName, guiClass);
             
+            // Tự động làm mới dữ liệu nếu là màn hình Chọn Bàn
+            if (card instanceof ChonBan_GUI) {
+                ((ChonBan_GUI) card).refreshData();
+            }
+
             // Nếu đang ở trong một window khác (JFrame cũ), thì đóng nó đi
             if (parentWindow != null && parentWindow != mainGUI) {
                 parentWindow.dispose();
