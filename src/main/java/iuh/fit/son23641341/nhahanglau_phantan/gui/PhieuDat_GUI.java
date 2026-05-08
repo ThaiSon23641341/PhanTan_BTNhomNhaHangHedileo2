@@ -169,7 +169,7 @@ public class PhieuDat_GUI extends JPanel {
         this.banHienTai = banAnCtr.timBanTheoMa(soBan);
         if (banHienTai == null) return;
         
-        lblSoBan.setText("Lập phiếu đặt: Bàn " + banHienTai.getMaBanFormatted());
+        lblSoBan.setText("Lập phiếu đặt: Bàn " + banHienTai.getMaBanFormatted() + " (" + banHienTai.getKhuVuc() + ")");
         
         // Cập nhật ngày lên DateChooser
         if (ngayDatTuChonBan != null && !ngayDatTuChonBan.isEmpty()) {

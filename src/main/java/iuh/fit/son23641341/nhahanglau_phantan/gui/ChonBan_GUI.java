@@ -24,19 +24,19 @@
         private static final Color MAU_LOAI_VIP = new Color(0xF5A623);
         private static final Color MAU_LOAI_DELUXE = new Color(0x9013FE);
     
-        private static final int TONG_SO_BAN = 20;
     
         // Controller
         private BanAn_Ctr banAnCtr;
     
         // Panels chính
         private JPanel pnlHeader, pnlPhanBan;
+        private JTabbedPane tabKhuVuc;
     
         // Phần header
         private JLabel lblTieuDeTrang;
     
         // Phần bàn
-        private JPanel pnlChiDan, pnlTimKiem, pnlLuoiBan, pnlChonNgay;
+        private JPanel pnlChiDan, pnlTimKiem, pnlChonNgay;
         private JTextField txtTimKiem;
         private JButton btnIconTimKiem;
         private JPanel[] pnlCacTheBan;
@@ -70,7 +70,8 @@
             pnlChonNgay = new JPanel();
             txtTimKiem = new JTextField();
             btnIconTimKiem = new JButton();
-            pnlLuoiBan = new JPanel();
+            tabKhuVuc = new JTabbedPane();
+            tabKhuVuc.setFont(new Font("Arial", Font.BOLD, 16));
     
             // Khởi tạo JDateChooser chọn ngày đặt
             dateChooserNgayDat = new JDateChooser();
@@ -91,18 +92,6 @@
             // Mặc định là ngày hôm nay
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             ngayDatDaChon = sdf.format(ngayHienTai);
-    
-            // Khởi tạo mảng bàn
-            pnlCacTheBan = new JPanel[TONG_SO_BAN];
-            lblSoBan = new JLabel[TONG_SO_BAN];
-            lblThongTinBan = new JLabel[TONG_SO_BAN];
-            lblLoaiBan = new JLabel[TONG_SO_BAN];
-            for (int i = 0; i < TONG_SO_BAN; i++) {
-                pnlCacTheBan[i] = new JPanel();
-                lblSoBan[i] = new JLabel("Bàn " + String.format("%02d", i + 1));
-                lblThongTinBan[i] = new JLabel();
-                lblLoaiBan[i] = new JLabel();
-            }
     
             // Khởi tạo combo box lọc loại bàn
             String[] loaiBan = { "Tất cả", "Thường", "VIP", "Deluxe" };
@@ -248,35 +237,10 @@
     
             setupTableGrid();
     
-            JScrollPane scrollPane = new JScrollPane(pnlLuoiBan);
-            scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-            scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-            scrollPane.setBorder(null);
-    
             pnlPhanBan.add(pnlTren, BorderLayout.NORTH);
-            pnlPhanBan.add(scrollPane, BorderLayout.CENTER);
+            pnlPhanBan.add(tabKhuVuc, BorderLayout.CENTER);
         }
     
-        private void setupTableGrid() {
-            final int soCot = 4;
-            final int soHang = (TONG_SO_BAN + soCot - 1) / soCot;
-            pnlLuoiBan.setLayout(new GridLayout(soHang, soCot, 15, 15));
-            pnlLuoiBan.setBackground(MAU_NEN);
-            pnlLuoiBan.setPreferredSize(new Dimension(1000, soHang * 200));
-    
-            // Lấy danh sách bàn từ controller
-            // Luôn load lại danh sách bàn từ DB để đảm bảo đồng bộ trạng thái
-            banAnCtr.loadBanFromDB();
-            ArrayList<BanAn> danhSachBan = banAnCtr.layTatCaBan();
-    
-            // Truyền trực tiếp ngày dd/MM/yyyy vào DAO, không chuyển đổi
-            danhSachPhieuTheoNgay = phieuDatDAO.getPhieuDatByNgay(ngayDatDaChon);
-    
-            for (int i = 0; i < danhSachBan.size(); i++) {
-                BanAn ban = danhSachBan.get(i);
-                pnlLuoiBan.add(taoTheBan(ban));
-            }
-        }
 
         private JPanel taoChiDan(String text, Color mau) {
             JPanel pnl = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
@@ -331,10 +295,7 @@
                     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
                     ngayDatDaChon = sdf.format(ngayDuocChon);
                     // Làm mới danh sách bàn theo ngày đã chọn
-                    pnlLuoiBan.removeAll();
-                    setupTableGrid();
-                    pnlLuoiBan.revalidate();
-                    pnlLuoiBan.repaint();
+                    refreshData();
                 }
             });
         }
@@ -359,40 +320,33 @@
                         "Không tìm thấy bàn với từ khóa: " + tuKhoa,
                         "Thông báo",
                         JOptionPane.INFORMATION_MESSAGE);
-                // Tạo lại lưới với tất cả bàn
-                pnlLuoiBan.removeAll();
                 setupTableGrid();
-                pnlLuoiBan.revalidate();
-                pnlLuoiBan.repaint();
                 return;
             }
     
-            // Xóa lưới cũ
-            pnlLuoiBan.removeAll();
-    
-            // Giữ nguyên layout với 4 cột cố định
-            final int soCot = 4;
-            final int soHang = (TONG_SO_BAN + soCot - 1) / soCot; // Đủ số hàng như ban đầu
-            pnlLuoiBan.setLayout(new GridLayout(soHang, soCot, 15, 15));
-            pnlLuoiBan.setBackground(MAU_NEN);
-            pnlLuoiBan.setPreferredSize(new Dimension(1000, soHang * 200));
-    
-            // Thêm các bàn tìm thấy liên tục từ đầu (không có khoảng trống)
+            // Hiển thị kết quả tìm kiếm trong một tab tạm thời hoặc lọc lại các tab
+            tabKhuVuc.removeAll();
+            JPanel pnlResult = new JPanel(new GridLayout(0, 4, 20, 20));
+            pnlResult.setBackground(MAU_NEN);
+            pnlResult.setBorder(new EmptyBorder(20, 20, 20, 20));
+            
             for (BanAn ban : danhSachBanTimThay) {
-                pnlLuoiBan.add(taoTheBan(ban));
+                pnlResult.add(taoTheBan(ban));
             }
-    
-            // Điền các ô trống còn lại để giữ kích cỡ lưới
-            int soODaThemh = danhSachBanTimThay.size();
-            while (soODaThemh < TONG_SO_BAN) {
-                JPanel pnlTrong = new JPanel();
-                pnlTrong.setBackground(MAU_NEN);
-                pnlLuoiBan.add(pnlTrong);
-                soODaThemh++;
-            }
-    
-            pnlLuoiBan.revalidate();
-            pnlLuoiBan.repaint();
+            
+            // Cố định độ cao kết quả tìm kiếm
+            int soHangRes = (danhSachBanTimThay.size() + 3) / 4;
+            pnlResult.setPreferredSize(new Dimension(1000, Math.max(200, soHangRes * 220)));
+            
+            JScrollPane scroll = new JScrollPane(pnlResult);
+            scroll.setBorder(null);
+            
+            // Wrapper để không bị dãn
+            JPanel pnlWrapper = new JPanel(new BorderLayout());
+            pnlWrapper.add(pnlResult, BorderLayout.NORTH);
+            scroll.setViewportView(pnlWrapper);
+            
+            tabKhuVuc.addTab("KẾT QUẢ TÌM KIẾM", scroll);
         }
     
         private void hienThiTatCaBan() {
@@ -405,12 +359,61 @@
          * Làm mới dữ liệu và hiển thị lại lưới bàn
          */
         public void refreshData() {
-            // Xóa lưới cũ
-            pnlLuoiBan.removeAll();
-            // Tạo lại lưới với dữ liệu mới nhất
-            setupTableGrid();
-            pnlLuoiBan.revalidate();
-            pnlLuoiBan.repaint();
+            String loaiFilter = (cboLocLoaiBan != null) ? (String)cboLocLoaiBan.getSelectedItem() : "Tất cả";
+            setupTableGrid(loaiFilter);
+            tabKhuVuc.revalidate();
+            tabKhuVuc.repaint();
+        }
+    
+        private void setupTableGrid() {
+            setupTableGrid("Tất cả");
+        }
+    
+        private void setupTableGrid(String loaiFilter) {
+            tabKhuVuc.removeAll();
+            
+            // Lấy danh sách bàn từ controller
+            banAnCtr.loadBanFromDB();
+            ArrayList<BanAn> tatCaBan = banAnCtr.layTatCaBan();
+            danhSachPhieuTheoNgay = phieuDatDAO.getPhieuDatByNgay(ngayDatDaChon);
+    
+            // Phân loại bàn theo khu vực
+            String[] khuVucs = {"Trong nhà", "Trên lầu", "Ngoài trời"};
+            Color[] mauNens = {new Color(0xFDFCF0), new Color(0xF0F7FD), new Color(0xF0FDF4)}; // Vàng nhạt, Xanh dương nhạt, Xanh lá nhạt
+            
+            for (int k = 0; k < khuVucs.length; k++) {
+                String kv = khuVucs[k];
+                JPanel pnlLuoi = new JPanel();
+                final int soCot = 4;
+                pnlLuoi.setLayout(new GridLayout(0, soCot, 20, 20));
+                pnlLuoi.setBackground(mauNens[k]);
+                pnlLuoi.setBorder(new EmptyBorder(20, 20, 20, 20));
+                
+                // Lọc bàn theo khu vực VÀ loại bàn
+                int count = 0;
+                for (BanAn ban : tatCaBan) {
+                    if (kv.equals(ban.getKhuVuc())) {
+                        if (loaiFilter.equals("Tất cả") || loaiFilter.equalsIgnoreCase(ban.getLoaiBan())) {
+                            pnlLuoi.add(taoTheBan(ban));
+                            count++;
+                        }
+                    }
+                }
+                
+                // Cố định độ cao để bàn không bị "dẹp"
+                int soHang = (count + soCot - 1) / soCot;
+                pnlLuoi.setPreferredSize(new Dimension(1000, Math.max(200, soHang * 220)));
+                
+                // Ngăn chặn việc dãn thẻ bàn khi số lượng bàn ít
+                JPanel pnlWrapper = new JPanel(new BorderLayout());
+                pnlWrapper.setBackground(mauNens[k]);
+                pnlWrapper.add(pnlLuoi, BorderLayout.NORTH);
+                
+                JScrollPane scroll = new JScrollPane(pnlWrapper);
+                scroll.setBorder(null);
+                scroll.getVerticalScrollBar().setUnitIncrement(16);
+                tabKhuVuc.addTab(kv.toUpperCase() + " (" + count + ")", scroll);
+            }
         }
     
         // Phương thức tiện ích để tạo thẻ bàn
@@ -535,51 +538,7 @@
         }
     
         private void locBanTheoLoai(String loaiBan) {
-            if (loaiBan.equals("Tất cả")) {
-                // Tạo lại lưới với tất cả bàn
-                pnlLuoiBan.removeAll();
-                setupTableGrid();
-                pnlLuoiBan.revalidate();
-                pnlLuoiBan.repaint();
-                return;
-            }
-    
-            // Lấy danh sách bàn theo loại
-            ArrayList<BanAn> danhSachBanLoc = new ArrayList<>();
-            ArrayList<BanAn> tatCaBan = banAnCtr.layTatCaBan();
-
-            for (BanAn ban : tatCaBan) {
-                if (ban.getLoaiBan().equals(loaiBan)) {
-                    danhSachBanLoc.add(ban);
-                }
-            }
-    
-            // Xóa lưới cũ
-            pnlLuoiBan.removeAll();
-    
-            // Giữ nguyên layout với 4 cột cố định
-            final int soCot = 4;
-            final int soHang = (TONG_SO_BAN + soCot - 1) / soCot; // Đủ số hàng như ban đầu
-            pnlLuoiBan.setLayout(new GridLayout(soHang, soCot, 15, 15));
-            pnlLuoiBan.setBackground(MAU_NEN);
-            pnlLuoiBan.setPreferredSize(new Dimension(1000, soHang * 200));
-    
-            // Thêm các bàn đã lọc liên tục từ đầu (không có khoảng trống)
-            for (BanAn ban : danhSachBanLoc) {
-                pnlLuoiBan.add(taoTheBan(ban));
-            }
-    
-            // Điền các ô trống còn lại để giữ kích cỡ lưới
-            int soODaThemh = danhSachBanLoc.size();
-            while (soODaThemh < TONG_SO_BAN) {
-                JPanel pnlTrong = new JPanel();
-                pnlTrong.setBackground(MAU_NEN);
-                pnlLuoiBan.add(pnlTrong);
-                soODaThemh++;
-            }
-    
-            pnlLuoiBan.revalidate();
-            pnlLuoiBan.repaint();
+            refreshData();
         }
     
         @Override
@@ -591,12 +550,7 @@
     }
 
     public void lamMoiDuLieu() {
-        if (pnlLuoiBan != null) {
-            pnlLuoiBan.removeAll();
-            setupTableGrid();
-            pnlLuoiBan.revalidate();
-            pnlLuoiBan.repaint();
-        }
+        refreshData();
     }
 
     public static void main(String[] args) {

@@ -20,29 +20,28 @@ public class BanAn {
     @Column(name = "loai_ban")
     private String loaiBan; // Thường, VIP, Deluxe
 
+    @Column(name = "khu_vuc")
+    private String khuVuc; // Trong nhà, Ngoài trời, Trên lầu
+
     // Constructor mặc định
     public BanAn() {
         this.maBan = 0;
         this.soCho = 0; 
         this.loaiBan = "Thường";
+        this.khuVuc = "Trong nhà";
     }
 
     // Constructor đầy đủ tham số
-    public BanAn(int maBan, int soCho, String loaiBan) {
+    public BanAn(int maBan, int soCho, String loaiBan, String khuVuc) {
         this.maBan = (maBan > 0) ? maBan : 1;
         this.soCho = (soCho > 0) ? soCho : 2;
+        this.loaiBan = (loaiBan != null) ? loaiBan.trim() : "Thường";
+        this.khuVuc = (khuVuc != null) ? khuVuc.trim() : "Trong nhà";
+    }
 
-        // Kiểm tra loại bàn (trim khoảng trắng)
-        if (loaiBan != null) {
-            loaiBan = loaiBan.trim();
-        }
-        if (loaiBan != null && (loaiBan.equals("Thường") ||
-                loaiBan.equals("VIP") ||
-                loaiBan.equals("Deluxe"))) {
-            this.loaiBan = loaiBan;
-        } else {
-            this.loaiBan = "Thường";
-        }
+    // Constructor cũ để tương thích ngược
+    public BanAn(int maBan, int soCho, String loaiBan) {
+        this(maBan, soCho, loaiBan, "Trong nhà");
     }
 
     // Getter
@@ -69,14 +68,15 @@ public class BanAn {
     }
 
     public void setLoaiBan(String loaiBan) {
-        if (loaiBan != null) {
-            loaiBan = loaiBan.trim();
-        }
-        if (loaiBan != null && (loaiBan.equals("Thường") ||
-                loaiBan.equals("VIP") ||
-                loaiBan.equals("Deluxe"))) {
-            this.loaiBan = loaiBan;
-        }
+        this.loaiBan = loaiBan;
+    }
+
+    public String getKhuVuc() {
+        return khuVuc;
+    }
+
+    public void setKhuVuc(String khuVuc) {
+        this.khuVuc = khuVuc;
     }
 
     @Override
