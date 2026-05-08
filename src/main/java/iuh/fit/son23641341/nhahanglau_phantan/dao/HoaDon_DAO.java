@@ -20,7 +20,13 @@ public class HoaDon_DAO {
     }
 
     public List<HoaDon> timKiemHoaDon(String keyword) {
-        String jpql = "SELECT h FROM HoaDon h WHERE h.maHoaDon LIKE :kw OR h.trangThai LIKE :kw OR h.phieuDat.sdtDat LIKE :kw";
+        String jpql = "SELECT DISTINCT h FROM HoaDon h " +
+                      "LEFT JOIN h.danhSachPhieuDat p " +
+                      "LEFT JOIN h.khachHangThanhVien k " +
+                      "WHERE h.maHoaDon LIKE :kw " +
+                      "OR h.trangThai LIKE :kw " +
+                      "OR p.sdtDat LIKE :kw " +
+                      "OR k.soDienThoai LIKE :kw";
         return em.createQuery(jpql, HoaDon.class)
                 .setParameter("kw", "%" + keyword + "%")
                 .getResultList();
