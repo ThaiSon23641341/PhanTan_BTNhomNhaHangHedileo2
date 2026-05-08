@@ -93,7 +93,7 @@ public class PhieuDat_GUI extends JPanel {
 
     private KhuyenMai khuyenMaiDaApDung;
 
-    private ArrayList<ChiTietDatMon> danhSachMonDaChonA;
+    private ArrayList<ChiTietDatMon> danhSachMonDaChon;
     private int soBan;
     private BanAn_Ctr banAnCtr;
     private BanAn banHienTai;
@@ -104,7 +104,6 @@ public class PhieuDat_GUI extends JPanel {
     private String maPhieuDangXem; // Lưu mã phiếu khi load từ DB
     private boolean isBanFullKhungGio = false; // Đánh dấu bàn đã full 6/6 khung giờ
 
-    private ArrayList<ChiTietDatMon> danhSachMonDaChon;
     private JLabel lblGiaTriTamTinh;
     private JLabel lblThoat;
 
@@ -134,6 +133,10 @@ public class PhieuDat_GUI extends JPanel {
         this.isThanhVienTamThoi = false;
         this.isCheckboxThanhVienTamThoi = false;
         
+        // Reset danh sách món để tránh lem dữ liệu giữa các bàn
+        this.danhSachMonDaChon = new ArrayList<>();
+        this.maPhieuDangXem = null;
+        
         khoiTaoVoiDuLieu();
     }
 
@@ -144,6 +147,11 @@ public class PhieuDat_GUI extends JPanel {
         this.soBan = soBan;
         this.ngayDatTuChonBan = ngayDat;
         this.phieuTamThoi = phieuTam;
+        
+        // Lưu lại mã phiếu đang xem nếu có
+        if (phieuTam != null && phieuTam.getMaPhieu() != null) {
+            this.maPhieuDangXem = phieuTam.getMaPhieu();
+        }
         
         khoiTaoVoiDuLieu();
     }
@@ -224,19 +232,9 @@ public class PhieuDat_GUI extends JPanel {
         if (this.banAnCtr == null || this.phieuDatBanCtr == null) {
             return;
         }
-        
+
         loadData();
         kichHoatForm();
-        
-        // Reset trạng thái hiển thị mặc định của các nút
-        btnXacNhan.setVisible(true);
-        btnHuy.setVisible(true);
-        btnBatDauSuDung.setVisible(false);
-        btnLuuThayDoi.setVisible(false);
-        btnThanhToan.setVisible(false);
-        btnThemMonAn.setVisible(true);
-        btnXemPhieuDat.setVisible(false);
-        btnTaoPhieuMoi.setVisible(false);
 
         banHienTai = this.banAnCtr.timBanTheoMa(soBan);
         if (banHienTai == null) {
@@ -250,51 +248,47 @@ public class PhieuDat_GUI extends JPanel {
         String ngayHienTai = sdf.format(new Date());
         String ngayDangXet = (ngayDatTuChonBan != null) ? ngayDatTuChonBan : ngayHienTai;
 
-        // Kiểm tra nếu bàn đang có phiếu "Đang sử dụng" từ DB
+        // 1. XÁC ĐỊNH PHIẾU HIỆN TẠI VÀ TRẠNG THÁI
         phieuHienTai = phieuDatBanCtr.layPhieuDangSuDungTheoMaBan(soBan);
         if (phieuHienTai == null) {
-            // Nếu không có phiếu đang dùng, tìm phiếu đặt trước hoặc xác nhận
             phieuHienTai = phieuDatBanCtr.timPhieuTheoMaBan(soBan);
-        }
-
-        // Nếu truyền vào danhSachBanKhoiPhuc (tức là click từ bàn đã đặt nhiều bàn),
-        // thì hiển thị đúng danh sách này
-        // Loại bỏ các bàn đã có phiếu đặt trước cho ngày đó
-        this.danhSachBanDaChon = new ArrayList<>();
-        ArrayList<PhieuDatBan> phieuDatCungNgay = PhieuDatBan_Ctr.getInstance().layTatCaPhieu();
-        ArrayList<Integer> banDaDatTruoc = new ArrayList<>();
-        if (phieuDatCungNgay != null) {
-            for (PhieuDatBan phieu : phieuDatCungNgay) {
-                if (phieu.getNgayDat() != null && phieu.getNgayDat().equals(ngayDangXet)) {
-                    banDaDatTruoc.addAll(phieu.getDanhSachBan());
-                }
-            }
-        }
-        if (this.danhSachBanKhoiPhuc != null && !this.danhSachBanKhoiPhuc.isEmpty()) {
-            for (Integer b : this.danhSachBanKhoiPhuc) {
-                if (!banDaDatTruoc.contains(b)) {
-                    this.danhSachBanDaChon.add(b);
-                }
-            }
-        } else {
-            if (!banDaDatTruoc.contains(soBan)) {
-                this.danhSachBanDaChon.add(soBan);
-            }
         }
 
         if (phieuHienTai != null) {
             this.maPhieuDangXem = phieuHienTai.getMaPhieu();
-            if ("Đang sử dụng".equals(phieuHienTai.getTrangThai())
-                    || "Đã xác nhận".equals(phieuHienTai.getTrangThai())) {
+            if ("Đang sử dụng".equals(phieuHienTai.getTrangThai()) || "Đã xác nhận".equals(phieuHienTai.getTrangThai())) {
                 cheDoHienThi = "DANG_SU_DUNG";
             } else {
                 cheDoHienThi = "XEM_PHIEU";
             }
         } else {
             cheDoHienThi = "DAT_MOI";
+            maPhieuDangXem = null;
         }
 
-        // Nếu có phieuTamThoi thì khôi phục lại dữ liệu form (Phải đặt sau khi set cheDoHienThi)
+        // 2. XỬ LÝ DANH SÁCH BÀN (Multi-table)
+        this.danhSachBanDaChon = new ArrayList<>();
+        ArrayList<PhieuDatBan> phieuDatCungNgay = PhieuDatBan_Ctr.getInstance().layTatCaPhieu();
+        ArrayList<Integer> banDaDatTruoc = new ArrayList<>();
+        if (phieuDatCungNgay != null) {
+            for (PhieuDatBan p : phieuDatCungNgay) {
+                if (p.getNgayDat() != null && p.getNgayDat().equals(ngayDangXet) && !"Đã hủy".equals(p.getTrangThai())) {
+                    banDaDatTruoc.addAll(p.getDanhSachBan());
+                }
+            }
+        }
+
+        if (this.danhSachBanKhoiPhuc != null && !this.danhSachBanKhoiPhuc.isEmpty()) {
+            for (Integer b : this.danhSachBanKhoiPhuc) {
+                if (!banDaDatTruoc.contains(b) || (phieuHienTai != null && phieuHienTai.getDanhSachBan().contains(b))) {
+                    this.danhSachBanDaChon.add(b);
+                }
+            }
+        } else {
+            this.danhSachBanDaChon.add(soBan);
+        }
+
+        // 3. NẠP DỮ LIỆU TỪ PHIẾU TẠM (Nếu quay về từ màn hình chọn món)
         if (this.phieuTamThoi != null) {
             txtTenKhachHang.setText(this.phieuTamThoi.getTenKhachDat());
             txtSoDienThoai.setText(this.phieuTamThoi.getSdtDat());
@@ -302,149 +296,50 @@ public class PhieuDat_GUI extends JPanel {
             try {
                 if (this.phieuTamThoi.getGioDat() != null)
                     spinnerGioDat.setValue(new SimpleDateFormat("HH:mm").parse(this.phieuTamThoi.getGioDat()));
-                if (this.phieuTamThoi.getNgayDat() != null)
-                    dateChooserNgayDat.setDate(new SimpleDateFormat("dd/MM/yyyy").parse(this.phieuTamThoi.getNgayDat()));
             } catch (Exception ex) {
             }
             cboPhuongThucThanhToan.setSelectedItem(this.phieuTamThoi.getPhuongThucThanhToan());
             danhSachBanDaChon = new ArrayList<>(this.phieuTamThoi.getDanhSachBanDaChon());
 
-            if (this.phieuTamThoi.getDanhSachMonAn() != null && !this.phieuTamThoi.getDanhSachMonAn().isEmpty()) {
-                danhSachMonDaChon = new ArrayList<>();
-                for (ChiTietDatMon mon : this.phieuTamThoi.getDanhSachMonAn()) {
-                    if (mon.getSoLuong() > 0) {
-                        danhSachMonDaChon.add(mon);
-                    }
-                }
+            // Ưu tiên danh sách món từ phiếu tạm
+            if (this.phieuTamThoi.getDanhSachMonAn() != null) {
+                this.danhSachMonDaChon = new ArrayList<>(this.phieuTamThoi.getDanhSachMonAn());
             }
-            
-            // Khôi phục chế độ hiển thị và mã phiếu
+
             if (this.cheDoHienThiTamThoi != null) {
                 cheDoHienThi = this.cheDoHienThiTamThoi;
                 this.cheDoHienThiTamThoi = null;
             }
-            if (this.maPhieuTamThoi != null) {
-                maPhieuDangXem = this.maPhieuTamThoi;
-                this.maPhieuTamThoi = null;
-            }
-            if (this.phieuTamThoi != null && this.phieuTamThoi.getMaPhieu() != null) {
-                maPhieuDangXem = this.phieuTamThoi.getMaPhieu();
-                cheDoHienThi = "XEM_PHIEU";
-            }
-
-            // Cập nhật hiển thị nút tương ứng với chế độ
-            if (cheDoHienThi.equals("XEM_PHIEU")) {
-                btnXacNhan.setVisible(false);
-                btnLuuThayDoi.setVisible(true);
-                btnHuy.setVisible(true);
-                btnHuy.setText("Hủy đặt bàn");
-            } else if (cheDoHienThi.equals("DAT_MOI")) {
-                btnXacNhan.setVisible(true);
-                btnLuuThayDoi.setVisible(false);
-                btnHuy.setVisible(true);
-                btnHuy.setText("Hủy");
+        } else {
+            // 4. NẠP DỮ LIỆU TỪ DB (Nếu không có phiếu tạm)
+            if (phieuHienTai != null) {
+                hienThiThongTinPhieuDat();
+                this.danhSachMonDaChon = new ArrayList<>(phieuHienTai.getDanhSachMonAn());
+            } else {
+                // Load từ giỏ hàng tạm trong controller
+                this.danhSachMonDaChon = new ArrayList<>(phieuDatBanCtr.layDanhSachMonAnChoBan(soBan));
             }
         }
 
-        this.danhSachMonDaChon = new ArrayList<>(phieuDatBanCtr.layDanhSachMonAnChoBan(soBan));
-        if (this.danhSachMonDaChon == null) {
-            this.danhSachMonDaChon = new ArrayList<>();
-            phieuDatBanCtr.capNhatDanhSachMonAn(soBan, rawDanhSachMon(this.danhSachMonDaChon));
-        }
-
+        // Đảm bảo đồng bộ với controller
+        phieuDatBanCtr.capNhatDanhSachMonAn(soBan, rawDanhSachMon(this.danhSachMonDaChon));
         capNhatPanelThongTinDatMon();
 
-        if (cheDoHienThi.equals("XEM_PHIEU")) {
-            hienThiThongTinPhieuDat();
-            voHieuHoaForm();
-        } else if (cheDoHienThi.equals("DANG_SU_DUNG")) {
-            // Load thông tin từ phiếu đang sử dụng
-            if (phieuHienTai != null) {
-                // Load danh sách món ăn từ phiếu
-                if (phieuHienTai.getDanhSachMonAn() != null && !phieuHienTai.getDanhSachMonAn().isEmpty()) {
-                    this.danhSachMonDaChon = new ArrayList<>(phieuHienTai.getDanhSachMonAn());
-                    phieuDatBanCtr.capNhatDanhSachMonAn(soBan, rawDanhSachMon(danhSachMonDaChon));
-                    capNhatPanelThongTinDatMon();
-                }
-                // Load thông tin khách hàng lên form
-                hienThiThongTinPhieuDat();
-            }
-            // Hiển thị chế độ đang sử dụng
-            hienThiCheDoDangSuDung();
-        } else if (cheDoHienThi.equals("DAT_MOI")) {
-            SimpleDateFormat sdfCheck = new SimpleDateFormat("dd/MM/yyyy");
-            String ngayHienTaiCheck = sdfCheck.format(new Date());
-            String ngayDangXetCheck = (ngayDatTuChonBan != null) ? ngayDatTuChonBan : ngayHienTaiCheck;
-
-            if (ngayDangXetCheck.equals(ngayHienTaiCheck)) {
-                btnBatDauSuDung.setVisible(true);
-            } else {
-                btnBatDauSuDung.setVisible(false);
-            }
-
-            int soLuongBan = danhSachBanDaChon.size();
-            double phiBan = 250000 * soLuongBan;
-            double tienMonAn = 0;
-            if (danhSachMonDaChon != null && !danhSachMonDaChon.isEmpty()) {
-                for (ChiTietDatMon ct : danhSachMonDaChon) {
-                    tienMonAn += ct.getMonAn().getGia() * ct.getSoLuong();
-                }
-            }
-            double phiMonAn = tienMonAn * 0.3;
-            double tienCoc = phiBan + phiMonAn;
-            lblTongTienDatCoc.setText(String.format(" %,.0f VNĐ", tienCoc));
-            // Hiển thị label cho chế độ đặt mới
-            lblNhanTongTien.setVisible(true);
-            lblTongTienDatCoc.setVisible(true);
-        }
-
-        apDungKieuDang();
-
-        // Đếm số phiếu đặt của bàn này trong ngày đã chọn
+        // 5. KIỂM TRA FULL KHUNG GIỜ
         int soPhieuDat = 0;
-        String ngayCanKiem = (ngayDatTuChonBan != null) ? ngayDatTuChonBan : ngayHienTai;
-        ArrayList<PhieuDatBan> phieuTrongNgay = phieuDatBanCtr.layPhieuDatTheoNgay(ngayCanKiem);
-        if (phieuTrongNgay != null) {
-            for (PhieuDatBan phieu : phieuTrongNgay) {
-                // Đếm các phiếu chứa bàn này và không bị hủy
-                ArrayList<Integer> dsBan = (ArrayList<Integer>) phieu.getDanhSachBan();
-                if (dsBan != null && dsBan.contains(soBan) && !"Đã hủy".equals(phieu.getTrangThai())) {
-                    soPhieuDat++;
+        if (phieuDatCungNgay != null) {
+            for (PhieuDatBan p : phieuDatCungNgay) {
+                if (p.getNgayDat() != null && p.getNgayDat().equals(ngayDangXet) && !"Đã hủy".equals(p.getTrangThai())) {
+                    if (p.getDanhSachBan().contains(soBan)) soPhieuDat++;
                 }
             }
         }
-        // Nếu đủ 6 phiếu thì đánh dấu full
         this.isBanFullKhungGio = (soPhieuDat >= 6);
-        System.out.println(isBanFullKhungGio);
-        // Cập nhật hiển thị nút sau khi khôi phục từ phieuTamThoi
-        if (cheDoHienThi.equals("XEM_PHIEU")) {
-            // Đảm bảo form bị vô hiệu hóa khi xem phiếu
-            if (this.phieuTamThoi != null || maPhieuDangXem != null) {
-                voHieuHoaForm();
-            } else {
-                // Trường hợp không có phieuTamThoi nhưng cheDoHienThi = XEM_PHIEU
-                btnHuy.setVisible(true);
-                btnLuuThayDoi.setVisible(true);
-                btnXacNhan.setVisible(false);
-            }
-        } else if (cheDoHienThi.equals("DANG_SU_DUNG")) {
-            // Chế độ đang sử dụng: hiển thị nút "Lưu thay đổi" được xử lý trong
-            // hienThiCheDoDangSuDung()
-            // Không làm gì ở đây
-        } else if (!cheDoHienThi.equals("XEM_PHIEU") && !cheDoHienThi.equals("DANG_SU_DUNG")) {
-            btnHuy.setVisible(true);
-            btnHuy.setText("Hủy");
-            btnLuuThayDoi.setVisible(false);
-        }
 
-        // Ẩn 3 nút khi bàn đã full khung giờ (6/6 slots) - PHẢI ĐẶT SAU CÙNG để không
-        // bị ghi đè
-        if (isBanFullKhungGio && cheDoHienThi.equals("DAT_MOI")) {
-            System.out.println("Full giờ");
-            btnXacNhan.setVisible(false);
-            btnBatDauSuDung.setVisible(false);
-            btnTaoPhieuMoi.setVisible(false);
-        }
+        // 6. THIẾT LẬP GIAO DIỆN NÚT BẤM
+        thietLapGiaoDienTheoTrangThai(cheDoHienThi);
+        
+        apDungKieuDang();
     }
 
     private void initializeComponents() {
@@ -820,8 +715,8 @@ public class PhieuDat_GUI extends JPanel {
                 tongTienMonAn += ct.getMonAn().getGia() * ct.getSoLuong();
             }
 
-            danhSachMonDaChonA = danhSachMonDaChon;
-            System.out.println("Số món đã chọn: " + danhSachMonDaChonA.size());
+            danhSachMonDaChon = danhSachMonDaChon;
+            System.out.println("Số món đã chọn: " + danhSachMonDaChon.size());
 
         } else {
             JLabel lblChuaCoMon = new JLabel("Chưa có món ăn nào được chọn");
@@ -1151,8 +1046,8 @@ public class PhieuDat_GUI extends JPanel {
             int soLuongBan = danhSachBanDaChon.size();
             double phiBan = 250000 * soLuongBan;
             double tienMonAn = 0;
-            if (danhSachMonDaChonA != null && !danhSachMonDaChonA.isEmpty()) {
-                for (ChiTietDatMon ct : danhSachMonDaChonA) {
+            if (danhSachMonDaChon != null && !danhSachMonDaChon.isEmpty()) {
+                for (ChiTietDatMon ct : danhSachMonDaChon) {
                     tienMonAn += ct.getMonAn().getGia() * ct.getSoLuong();
                 }
             }
@@ -1273,7 +1168,8 @@ public class PhieuDat_GUI extends JPanel {
                     }
                 }
             } else if (cheDoHienThi.equals("DAT_MOI")) {
-                phieuDatBanCtr.xoaGioHangTamThoi(banHienTai.getMaBan());
+                // Không xóa giỏ hàng khi nhấn Hủy ở màn hình đặt mới, chỉ quay lại chọn bàn
+                // để món ăn vẫn được lưu trong controller
                 GUIManager.getInstance().switchToGUI(ChonBan_GUI.class, PhieuDat_GUI.this);
             }
         });
@@ -1354,8 +1250,8 @@ public class PhieuDat_GUI extends JPanel {
 
                 System.out.println("=== LƯU THAY ĐỔI ===");
                 System.out.println("Số món trong danhSachMonDaChon: " + danhSachMonDaChon.size());
-                System.out.println("Số món trong danhSachMonDaChonA: "
-                        + (danhSachMonDaChonA != null ? danhSachMonDaChonA.size() : "null"));
+                System.out.println("Số món trong danhSachMonDaChon: "
+                        + (danhSachMonDaChon != null ? danhSachMonDaChon.size() : "null"));
 
                 boolean thanhCong = phieuDatBanCtr.capNhatMonAnCuaPhieu(maPhieu, rawDanhSachMon(danhSachMon));
 
@@ -1451,6 +1347,9 @@ public class PhieuDat_GUI extends JPanel {
                     phieuVangLai.setTenKhachHang(tenKhach);
                     phieuVangLai.setSdtDat(sdt);
                     phieuVangLai.setEmailDat(email);
+                    // Set danh sách món đã chọn (QUAN TRỌNG)
+                    phieuVangLai.setDanhSachMonAn(new ArrayList<>(danhSachMonDaChon));
+                    
                     // Set ngày giờ hiện tại
                     SimpleDateFormat sdfDate = new SimpleDateFormat("dd/MM/yyyy");
                     SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm");
@@ -1459,7 +1358,7 @@ public class PhieuDat_GUI extends JPanel {
                     phieuVangLai.setGioDat(sdfTime.format(now));
                     phieuVangLai.setThoiGianDat(new java.sql.Timestamp(now.getTime()));
 
-                    phieuVangLai.setTrangThai("Đã xác nhận");
+                    phieuVangLai.setTrangThai("Đang sử dụng");
                     phieuVangLai.setTienCoc(0);
                     phieuVangLai.setPhuongThucThanhToan(null); // Khách vãng lai chưa chọn phương thức
 
@@ -1479,12 +1378,12 @@ public class PhieuDat_GUI extends JPanel {
                     // Nếu đã có phiếu (Đặt trước -> Khách đến)
                     System.out.println("=== CẬP NHẬT PHIẾU ĐẶT TRƯỚC: " + phieuHienTai.getMaPhieu() + " ===");
                     coPhieuDatTruoc = true; // CÓ phiếu đặt trước
-                    phieuHienTai.setTrangThai("Đã xác nhận");
+                    phieuHienTai.setTrangThai("Đang sử dụng");
 
                     // CẬP NHẬT TRẠNG THÁI VÀO DB
                     if (phieuHienTai.getMaPhieu() != null && !phieuHienTai.getMaPhieu().isEmpty()) {
                         PhieuDat_DAO phieuDAO = new PhieuDat_DAO();
-                        boolean updated = phieuDAO.capNhatTrangThai(phieuHienTai.getMaPhieu(), "Đã xác nhận");
+                        boolean updated = phieuDAO.capNhatTrangThai(phieuHienTai.getMaPhieu(), "Đang sử dụng");
                         System.out.println(
                                 "=== Cập nhật DB trạng thái: " + (updated ? "Thành công" : "Thất bại") + " ===");
                     }
@@ -1503,7 +1402,8 @@ public class PhieuDat_GUI extends JPanel {
                 if (coPhieuDatTruoc) {
                     System.out.println("=== GIỮ FORM VÀ ẨN/HIỆN NÚT ===");
                     // GIỮ FORM, chỉ ẩn/hiện nút theo yêu cầu
-                    hienThiCheDoDangSuDung();
+                    cheDoHienThi = "DANG_SU_DUNG";
+                    thietLapGiaoDienTheoTrangThai("DANG_SU_DUNG");
 
                     // Render lại món ăn lên giao diện
                     capNhatPanelThongTinDatMon();
@@ -1515,7 +1415,8 @@ public class PhieuDat_GUI extends JPanel {
                 } else {
                     System.out.println("=== GIỮ FORM CHO KHÁCH VÃNG LAI ===");
                     // Khách vãng lai -> GIỮ FORM để có thể thêm món và cập nhật thông tin
-                    hienThiCheDoDangSuDung();
+                    cheDoHienThi = "DANG_SU_DUNG";
+                    thietLapGiaoDienTheoTrangThai("DANG_SU_DUNG");
 
                     // Render lại món ăn lên giao diện (nếu có)
                     capNhatPanelThongTinDatMon();
@@ -1593,11 +1494,11 @@ public class PhieuDat_GUI extends JPanel {
             emailDat = "";
         }
 
-        System.out.println("Danh sách món đã chọn: " + danhSachMonDaChonA);
+        System.out.println("Danh sách món đã chọn: " + danhSachMonDaChon);
 
         PhieuDatBan_Ctr phieuDatBanCtr = PhieuDatBan_Ctr.getInstance();
         PhieuDatBan phieuDatMoi = phieuDatBanCtr.taoPhieuDat(tenKH, sdt, ngayDat, gioDat, phuongThuc, emailDat,
-                danhSachBanDaChon, rawDanhSachMon(danhSachMonDaChonA), 0);
+                danhSachBanDaChon, rawDanhSachMon(danhSachMonDaChon), 0);
         if (phieuDatMoi != null) {
             System.out.println("Lưu phiếu đặt bàn thành công!");
 
@@ -1664,23 +1565,91 @@ public class PhieuDat_GUI extends JPanel {
         cboPhuongThucThanhToan.setVisible(true);
     }
 
+    /**
+     * Thiết lập giao diện (nút bấm, độ khả dụng của field) dựa trên trạng thái phiếu
+     * @param trangThai "DAT_MOI", "XEM_PHIEU", "DANG_SU_DUNG"
+     */
+    private void thietLapGiaoDienTheoTrangThai(String trangThai) {
+        if (trangThai == null) trangThai = "DAT_MOI";
+        
+        // 1. CÁC NÚT LUÔN HIỆN (Theo yêu cầu của USER)
+        btnThemMonAn.setVisible(true);
+        btnXemPhieuDat.setVisible(true);
+        btnHuy.setVisible(true);
+
+        // 2. CÁC NÚT PHỤ THUỘC TRẠNG THÁI
+        switch (trangThai) {
+            case "DAT_MOI":
+                btnXacNhan.setVisible(true);
+                btnBatDauSuDung.setVisible(true);
+                btnTaoPhieuMoi.setVisible(true);
+                btnLuuThayDoi.setVisible(false);
+                btnThanhToan.setVisible(false);
+                btnChonThemBan.setVisible(true);
+                
+                btnHuy.setText("Hủy");
+                kichHoatForm();
+                break;
+
+            case "XEM_PHIEU":
+                btnXacNhan.setVisible(false);
+                btnBatDauSuDung.setVisible(true);
+                btnTaoPhieuMoi.setVisible(true); // Cho phép tạo phiếu mới (vãng lai) kể cả khi bàn đã được đặt trước
+                btnLuuThayDoi.setVisible(true);
+                btnThanhToan.setVisible(false);
+                btnChonThemBan.setVisible(true);
+                
+                btnHuy.setText("Hủy đặt bàn");
+                voHieuHoaForm();
+                break;
+
+            case "DANG_SU_DUNG":
+                btnXacNhan.setVisible(false);
+                btnBatDauSuDung.setVisible(false);
+                btnTaoPhieuMoi.setVisible(false);
+                btnLuuThayDoi.setVisible(true);
+                btnThanhToan.setVisible(true);
+                btnChonThemBan.setVisible(false);
+                
+                btnHuy.setText("Kết thúc sử dụng");
+                hienThiCheDoDangSuDung(); // Thiết lập chi tiết cho chế độ đang dùng
+                break;
+        }
+        
+        // Ẩn nút "Bắt đầu sử dụng" nếu không phải ngày hôm nay
+        if (trangThai.equals("DAT_MOI") || trangThai.equals("XEM_PHIEU")) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            String ngayHienTai = sdf.format(new Date());
+            String ngayDat = (ngayDatTuChonBan != null) ? ngayDatTuChonBan : sdf.format(dateChooserNgayDat.getDate());
+            if (!ngayDat.equals(ngayHienTai)) {
+                btnBatDauSuDung.setVisible(false);
+            }
+        }
+        
+        // Ẩn các nút đặt nếu bàn đã full khung giờ
+        if (isBanFullKhungGio && trangThai.equals("DAT_MOI")) {
+            btnXacNhan.setVisible(false);
+            btnBatDauSuDung.setVisible(false);
+        }
+
+        // Áp dụng kiểu dáng và đồng bộ visibility cuối cùng
+        apDungKieuDang();
+    }
+
     private void hienThiCheDoDangSuDung() {
         if (phieuHienTai != null)
             hienThiThongTinPhieuDat();
 
-        // Kiểm tra xem có phải khách vãng lai không:
-        // Khách vãng lai = có phiếu đặt nhưng tiền cọc = 0
+        // Kiểm tra xem có phải khách vãng lai không
         boolean laKhachVangLai = (phieuHienTai != null && phieuHienTai.getTienCoc() == 0);
 
-        Color mauVoHieuHoa = new Color(240, 240, 240);
-
-        // CHO PHÉP ĐIỀN THÔNG TIN trong mọi trường hợp (đang sử dụng)
+        // Cho phép điền thông tin khách hàng để cập nhật
         txtTenKhachHang.setEditable(true);
         txtSoDienThoai.setEditable(true);
         txtEmail.setEditable(true);
         txtSoDienThoaiThanhVien.setEditable(true);
         cboGioiTinh.setEnabled(true);
-        cboPhuongThucThanhToan.setEnabled(!laKhachVangLai); // Ẩn phương thức thanh toán cho khách vãng lai
+        cboPhuongThucThanhToan.setEnabled(!laKhachVangLai);
         chkThemThanhVien.setVisible(true);
 
         txtTenKhachHang.setBackground(Color.WHITE);
@@ -1689,43 +1658,20 @@ public class PhieuDat_GUI extends JPanel {
         txtSoDienThoaiThanhVien.setBackground(Color.WHITE);
         cboGioiTinh.setBackground(Color.WHITE);
 
-        // CHỈ KHÔNG cho phép chỉnh giờ đặt
+        // Không cho phép chỉnh ngày giờ
         dateChooserNgayDat.setEnabled(false);
         spinnerGioDat.setEnabled(false);
-        dateChooserNgayDat.setBackground(mauVoHieuHoa);
-        spinnerGioDat.setBackground(mauVoHieuHoa);
 
-        // Cập nhật label và tiền hiển thị
         if (laKhachVangLai) {
-            // Khách vãng lai: ẨN tổng tiền đặt cọc và phương thức thanh toán
             lblNhanTongTien.setVisible(false);
             lblTongTienDatCoc.setVisible(false);
-            cboPhuongThucThanhToan.setVisible(false); // Ẩn combo box phương thức thanh toán
+            cboPhuongThucThanhToan.setVisible(false);
         } else {
-            // Khách đặt trước: HIỆN "Tổng tiền đặt cọc" và phương thức thanh toán
             lblNhanTongTien.setVisible(true);
             lblTongTienDatCoc.setVisible(true);
-            cboPhuongThucThanhToan.setVisible(true); // Hiện combo box phương thức thanh toán
+            cboPhuongThucThanhToan.setVisible(true);
             lblNhanTongTien.setText("Tổng tiền đặt cọc:");
-            // Giữ nguyên tiền cọc đã tính
         }
-
-        // Hiển thị form thông tin
-        pnlFormBenTrai.setVisible(true);
-
-        // ẨN TẤT CẢ các nút không cần thiết
-        btnXacNhan.setVisible(false);
-        btnBatDauSuDung.setVisible(false);
-        btnHuy.setVisible(false);
-        btnChonThemBan.setVisible(false);
-
-        // CHỈ GIỮ 5 nút: Xem phiếu đặt, Tạo phiếu mới, Thanh toán, Thêm món ăn, Lưu
-        // thay đổi
-        btnXemPhieuDat.setVisible(true);
-        btnTaoPhieuMoi.setVisible(true);
-        btnThanhToan.setVisible(true);
-        btnThemMonAn.setVisible(true);
-        btnLuuThayDoi.setVisible(true); // Hiện nút lưu thay đổi cho khách vãng lai
     }
 
     private void voHieuHoaForm() {
@@ -1744,40 +1690,6 @@ public class PhieuDat_GUI extends JPanel {
         cboGioiTinh.setBackground(mauVoHieuHoa);
         dateChooserNgayDat.setBackground(mauVoHieuHoa);
         spinnerGioDat.setBackground(mauVoHieuHoa);
-
-        btnXacNhan.setVisible(false);
-
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        String ngayHienTai = sdf.format(new Date());
-        String ngayDat = (ngayDatTuChonBan != null) ? ngayDatTuChonBan : sdf.format(dateChooserNgayDat.getDate());
-
-        // Kiểm tra trạng thái phiếu và loại khách
-        boolean isPhieuDaXacNhan = (phieuHienTai != null && "Đã xác nhận".equals(phieuHienTai.getTrangThai()));
-        boolean laKhachVangLai = (phieuHienTai != null && phieuHienTai.getTienCoc() == 0);
-
-        // Hiển thị nút Bắt đầu sử dụng (chỉ khi là ngày hiện tại VÀ chưa xác nhận)
-        btnBatDauSuDung.setVisible(ngayDat.equals(ngayHienTai) && !isPhieuDaXacNhan);
-
-        // Hiển thị nút Hủy (chỉ khi chưa xác nhận HOẶC là khách vãng lai chưa có món)
-        if (laKhachVangLai && isPhieuDaXacNhan) {
-            // Khách vãng lai đã xác nhận -> không hiện nút Hủy
-            btnHuy.setVisible(false);
-        } else {
-            btnHuy.setVisible(!isPhieuDaXacNhan);
-            btnHuy.setText("Hủy đặt bàn");
-        }
-        btnChonThemBan.setVisible(true);
-
-        // Hiển thị nút Lưu thay đổi (chỉ khi chưa xác nhận HOẶC là khách vãng lai)
-        if (laKhachVangLai && isPhieuDaXacNhan) {
-            // Khách vãng lai đã xác nhận -> VẪN HIỆN nút Lưu thay đổi để cập nhật thông tin
-            btnLuuThayDoi.setVisible(true);
-        } else {
-            btnLuuThayDoi.setVisible(!isPhieuDaXacNhan);
-        }
-
-        // Hiển thị nút Thanh toán cho phiếu "Đã xác nhận"
-        btnThanhToan.setVisible(isPhieuDaXacNhan);
     }
 
     /**
@@ -2018,9 +1930,13 @@ public class PhieuDat_GUI extends JPanel {
         kichHoatForm();
 
         txtTenKhachHang.setText("Nhập họ tên");
+        txtTenKhachHang.setForeground(MAU_PLACEHOLDER);
         txtSoDienThoai.setText("Nhập số điện thoại");
+        txtSoDienThoai.setForeground(MAU_PLACEHOLDER);
         txtEmail.setText("Nhập email");
+        txtEmail.setForeground(MAU_PLACEHOLDER);
         txtSoDienThoaiThanhVien.setText("Nhập SĐT thành viên");
+        txtSoDienThoaiThanhVien.setForeground(MAU_PLACEHOLDER);
 
         chkThemThanhVien.setSelected(false);
         lblTrangThaiThanhVien.setText("Chưa là khách hàng thành viên");
@@ -2047,7 +1963,7 @@ public class PhieuDat_GUI extends JPanel {
         cboPhuongThucThanhToan.setSelectedIndex(0);
 
         danhSachMonDaChon.clear();
-        danhSachMonDaChonA.clear();
+        phieuDatBanCtr.xoaGioHangTamThoi(soBan); 
         phieuDatBanCtr.capNhatDanhSachMonAn(soBan, rawDanhSachMon(danhSachMonDaChon));
         capNhatPanelThongTinDatMon();
 
@@ -2062,26 +1978,8 @@ public class PhieuDat_GUI extends JPanel {
         cboPhuongThucThanhToan.setVisible(true);
 
         cheDoHienThi = "DAT_MOI";
+        thietLapGiaoDienTheoTrangThai("DAT_MOI");
 
-        btnXacNhan.setVisible(true);
-        btnBatDauSuDung.setVisible(true);
-        btnXemPhieuDat.setVisible(true);
-        btnTaoPhieuMoi.setVisible(true);
-        btnThanhToan.setVisible(false);
-        btnHuy.setVisible(false);
-        btnLuuThayDoi.setVisible(false);
-        btnChonThemBan.setVisible(true);
-        btnThemMonAn.setVisible(true);
-
-        btnXacNhan.setEnabled(true);
-        btnBatDauSuDung.setEnabled(true);
-
-        System.out.println("=== RESET FORM - Trạng thái các nút:");
-        System.out.println("  btnXacNhan: " + btnXacNhan.isVisible());
-        System.out.println("  btnBatDauSuDung: " + btnBatDauSuDung.isVisible());
-        System.out.println("  btnXemPhieuDat: " + btnXemPhieuDat.isVisible());
-        System.out.println("  btnTaoPhieuMoi: " + btnTaoPhieuMoi.isVisible());
-        System.out.println("  btnThanhToan: " + btnThanhToan.isVisible());
         System.out.println("=== FORM ĐÃ ĐƯỢC RESET - SẴN SÀNG TẠO PHIẾU MỚI ===");
     }
 
@@ -2089,8 +1987,7 @@ public class PhieuDat_GUI extends JPanel {
      * Xử lý khi click nút Thoát (giống nút Hủy)
      */
     public void handleThoatButton() {
-        // Xóa giỏ hàng tạm thời
-        phieuDatBanCtr.xoaGioHangTamThoi(banHienTai.getMaBan());
+        // KHÔNG xóa giỏ hàng khi thoát (quay lại chọn bàn) để giữ lại món ăn đang chọn dở
         // Chuyển mượt mà sang màn hình chọn bàn
         GUIManager.getInstance().switchToGUI(ChonBan_GUI.class, PhieuDat_GUI.this);
     }
@@ -2105,7 +2002,7 @@ public class PhieuDat_GUI extends JPanel {
         System.out.println("=== LOAD PHIẾU: " + phieu.getMaPhieu() + " - " + phieu.getTenKhachDat());
 
         danhSachMonDaChon = new ArrayList<>();
-        danhSachMonDaChonA = new ArrayList<>();
+        danhSachMonDaChon = new ArrayList<>();
 
         this.phieuHienTai = phieu;
         this.maPhieuDangXem = phieu.getMaPhieu();

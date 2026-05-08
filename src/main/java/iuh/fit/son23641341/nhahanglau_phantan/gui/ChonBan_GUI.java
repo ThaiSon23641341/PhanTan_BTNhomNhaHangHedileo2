@@ -18,6 +18,7 @@
         private static final Color MAU_CHINH = new Color(0xE44433);
         private static final Color MAU_TRONG = new Color(0x7AB750);
         private static final Color MAU_DA_DAT = new Color(0xD94B33);
+        private static final Color MAU_DANG_SU_DUNG = new Color(0xFFC107); // Màu vàng hổ phách (Amber)
         private static final Color MAU_NEN = new Color(0xF5F5F5);
         private static final Color MAU_LOAI_THUONG = new Color(0x4A90E2);
         private static final Color MAU_LOAI_VIP = new Color(0xF5A623);
@@ -157,6 +158,10 @@
             pnlKhoangCach.setBackground(MAU_NEN);
             pnlChiDan.add(pnlKhoangCach);
     
+            pnlChiDan.add(taoChiDan("TRỐNG", MAU_TRONG));
+            pnlChiDan.add(taoChiDan("ĐÃ ĐẶT", MAU_DA_DAT));
+            pnlChiDan.add(taoChiDan("ĐANG DÙNG", MAU_DANG_SU_DUNG));
+            
             pnlChiDan.add(taoChiDan("THƯỜNG", MAU_LOAI_THUONG));
             pnlChiDan.add(taoChiDan("VIP", MAU_LOAI_VIP));
             pnlChiDan.add(taoChiDan("DELUXE", MAU_LOAI_DELUXE));
@@ -393,13 +398,17 @@
         private void hienThiTatCaBan() {
             // Reset combo box về "Tất cả"
             cboLocLoaiBan.setSelectedIndex(0);
-    
+            refreshData();
+        }
+
+        /**
+         * Làm mới dữ liệu và hiển thị lại lưới bàn
+         */
+        public void refreshData() {
             // Xóa lưới cũ
             pnlLuoiBan.removeAll();
-    
-            // Tạo lại lưới với tất cả bàn
+            // Tạo lại lưới với dữ liệu mới nhất
             setupTableGrid();
-    
             pnlLuoiBan.revalidate();
             pnlLuoiBan.repaint();
         }
@@ -424,17 +433,27 @@
     
             ArrayList<PhieuDatBan> phieuTheoNgay = phieuDatDAO.getPhieuDatByNgay(ngayDatDaChon);
             int soPhieuDat = 0;
+            boolean dangSuDung = false;
+            
             for (PhieuDatBan phieu : phieuTheoNgay) {
-                ArrayList<Integer> danhSachBanPhieu = (ArrayList<Integer>) phieu.getDanhSachBan();
-                if (danhSachBanPhieu != null && danhSachBanPhieu.contains(ban.getMaBan())) {
-                    soPhieuDat++;
+                // Chỉ tính các phiếu CHƯA thanh toán và CHƯA hủy
+                if (!"Đã hủy".equals(phieu.getTrangThai()) && !"Đã thanh toán".equals(phieu.getTrangThai())) {
+                    ArrayList<Integer> danhSachBanPhieu = (ArrayList<Integer>) phieu.getDanhSachBan();
+                    if (danhSachBanPhieu != null && danhSachBanPhieu.contains(ban.getMaBan())) {
+                        soPhieuDat++;
+                        if ("Đang sử dụng".equals(phieu.getTrangThai())) {
+                            dangSuDung = true;
+                        }
+                    }
                 }
             }
     
             final int MAX_KHUNG_GIO = 6;
             boolean isFullKhungGio = (soPhieuDat >= MAX_KHUNG_GIO);
     
-            if (soPhieuDat > 0) {
+            if (dangSuDung) {
+                mauTrangThai = MAU_DANG_SU_DUNG;
+            } else if (soPhieuDat > 0) {
                 mauTrangThai = MAU_DA_DAT;
             } else {
                 mauTrangThai = MAU_TRONG;

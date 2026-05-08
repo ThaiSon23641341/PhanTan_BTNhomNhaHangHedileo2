@@ -20,28 +20,27 @@ import java.time.LocalDate;
 public class KhachHangThanhVien {
     @Id
     @Column(name = "ma_khach_hang", nullable = false, unique = true)
-    private String maKhachHang;     
-    private String hoTen;           
-    private String soDienThoai;     
-    private String email;           
-    private String gioiTinh;        
-    private String thanhVien;       
+    private String maKhachHang;
+    private String hoTen;
+    private String soDienThoai;
+    private String email;
+    private String gioiTinh;
+    private String thanhVien;
     private int diemTichLuy;
     private LocalDate ngayDangKy;
 
-    public KhachHangThanhVien(String maKhachHang, String hoTen, String soDienThoai, String email, String gioiTinh, String thanhVien, int diemTichLuy, LocalDate ngayDangKy) {
+    public KhachHangThanhVien(String maKhachHang, String hoTen, String soDienThoai, String email, String gioiTinh,
+            String thanhVien, int diemTichLuy, LocalDate ngayDangKy) {
         this.maKhachHang = maKhachHang;
         this.hoTen = hoTen;
         this.soDienThoai = soDienThoai;
         // Gọi setter để đảm bảo email được kiểm tra
-        setEmail(email); 
+        setEmail(email);
         this.gioiTinh = gioiTinh;
         this.thanhVien = thanhVien;
         this.diemTichLuy = diemTichLuy;
         this.ngayDangKy = ngayDangKy;
     }
-
-
 
     public String getMaKhachHang() {
         return maKhachHang;
@@ -75,8 +74,6 @@ public class KhachHangThanhVien {
         return ngayDangKy;
     }
 
-
-
     public void setMaKhachHang(String maKhachHang) {
         if (maKhachHang == null || !maKhachHang.matches("KH\\d{3}")) {
             throw new IllegalArgumentException("Mã khách hàng phải có định dạng KHxxx (ví dụ: KH001).");
@@ -101,13 +98,13 @@ public class KhachHangThanhVien {
     // ⭐ ĐÃ SỬA: Cho phép email rỗng hoặc null, chỉ kiểm tra định dạng nếu có nhập.
     public void setEmail(String email) {
         String trimmedEmail = (email == null) ? "" : email.trim();
-        if (!trimmedEmail.isEmpty()) { 
+        if (!trimmedEmail.isEmpty()) {
             // Kiểm tra định dạng nếu email không rỗng
             if (!trimmedEmail.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
                 throw new IllegalArgumentException("Email không hợp lệ.");
             }
         }
-        this.email = trimmedEmail; 
+        this.email = trimmedEmail;
     }
 
     public void setGioiTinh(String gioiTinh) {
@@ -132,15 +129,14 @@ public class KhachHangThanhVien {
     }
 
     public void setNgayDangKy(LocalDate ngayDangKy) {
-        // Có thể cần nới lỏng ràng buộc này tùy vào logic ứng dụng (ví dụ: ngày quá khứ vẫn ok)
+        // Có thể cần nới lỏng ràng buộc này tùy vào logic ứng dụng (ví dụ: ngày quá khứ
+        // vẫn ok)
         // Hiện tại giữ nguyên logic cũ:
         if (ngayDangKy == null || ngayDangKy.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Ngày đăng ký phải là ngày hiện tại hoặc trước đó.");
         }
         this.ngayDangKy = ngayDangKy;
     }
-
-
 
     @Override
     public String toString() {

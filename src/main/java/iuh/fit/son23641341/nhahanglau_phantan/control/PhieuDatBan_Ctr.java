@@ -66,8 +66,9 @@ public class PhieuDatBan_Ctr {
     public PhieuDatBan timPhieuTheoMaBan(int maBan) {
         // Ưu tiên tìm phiếu đang sử dụng
         PhieuDatBan p = phieuDatDao.getPhieuDangSuDungTheoMaBan(maBan);
-        if (p != null) return p;
-        
+        if (p != null)
+            return p;
+
         // Nếu không có, tìm phiếu đặt trước trong ngày hôm nay
         String ngayHômNay = new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date());
         ArrayList<PhieuDatBan> list = phieuDatDao.getPhieuDatByBanVaNgay(maBan, ngayHômNay);
@@ -86,7 +87,8 @@ public class PhieuDatBan_Ctr {
     public boolean capNhatPhieuDat(PhieuDatBan phieuCapNhat) {
         // Sử dụng logic cập nhật thông tin khách hàng trong DAO hoặc merge
         // Ở đây ta có thể dùng merge nếu DAO hỗ trợ hoặc viết hàm riêng
-        if (phieuDatDao.capNhatThongTinKhachHang(phieuCapNhat.getMaPhieu(), phieuCapNhat.getTenKhachDat(), phieuCapNhat.getSdtDat(), phieuCapNhat.getEmailDat())) {
+        if (phieuDatDao.capNhatThongTinKhachHang(phieuCapNhat.getMaPhieu(), phieuCapNhat.getTenKhachDat(),
+                phieuCapNhat.getSdtDat(), phieuCapNhat.getEmailDat())) {
             lamMoiDuLieu();
             return true;
         }
@@ -107,7 +109,8 @@ public class PhieuDatBan_Ctr {
     }
 
     public PhieuDatBan taoPhieuDat(String tenKH, String sdt, String ngayDat, String gioDat, String phuongThuc,
-                                 String emailDat, ArrayList<Integer> danhSachBan, List<? extends ChiTietDatMon> danhSachMon, double giamGia) {
+            String emailDat, ArrayList<Integer> danhSachBan, List<? extends ChiTietDatMon> danhSachMon,
+            double giamGia) {
         String maPhieu = taoMaPhieu(ngayDat, gioDat, sdt);
         String maKhachHang = null;
         if (sdt != null && !sdt.trim().isEmpty()) {
@@ -116,7 +119,8 @@ public class PhieuDatBan_Ctr {
 
         NhanVien nvHienTai = User_Ctr.getInstance().getNhanVienHienTai();
         ArrayList<ChiTietDatMon> danhSachMonCopy = new ArrayList<>();
-        if (danhSachMon != null) danhSachMonCopy.addAll(danhSachMon);
+        if (danhSachMon != null)
+            danhSachMonCopy.addAll(danhSachMon);
 
         PhieuDatBan phieu = new PhieuDatBan(maPhieu, maKhachHang, tenKH, sdt, emailDat, "Đặt trước",
                 nvHienTai != null ? nvHienTai.getManv() : "NV001", ngayDat, gioDat,
@@ -125,7 +129,7 @@ public class PhieuDatBan_Ctr {
         double tongTienMonAn = phieu.tinhTongTienMonAn();
         int soLuongBan = (danhSachBan != null) ? danhSachBan.size() : 1;
         double tienCoc = (250000 * soLuongBan) + (tongTienMonAn * 0.3);
-        
+
         phieu.setTienCoc(tienCoc);
         phieu.setTongTien(tongTienMonAn + tienCoc - giamGia);
 
@@ -138,8 +142,9 @@ public class PhieuDatBan_Ctr {
 
     public void capNhatDanhSachMonAn(int maBan, List<? extends ChiTietDatMon> danhSachMon) {
         ArrayList<ChiTietDatMon> danhSachMonCopy = new ArrayList<>();
-        if (danhSachMon != null) danhSachMonCopy.addAll(danhSachMon);
-        
+        if (danhSachMon != null)
+            danhSachMonCopy.addAll(danhSachMon);
+
         PhieuDatBan phieu = timPhieuTheoMaBan(maBan);
         if (phieu != null) {
             phieuDatDao.capNhatMonAnCuaPhieu(phieu.getMaPhieu(), danhSachMonCopy);
@@ -155,8 +160,9 @@ public class PhieuDatBan_Ctr {
 
     public ArrayList<ChiTietDatMon> layDanhSachMonAnChoBan(int maBan) {
         PhieuDatBan phieu = timPhieuTheoMaBan(maBan);
-        if (phieu != null) return new ArrayList<>(phieu.getDanhSachMonAn());
-        
+        if (phieu != null)
+            return new ArrayList<>(phieu.getDanhSachMonAn());
+
         ArrayList<ChiTietDatMon> gioHang = gioHangTamThoi.get(maBan);
         return gioHang != null ? gioHang : new ArrayList<>();
     }
@@ -164,14 +170,17 @@ public class PhieuDatBan_Ctr {
     public boolean kiemTraTrungLich(int maBan, String ngayDat, String gioDat) {
         ArrayList<PhieuDatBan> phieus = phieuDatDao.getPhieuDatByBanVaNgay(maBan, ngayDat);
         for (PhieuDatBan p : phieus) {
-            if (!p.getTrangThai().equals("Đã hủy")) return true;
+            if (!p.getTrangThai().equals("Đã hủy"))
+                return true;
         }
         return false;
     }
 
     public void luuKhuyenMaiTamThoi(int maBan, KhuyenMai khuyenMai) {
-        if (khuyenMai != null) khuyenMaiTamThoi.put(maBan, khuyenMai);
-        else khuyenMaiTamThoi.remove(maBan);
+        if (khuyenMai != null)
+            khuyenMaiTamThoi.put(maBan, khuyenMai);
+        else
+            khuyenMaiTamThoi.remove(maBan);
     }
 
     public KhuyenMai layKhuyenMaiTamThoi(int maBan) {
@@ -231,4 +240,3 @@ public class PhieuDatBan_Ctr {
         return phieuDatDao.getPhieuDangSuDungTheoMaBan(maBan);
     }
 }
-
