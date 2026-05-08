@@ -154,7 +154,7 @@ public class DangNhap_GUI extends JFrame {
             // Lấy trực tiếp nhân viên hiện tại ra hiển thị (không cần gọi hàm từ DAO nữa)
             NhanVien nhanVienLogin = userCtr.getNhanVienHienTai();
             if (nhanVienLogin != null) {
-                JOptionPane.showMessageDialog(this, "Xin chào: " + nhanVienLogin.getHoten());
+                System.out.println("Đăng nhập thành công! Xin chào: " + nhanVienLogin.getHoten());
             }
 
             // Chuyển sang khung giao diện chính (Single Frame)

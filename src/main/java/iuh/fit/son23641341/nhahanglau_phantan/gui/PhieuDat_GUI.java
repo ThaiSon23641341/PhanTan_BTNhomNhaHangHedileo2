@@ -154,13 +154,22 @@ public class PhieuDat_GUI extends JPanel {
         }
         
         khoiTaoVoiDuLieu();
+
+        // TỰ ĐỘNG LƯU MÓN ĂN NẾU LÀ PHIẾU ĐANG DÙNG HOẶC ĐÃ ĐẶT (Tránh user phải ấn Lưu 2 lần)
+        if (phieuHienTai != null && phieuHienTai.getMaPhieu() != null) {
+            String trangThai = phieuHienTai.getTrangThai();
+            if ("Đang sử dụng".equals(trangThai) || "Đã xác nhận".equals(trangThai)) {
+                System.out.println("=== AUTO SYNC DISHES TO DB ===");
+                phieuDatBanCtr.capNhatMonAnCuaPhieu(phieuHienTai.getMaPhieu(), rawDanhSachMon(danhSachMonDaChon));
+            }
+        }
     }
 
     private void loadData() {
         this.banHienTai = banAnCtr.timBanTheoMa(soBan);
         if (banHienTai == null) return;
         
-        lblSoBan.setText("Lập phiếu đặt: Bàn " + banHienTai.getMaBanFormatted());
+        lblSoBan.setText("Lập phiếu đặt: Bàn " + banHienTai.getMaBanFormatted() + " (" + banHienTai.getKhuVuc() + ")");
         
         // Cập nhật ngày lên DateChooser
         if (ngayDatTuChonBan != null && !ngayDatTuChonBan.isEmpty()) {
@@ -1160,7 +1169,7 @@ public class PhieuDat_GUI extends JPanel {
                     // Cập nhật trạng thái phiếu thành "Đã hủy" thay vì xóa
                     boolean thanhCong = phieuDatBanCtr.capNhatTrangThaiPhieu(maPhieuDangXem, "Đã hủy");
                     if (thanhCong) {
-                        JOptionPane.showMessageDialog(this, "Đã hủy phiếu đặt bàn thành công!");
+                        System.out.println("Đã hủy phiếu đặt bàn thành công!");
                         phieuDatBanCtr.xoaGioHangTamThoi(banHienTai.getMaBan());
                         GUIManager.getInstance().switchToGUI(ChonBan_GUI.class, PhieuDat_GUI.this);
                     } else {
@@ -1264,8 +1273,7 @@ public class PhieuDat_GUI extends JPanel {
                     // Cập nhật vào controller
                     phieuDatBanCtr.capNhatDanhSachMonAn(soBan, rawDanhSachMon(danhSachMon));
 
-                    JOptionPane.showMessageDialog(this, "Đã cập nhật thông tin thành công!", "Thành công",
-                            JOptionPane.INFORMATION_MESSAGE);
+                    System.out.println("Đã cập nhật thông tin thành công!");
 
                     // Cập nhật lại tiền cọc sau khi thay đổi món (chỉ cho khách đặt trước)
                     if (phieuHienTai != null && phieuHienTai.getTienCoc() > 0) {
@@ -1408,10 +1416,7 @@ public class PhieuDat_GUI extends JPanel {
                     // Render lại món ăn lên giao diện
                     capNhatPanelThongTinDatMon();
 
-                    JOptionPane.showMessageDialog(this,
-                            "Đã bắt đầu sử dụng bàn thành công!",
-                            "Thành công",
-                            JOptionPane.INFORMATION_MESSAGE);
+                    System.out.println("Đã bắt đầu sử dụng bàn thành công!");
                 } else {
                     System.out.println("=== GIỮ FORM CHO KHÁCH VÃNG LAI ===");
                     // Khách vãng lai -> GIỮ FORM để có thể thêm món và cập nhật thông tin
@@ -1421,10 +1426,7 @@ public class PhieuDat_GUI extends JPanel {
                     // Render lại món ăn lên giao diện (nếu có)
                     capNhatPanelThongTinDatMon();
 
-                    JOptionPane.showMessageDialog(this,
-                            "Đã mở bàn thành công! Bạn có thể thêm món và cập nhật thông tin khách hàng.",
-                            "Thành công",
-                            JOptionPane.INFORMATION_MESSAGE);
+                    System.out.println("Bàn vãng lai đã sẵn sàng sử dụng!");
                 }
             }
         });
@@ -1507,11 +1509,8 @@ public class PhieuDat_GUI extends JPanel {
                 phieuDatBanCtr.xoaGioHangTamThoi(maBan);
             }
 
-            // Hiển thị thông báo thành công
-            JOptionPane.showMessageDialog(this,
-                    "Đặt bàn thành công!\nMã phiếu: " + PhieuDatBan_Ctr.taoMaPhieu(ngayDat, gioDat, sdt),
-                    "Thành công",
-                    JOptionPane.INFORMATION_MESSAGE);
+            // Hiển thị thông báo thành công vào console thay vì dialog thừa
+            System.out.println("Đặt bàn thành công! Mã phiếu: " + PhieuDatBan_Ctr.taoMaPhieu(ngayDat, gioDat, sdt));
             return phieuDatMoi;
         } else {
             JOptionPane.showMessageDialog(this, "Lưu phiếu đặt bàn thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);

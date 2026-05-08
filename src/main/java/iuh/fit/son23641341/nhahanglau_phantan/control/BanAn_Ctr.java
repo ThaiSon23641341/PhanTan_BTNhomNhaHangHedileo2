@@ -14,6 +14,45 @@ public class BanAn_Ctr {
     private BanAn_Ctr() {
         this.em = EntityManagerFactoryUtil.getEntityManager();
         this.banAnDAO = new BanAn_DAO(this.em);
+        initializeDefaultTables(); // Tự động khởi tạo 40 bàn với các khu vực khác nhau
+    }
+
+    private void initializeDefaultTables() {
+        ArrayList<BanAn> existing = layTatCaBan();
+        
+        // Sửa lỗi các bàn đã có nhưng bị thiếu khu vực
+        for (BanAn ban : existing) {
+            if (ban.getKhuVuc() == null || ban.getKhuVuc().isEmpty()) {
+                int i = ban.getMaBan();
+                String khuVuc = "Trong nhà";
+                if (i > 15 && i <= 30) khuVuc = "Trên lầu";
+                else if (i > 30) khuVuc = "Ngoài trời";
+                ban.setKhuVuc(khuVuc);
+                banAnDAO.mergeBanAn(ban);
+            }
+        }
+
+        // Thêm bàn mới nếu tổng số bàn < 40
+        if (existing.size() < 40) {
+            System.out.println("=== INITIALIZING ADDITIONAL TABLES ===");
+            for (int i = 1; i <= 40; i++) {
+                if (timBanTheoMa(i) != null) continue;
+                
+                String khuVuc = "Trong nhà";
+                if (i > 15 && i <= 30) khuVuc = "Trên lầu";
+                else if (i > 30) khuVuc = "Ngoài trời";
+                
+                String loaiBan = "Thường";
+                if (i % 5 == 0) loaiBan = "VIP";
+                if (i % 8 == 0) loaiBan = "Deluxe";
+                
+                int soCho = (i % 2 == 0) ? 4 : 2;
+                if (loaiBan.equals("VIP")) soCho = 6;
+                
+                BanAn ban = new BanAn(i, soCho, loaiBan, khuVuc);
+                banAnDAO.mergeBanAn(ban);
+            }
+        }
     }
 
     public static synchronized BanAn_Ctr getInstance() {
