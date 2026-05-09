@@ -64,9 +64,17 @@ public class GUIManager {
         if (mainGUI != null && cardName != null) {
             Component card = mainGUI.showCard(cardName, guiClass);
             
-            // Tự động làm mới dữ liệu nếu là màn hình Chọn Bàn
+            // Tự động làm mới dữ liệu nếu là các màn hình cần cập nhật số liệu
             if (card instanceof ChonBan_GUI) {
                 ((ChonBan_GUI) card).refreshData();
+            } else if (card instanceof TrangChu_GUI) {
+                ((TrangChu_GUI) card).refreshData();
+            } else if (card instanceof ThongKe_GUI) {
+                ((ThongKe_GUI) card).updateData();
+            } else if (card instanceof TrangChuQL_GUI) {
+                ((TrangChuQL_GUI) card).refreshData();
+            } else if (card instanceof QuanLyKhachHang_GUI) {
+                ((QuanLyKhachHang_GUI) card).refreshData();
             }
 
             // Nếu đang ở trong một window khác (JFrame cũ), thì đóng nó đi
@@ -145,7 +153,10 @@ public class GUIManager {
                 ((Window) gui).dispose();
             }
         }
-        if (mainGUI != null) mainGUI.dispose();
+        if (mainGUI != null) {
+            mainGUI.dispose();
+            mainGUI = null; // Reset Main_GUI để tạo mới ở lần đăng nhập sau
+        }
         guiCache.clear();
         currentVisibleGUI = null;
     }

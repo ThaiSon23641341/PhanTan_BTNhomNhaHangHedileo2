@@ -240,36 +240,37 @@ public class SideBar_GUI extends JPanel implements ActionListener {
     
     private void phanQuyenTaiKhoan() {
         NhanVien nv = User_Ctr.getInstance().getNhanVienHienTai();
-
         if (nv == null) return; 
 
-        String chucVu = nv.getChucVu(); 
-
+        String chucVu = nv.getChucVu() != null ? nv.getChucVu().trim() : ""; 
         System.out.println("Phân quyền Sidebar cho chức vụ: " + chucVu);
 
-        if (chucVu != null) {
-            if (chucVu.trim().equalsIgnoreCase("Thu ngan")) {
+        // Kiểm tra vai trò Thu ngân (chấp nhận cả có dấu và không dấu)
+        if (chucVu.equalsIgnoreCase("Thu ngan") || chucVu.equalsIgnoreCase("Thu ngân")) {
+            // Hiển thị: Tổng quan, Trang chủ, Đặt bàn, Thống kê, Hướng dẫn sử dụng
+            btnTongQuan.setVisible(true);
+            btnTrangChu.setVisible(true);
+            btnDatBan.setVisible(true);
+            btnThongKe.setVisible(true);
+            btnTroGiup.setVisible(true);
 
-                
-                btnTongQuan.setVisible(false);      
-                btnQuanLyMon.setVisible(false);    
-                btnThongKe.setVisible(false);       
-                btnQuanLyDuLieu.setVisible(false);  
-                btnKhachHang.setVisible(false);
-                
-                
-            } else if (chucVu.trim().equalsIgnoreCase("Quan ly")) {
-
-                btnTongQuan.setVisible(true);
-                btnTrangChu.setVisible(true);
-                btnTimKiem.setVisible(true);
-                btnDatBan.setVisible(true);
-                btnQuanLyMon.setVisible(true);
-                btnKhachHang.setVisible(true);
-                btnThongKe.setVisible(true);
-                btnQuanLyDuLieu.setVisible(true);
-                btnTroGiup.setVisible(true);
-            }
+            // Ẩn các chức năng không được phép: Tìm kiếm, Quản lý món, Khách hàng, Quản lý dữ liệu
+            btnTimKiem.setVisible(false);
+            btnQuanLyMon.setVisible(false);
+            btnKhachHang.setVisible(false);
+            btnQuanLyDuLieu.setVisible(false);
+            
+        } else {
+            // Mặc định cho Quản lý hoặc các vai trò khác: Hiển thị tất cả
+            btnTongQuan.setVisible(true);
+            btnTrangChu.setVisible(true);
+            btnTimKiem.setVisible(true);
+            btnDatBan.setVisible(true);
+            btnQuanLyMon.setVisible(true);
+            btnKhachHang.setVisible(true);
+            btnThongKe.setVisible(true);
+            btnQuanLyDuLieu.setVisible(true);
+            btnTroGiup.setVisible(true);
         }
     }
 
@@ -287,23 +288,23 @@ public class SideBar_GUI extends JPanel implements ActionListener {
 
         if (targetMain != null) {
             if (source == btnTongQuan) {
-                targetMain.showCard("Tổng Quan", (Class<? extends Component>) TrangChuQL_GUI.class);
+                guiManager.switchToGUI((Class<? extends Component>) TrangChuQL_GUI.class, window);
             } else if (source == btnTrangChu) {
-                targetMain.showCard("Trang Chủ", (Class<? extends Component>) TrangChu_GUI.class);
+                guiManager.switchToGUI((Class<? extends Component>) TrangChu_GUI.class, window);
             } else if (source == btnTimKiem) {
-                targetMain.showCard("Tìm Kiếm", (Class<? extends Component>) TimKiem_GUI.class);
+                guiManager.switchToGUI((Class<? extends Component>) TimKiem_GUI.class, window);
             } else if (source == btnDatBan) {
-                targetMain.showCard("Đặt Bàn", (Class<? extends Component>) ChonBan_GUI.class);
+                guiManager.switchToGUI((Class<? extends Component>) ChonBan_GUI.class, window);
             } else if (source == btnQuanLyMon) {
-                targetMain.showCard("Quản Lý Món", (Class<? extends Component>) DanhSachMonAnQL_GUI.class);
+                guiManager.switchToGUI((Class<? extends Component>) DanhSachMonAnQL_GUI.class, window);
             } else if (source == btnKhachHang) {
-                targetMain.showCard("Khách Hàng", (Class<? extends Component>) QuanLyKhachHang_GUI.class);
+                guiManager.switchToGUI((Class<? extends Component>) QuanLyKhachHang_GUI.class, window);
             } else if (source == btnThongKe) {
-                targetMain.showCard("Thống Kê", (Class<? extends Component>) ThongKe_GUI.class);
+                guiManager.switchToGUI((Class<? extends Component>) ThongKe_GUI.class, window);
             } else if (source == btnQuanLyDuLieu) {
-                targetMain.showCard("Quản Lý Dữ Liệu", (Class<? extends Component>) QuanLiDuLieu_GUI.class);
+                guiManager.switchToGUI((Class<? extends Component>) QuanLiDuLieu_GUI.class, window);
             } else if (source == btnTroGiup) {
-                targetMain.showCard("Trợ Giúp", (Class<? extends Component>) TroGiup_GUI.class);
+                guiManager.switchToGUI((Class<? extends Component>) TroGiup_GUI.class, window);
             } else {
                 xuLyDangXuat(window);
             }

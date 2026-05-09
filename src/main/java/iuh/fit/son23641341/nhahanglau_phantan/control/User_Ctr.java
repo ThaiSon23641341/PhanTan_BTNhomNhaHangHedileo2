@@ -108,5 +108,8 @@ public class User_Ctr {
     public void dangXuat() {
         this.nhanVienHienTai = null;
         this.usernameHienTai = null;
+        if (em != null && em.isOpen()) {
+            em.clear(); // Xóa sạch bộ nhớ đệm JPA để tránh lộ dữ liệu phiên cũ
+        }
     }
 }

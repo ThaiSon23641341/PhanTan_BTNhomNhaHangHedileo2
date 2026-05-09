@@ -442,6 +442,11 @@ public class TrangChuQL_GUI extends JPanel {
     }
 
 
+    public void refreshData() {
+        loadFeaturedData();
+    }
+
+
     private void setupOurStory() {
         pnlOurStory.setLayout(new BorderLayout());
         pnlOurStory.setBackground(Color.WHITE);

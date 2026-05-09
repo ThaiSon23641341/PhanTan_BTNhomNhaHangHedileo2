@@ -60,7 +60,7 @@ public class ThongKe_DAO {
 
         ArrayList<TopMonAn> topList = new ArrayList<>();
         for (Object[] row : results) {
-            topList.add(new TopMonAn((String) row[0], ((Long) row[1]).intValue()));
+            topList.add(new TopMonAn((String) row[0], ((Number) row[1]).intValue()));
         }
         return topList;
     }
@@ -114,7 +114,7 @@ public class ThongKe_DAO {
 
         ArrayList<TopMonAn> topList = new ArrayList<>();
         for (Object[] row : results) {
-            topList.add(new TopMonAn((String) row[0], ((Long) row[1]).intValue()));
+            topList.add(new TopMonAn((String) row[0], ((Number) row[1]).intValue()));
         }
         return topList;
     }

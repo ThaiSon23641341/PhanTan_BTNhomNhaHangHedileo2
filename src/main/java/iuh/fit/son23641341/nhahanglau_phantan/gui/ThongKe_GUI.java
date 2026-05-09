@@ -134,7 +134,7 @@ public class ThongKe_GUI extends JPanel {
         updateData();
     }
 
-    private void updateData() {
+    public void updateData() {
         mainContent.removeAll();
         try {
             ThongKeCardData cardData;

@@ -146,6 +146,10 @@ public class QuanLyKhachHang_GUI extends JPanel implements ActionListener {
         add(contentWrapperPanel, BorderLayout.CENTER);
     }
 
+    public void refreshData() {
+        loadTableData(model, khControl.getDanhSachKhachHang());
+    }
+
     // Xử lý sự kiện nhấn nút 
     @Override
     public void actionPerformed(ActionEvent e) {

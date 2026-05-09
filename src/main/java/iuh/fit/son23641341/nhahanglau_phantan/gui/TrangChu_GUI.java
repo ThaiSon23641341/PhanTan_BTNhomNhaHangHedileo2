@@ -39,6 +39,10 @@ public class TrangChu_GUI extends JPanel {
     private JLabel lblAnhDiaChi;
     private JLabel lblTieuDeDiaChi;
     private JLabel lblTextDiaChi;
+    private iuh.fit.son23641341.nhahanglau_phantan.control.ThongKe_Ctr thongKeCtr = iuh.fit.son23641341.nhahanglau_phantan.control.ThongKe_Ctr.getInstance();
+    private iuh.fit.son23641341.nhahanglau_phantan.dao.MonAn_DAO monAnDAO = new iuh.fit.son23641341.nhahanglau_phantan.dao.MonAn_DAO();
+    private java.util.List<iuh.fit.son23641341.nhahanglau_phantan.dao.ThongKe_DAO.TopMonAn> topDishes;
+    private java.util.List<iuh.fit.son23641341.nhahanglau_phantan.entity.MonAn> allMonAn;
     
     // Lưu ý: Các lớp ngoài (User_Ctr, DangNhap_GUI, ChonBan_GUI, SideBar_GUI) cần phải tồn tại.
 
@@ -47,6 +51,35 @@ public class TrangChu_GUI extends JPanel {
         setupLayout();
         setupEventHandlers();
         applyStyling();
+    }
+
+    public void refreshData() {
+        // Cập nhật lại dữ liệu món ăn nổi bật
+        java.time.LocalDate now = java.time.LocalDate.now();
+        topDishes = thongKeCtr.getTopMonAn(now.getMonthValue(), now.getYear(), 4);
+        allMonAn = monAnDAO.getAllMonAn();
+        
+        java.text.NumberFormat currencyFormat = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"));
+
+        for (int i = 0; i < 4; i++) {
+            if (topDishes != null && i < topDishes.size()) {
+                iuh.fit.son23641341.nhahanglau_phantan.dao.ThongKe_DAO.TopMonAn top = topDishes.get(i);
+                lblTenMonAn[i].setText(top.tenMonAn);
+                
+                double gia = 0;
+                for (iuh.fit.son23641341.nhahanglau_phantan.entity.MonAn m : allMonAn) {
+                    if (m.getTenMon().equalsIgnoreCase(top.tenMonAn)) {
+                        gia = m.getGia();
+                        break;
+                    }
+                }
+                lblGiaMonAn[i].setText(gia > 0 ? currencyFormat.format(gia) : "Liên hệ");
+            } else {
+                lblTenMonAn[i].setText("Món ăn Hẻ Dì Leo " + (i + 1));
+                lblGiaMonAn[i].setText("Giá liên hệ");
+            }
+        }
+        repaint();
     }
 
     private void initializeComponents() {
@@ -66,10 +99,40 @@ public class TrangChu_GUI extends JPanel {
         btnDatBanNgay = new JButton("Đặt bàn ngay");
 
         // Khởi tạo menu nổi bật
-        lblTieuDeMenu = new JLabel("THỰC ĐƠN NỔI BẬT");
+        lblTieuDeMenu = new JLabel("THỰC ĐƠN NỔI BẬT TRONG THÁNG");
         pnlCacTheMonAn = new JPanel(new GridLayout(0, 4, 15, 15));
-        lblTenMonAn = new JLabel[4];
-        lblGiaMonAn = new JLabel[4];
+        
+        // Tải dữ liệu thật từ Thống kê
+        java.time.LocalDate now = java.time.LocalDate.now();
+        topDishes = thongKeCtr.getTopMonAn(now.getMonthValue(), now.getYear(), 4);
+        allMonAn = monAnDAO.getAllMonAn();
+        
+        int count = 4;
+        lblTenMonAn = new JLabel[count];
+        lblGiaMonAn = new JLabel[count];
+
+        java.text.NumberFormat currencyFormat = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"));
+
+        for (int i = 0; i < count; i++) {
+            if (topDishes != null && i < topDishes.size()) {
+                iuh.fit.son23641341.nhahanglau_phantan.dao.ThongKe_DAO.TopMonAn top = topDishes.get(i);
+                lblTenMonAn[i] = new JLabel(top.tenMonAn);
+                
+                // Tìm giá từ danh sách món ăn
+                double gia = 0;
+                for (iuh.fit.son23641341.nhahanglau_phantan.entity.MonAn m : allMonAn) {
+                    if (m.getTenMon().equalsIgnoreCase(top.tenMonAn)) {
+                        gia = m.getGia();
+                        break;
+                    }
+                }
+                lblGiaMonAn[i] = new JLabel(gia > 0 ? currencyFormat.format(gia) : "Liên hệ");
+            } else {
+                // Placeholder nếu không đủ 4 món top
+                lblTenMonAn[i] = new JLabel("Món ăn Hẻ Dì Leo " + (i + 1));
+                lblGiaMonAn[i] = new JLabel("Giá liên hệ");
+            }
+        }
 
         // Khởi tạo câu chuyện
         lblTieuDeCauChuyenCuaChungToi = new JLabel("CÂU CHUYỆN CỦA CHÚNG TÔI");
@@ -78,12 +141,6 @@ public class TrangChu_GUI extends JPanel {
         lblAnhDiaChi = new JLabel();
         lblTieuDeDiaChi = new JLabel("Địa chỉ của chúng tôi");
         lblTextDiaChi = new JLabel("12 Nguyễn Văn Bảo, Phường 4, Gò Vấp");
-
-        // Khởi tạo các thẻ món ăn
-        for (int i = 0; i < 4; i++) {
-            lblTenMonAn[i] = new JLabel("Lẩu Mala Sewcewle " + (i + 1));
-            lblGiaMonAn[i] = new JLabel("459.000 VND");
-        }
     }
 
     private void setupLayout() {

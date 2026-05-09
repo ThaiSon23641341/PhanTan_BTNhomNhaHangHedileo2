@@ -1469,11 +1469,21 @@ public class PhieuDat_GUI extends JPanel {
                 
                 // Bổ sung: Ghi nhận Khách hàng thành viên nếu thu ngân nhập SDT lúc thanh toán
                 String sdtTV = txtSoDienThoaiThanhVien.getText().trim();
-                if (!sdtTV.isEmpty() && !sdtTV.equals("Nhập số điện thoại") && !sdtTV.equals("Nhập SĐT thành viên")) {
+                String sdtChinh = txtSoDienThoai.getText().trim();
+                
+                String sdtDungDeTraCuu = null;
+                if (!sdtTV.isEmpty() && !sdtTV.equals("Nhập SĐT thành viên")) {
+                    sdtDungDeTraCuu = sdtTV;
+                } else if (!sdtChinh.isEmpty() && !sdtChinh.equals("Nhập số điện thoại")) {
+                    sdtDungDeTraCuu = sdtChinh;
+                }
+
+                if (sdtDungDeTraCuu != null) {
                     KhachHang_DAO khDao = new KhachHang_DAO();
-                    String maKhachHang = khDao.getmaKhachHangbySDT(sdtTV);
+                    String maKhachHang = khDao.getmaKhachHangbySDT(sdtDungDeTraCuu);
                     if (maKhachHang != null) {
                         phieuHienTai.setMaKhachHang(maKhachHang);
+                        System.out.println("DEBUG: Da ghi nhan ma KH: " + maKhachHang + " tu SDT: " + sdtDungDeTraCuu);
                     }
                 }
 

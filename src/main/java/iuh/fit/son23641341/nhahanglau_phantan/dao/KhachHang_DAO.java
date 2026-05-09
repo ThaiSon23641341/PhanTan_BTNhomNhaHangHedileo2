@@ -30,6 +30,7 @@ public class KhachHang_DAO {
     }
 
     public List<KhachHangThanhVien> getAllKhachHang() {
+        em.clear(); // Xóa cache để đảm bảo lấy dữ liệu mới nhất từ DB
         return em.createQuery("SELECT kh FROM KhachHangThanhVien kh", KhachHangThanhVien.class).getResultList();
     }
 
@@ -122,17 +123,25 @@ public class KhachHang_DAO {
     public boolean congDiemTichLuy(String maKhachHang, int diemCong) {
         EntityTransaction tx = em.getTransaction();
         try {
+            System.out.println("DEBUG: Dang cong " + diemCong + " diem cho KH: " + maKhachHang);
             tx.begin();
-            KhachHangThanhVien kh = em.find(KhachHangThanhVien.class, maKhachHang);
-            if (kh != null) {
-                kh.setDiemTichLuy(kh.getDiemTichLuy() + diemCong);
-                em.merge(kh);
-                tx.commit();
+            // Sử dụng UPDATE trực tiếp để đảm bảo tính nguyên tử và tránh vấn đề cache/detached entity
+            int updatedCount = em.createQuery("UPDATE KhachHangThanhVien kh SET kh.diemTichLuy = kh.diemTichLuy + :diem WHERE kh.maKhachHang = :ma")
+                    .setParameter("diem", diemCong)
+                    .setParameter("ma", maKhachHang)
+                    .executeUpdate();
+            tx.commit();
+            
+            if (updatedCount > 0) {
+                System.out.println("DEBUG: Cap nhat diem thanh cong cho " + maKhachHang);
                 return true;
+            } else {
+                System.err.println("DEBUG: Khong tim thay khach hang voi ma: " + maKhachHang);
+                return false;
             }
-            tx.rollback();
-            return false;
         } catch (Exception e) {
+            System.err.println("DEBUG: Loi khi cong diem: " + e.getMessage());
+            e.printStackTrace();
             if (tx.isActive()) tx.rollback();
             return false;
         }
