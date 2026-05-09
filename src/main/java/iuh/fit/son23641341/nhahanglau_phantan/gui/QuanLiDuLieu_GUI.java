@@ -423,7 +423,18 @@ public class QuanLiDuLieu_GUI extends JPanel {
             // Xóa sạch dữ liệu cũ trên table trước khi nạp mới
             modelNhanvien.setRowCount(0);
             NhanVien_DAO dao = new NhanVien_DAO();
-            List<NhanVien> list = dao.getAllNhanVien();
+            List<NhanVien> list;
+            if (dao.isFunctional()) {
+                list = dao.getAllNhanVien();
+            } else {
+                // Client side
+                iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+                    new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_ALL_NHANVIEN", null);
+                iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+                    iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+                list = (res.getStatus().equals("SUCCESS")) ? (List<NhanVien>) res.getData() : new ArrayList<>();
+            }
+            
             // Duyệt danh sách và thêm từng dòng vào model
             for (NhanVien nv : list) {
                 Object[] row = {

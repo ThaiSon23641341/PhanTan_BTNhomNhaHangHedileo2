@@ -39,7 +39,18 @@ public class MonAn_Ctr {
      * Làm mới danh sách món ăn từ cơ sở dữ liệu.
      */
     public void lamMoiDuLieu() {
-        this.danhSachMonAn = new ArrayList<>(monAnDao.getAllMonAn());
+        if (monAnDao != null && monAnDao.isFunctional()) {
+            this.danhSachMonAn = new ArrayList<>(monAnDao.getAllMonAn());
+        } else {
+            // Client side
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_ALL_MONAN", null);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            if (res.getStatus().equals("SUCCESS")) {
+                this.danhSachMonAn = new ArrayList<>((List<MonAn>) res.getData());
+            }
+        }
     }
 
     /**

@@ -40,7 +40,6 @@ public class TrangChu_GUI extends JPanel {
     private JLabel lblTieuDeDiaChi;
     private JLabel lblTextDiaChi;
     private iuh.fit.son23641341.nhahanglau_phantan.control.ThongKe_Ctr thongKeCtr = iuh.fit.son23641341.nhahanglau_phantan.control.ThongKe_Ctr.getInstance();
-    private iuh.fit.son23641341.nhahanglau_phantan.dao.MonAn_DAO monAnDAO = new iuh.fit.son23641341.nhahanglau_phantan.dao.MonAn_DAO();
     private java.util.List<iuh.fit.son23641341.nhahanglau_phantan.dao.ThongKe_DAO.TopMonAn> topDishes;
     private java.util.List<iuh.fit.son23641341.nhahanglau_phantan.entity.MonAn> allMonAn;
     
@@ -54,10 +53,26 @@ public class TrangChu_GUI extends JPanel {
     }
 
     public void refreshData() {
-        // Cập nhật lại dữ liệu món ăn nổi bật
+        // Cập nhật lại dữ liệu món ăn nổi bật QUA SOCKET
         java.time.LocalDate now = java.time.LocalDate.now();
-        topDishes = thongKeCtr.getTopMonAn(now.getMonthValue(), now.getYear(), 4);
-        allMonAn = monAnDAO.getAllMonAn();
+        int[] params = {now.getMonthValue(), now.getYear(), 4};
+        iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+            new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_TOP_MON_AN", params);
+        iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+            iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            
+        if (res.getStatus().equals("SUCCESS")) {
+            topDishes = (java.util.List<iuh.fit.son23641341.nhahanglau_phantan.dao.ThongKe_DAO.TopMonAn>) res.getData();
+        }
+        
+        iuh.fit.son23641341.nhahanglau_phantan.network.Request reqMon = 
+            new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_ALL_MONAN", null);
+        iuh.fit.son23641341.nhahanglau_phantan.network.Response resMon = 
+            iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(reqMon);
+            
+        if (resMon.getStatus().equals("SUCCESS")) {
+            allMonAn = (java.util.List<iuh.fit.son23641341.nhahanglau_phantan.entity.MonAn>) resMon.getData();
+        }
         
         java.text.NumberFormat currencyFormat = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"));
 
@@ -102,10 +117,29 @@ public class TrangChu_GUI extends JPanel {
         lblTieuDeMenu = new JLabel("THỰC ĐƠN NỔI BẬT TRONG THÁNG");
         pnlCacTheMonAn = new JPanel(new GridLayout(0, 4, 15, 15));
         
-        // Tải dữ liệu thật từ Thống kê
+        // Tải dữ liệu thật từ Thống kê QUA SOCKET (Client-Server)
         java.time.LocalDate now = java.time.LocalDate.now();
-        topDishes = thongKeCtr.getTopMonAn(now.getMonthValue(), now.getYear(), 4);
-        allMonAn = monAnDAO.getAllMonAn();
+        // Gửi yêu cầu qua Socket
+        int[] params = {now.getMonthValue(), now.getYear(), 4};
+        iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+            new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_TOP_MON_AN", params);
+        iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+            iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+        
+        if (res.getStatus().equals("SUCCESS")) {
+            topDishes = (java.util.List<iuh.fit.son23641341.nhahanglau_phantan.dao.ThongKe_DAO.TopMonAn>) res.getData();
+        } else {
+            System.err.println("Lỗi từ Server: " + res.getMessage());
+            topDishes = new java.util.ArrayList<>();
+        }
+
+        iuh.fit.son23641341.nhahanglau_phantan.network.Request reqMonAll = 
+            new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_ALL_MONAN", null);
+        iuh.fit.son23641341.nhahanglau_phantan.network.Response resMonAll = 
+            iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(reqMonAll);
+        if (resMonAll.getStatus().equals("SUCCESS")) {
+            allMonAn = (java.util.List<iuh.fit.son23641341.nhahanglau_phantan.entity.MonAn>) resMonAll.getData();
+        }
         
         int count = 4;
         lblTenMonAn = new JLabel[count];

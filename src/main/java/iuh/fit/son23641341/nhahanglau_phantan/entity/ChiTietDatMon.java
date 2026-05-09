@@ -9,7 +9,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Table(name = "chi_tiet_dat_mon")
 
-public class ChiTietDatMon {
+public class ChiTietDatMon implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

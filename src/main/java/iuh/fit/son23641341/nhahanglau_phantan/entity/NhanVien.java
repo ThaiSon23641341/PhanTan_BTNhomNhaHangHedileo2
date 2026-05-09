@@ -14,7 +14,8 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "nhan_vien")
-public class NhanVien {
+public class NhanVien implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
 
     // 1. Khai báo thuộc tính
     @Id

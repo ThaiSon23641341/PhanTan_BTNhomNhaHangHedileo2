@@ -54,6 +54,8 @@ public class GUIManager {
      */
     public Component switchToGUI(Class<? extends Component> guiClass, Component currentComponent) {
         if (guiClass == null) return null;
+        
+        System.out.println(">>> GUIManager: Yêu cầu chuyển sang " + guiClass.getSimpleName());
 
         // 1. Tìm Window cha của component hiện tại
         Window parentWindow = (currentComponent instanceof Window) ? (Window) currentComponent : 
@@ -61,30 +63,45 @@ public class GUIManager {
 
         // 2. Kiểm tra xem class này có phải là một Card trong Main_GUI không
         String cardName = getCardName(guiClass);
+        System.out.println(">>> GUIManager: CardName xác định = " + cardName + " | mainGUI status = " + (mainGUI != null ? "READY" : "NULL"));
+
         if (mainGUI != null && cardName != null) {
+            System.out.println(">>> GUIManager: Thực hiện chuyển CardLayout...");
             Component card = mainGUI.showCard(cardName, guiClass);
             
+            if (card == null) {
+                System.err.println(">>> GUIManager ERROR: showCard trả về NULL cho " + cardName);
+                return null;
+            }
+
             // Tự động làm mới dữ liệu nếu là các màn hình cần cập nhật số liệu
-            if (card instanceof ChonBan_GUI) {
-                ((ChonBan_GUI) card).refreshData();
-            } else if (card instanceof TrangChu_GUI) {
-                ((TrangChu_GUI) card).refreshData();
-            } else if (card instanceof ThongKe_GUI) {
-                ((ThongKe_GUI) card).updateData();
-            } else if (card instanceof TrangChuQL_GUI) {
-                ((TrangChuQL_GUI) card).refreshData();
-            } else if (card instanceof QuanLyKhachHang_GUI) {
-                ((QuanLyKhachHang_GUI) card).refreshData();
+            try {
+                if (card instanceof ChonBan_GUI) {
+                    ((ChonBan_GUI) card).refreshData();
+                } else if (card instanceof TrangChu_GUI) {
+                    ((TrangChu_GUI) card).refreshData();
+                } else if (card instanceof ThongKe_GUI) {
+                    ((ThongKe_GUI) card).updateData();
+                } else if (card instanceof TrangChuQL_GUI) {
+                    ((TrangChuQL_GUI) card).refreshData();
+                } else if (card instanceof QuanLyKhachHang_GUI) {
+                    ((QuanLyKhachHang_GUI) card).refreshData();
+                }
+            } catch (Exception e) {
+                System.err.println(">>> GUIManager: Lỗi khi refresh dữ liệu cho " + cardName);
+                e.printStackTrace();
             }
 
             // Nếu đang ở trong một window khác (JFrame cũ), thì đóng nó đi
             if (parentWindow != null && parentWindow != mainGUI) {
+                System.out.println(">>> GUIManager: Đóng cửa sổ cũ " + parentWindow.getClass().getSimpleName());
                 parentWindow.dispose();
             }
             return card;
         }
 
         // 3. Nếu không phải Card hoặc không có Main_GUI, mở cửa sổ độc lập (JFrame)
+        System.out.println(">>> GUIManager: Chế độ Window độc lập cho " + guiClass.getSimpleName());
         Component gui = getGUI(guiClass);
         if (gui == null) return null;
 

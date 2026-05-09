@@ -9,7 +9,8 @@ import lombok.Builder;
 @Entity
 @Table(name = "ban_an")
 @Builder
-public class BanAn {
+public class BanAn implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     @Id
     @Column(name = "ma_ban")
     private int maBan;

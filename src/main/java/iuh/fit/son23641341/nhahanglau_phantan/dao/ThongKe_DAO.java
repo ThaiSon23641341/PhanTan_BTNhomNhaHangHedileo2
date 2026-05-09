@@ -146,7 +146,8 @@ public class ThongKe_DAO {
         public int thang; public double tongDoanhThu; public int tonghoaDon;
         public ThongKeThang(int t, double dt, int hd) { this.thang = t; this.tongDoanhThu = dt; this.tonghoaDon = hd; }
     }
-    public static class TopMonAn {
+    public static class TopMonAn implements java.io.Serializable {
+        private static final long serialVersionUID = 1L;
         public String tenMonAn; public int soLuongDat;
         public TopMonAn(String t, int s) { this.tenMonAn = t; this.soLuongDat = s; }
     }

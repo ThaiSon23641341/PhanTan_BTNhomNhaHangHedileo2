@@ -41,7 +41,7 @@ public class Main_GUI extends JFrame {
     public Component showCard(String name, Class<? extends Component> guiClass) {
         if (!cards.containsKey(name)) {
             try {
-                System.out.println("Đang nạp Card: " + name);
+                System.out.println(">>> Main_GUI: Đang nạp Card mới: " + name + " (" + guiClass.getSimpleName() + ")");
                 Component comp = guiClass.getDeclaredConstructor().newInstance();
                 
                 JPanel content;
@@ -57,7 +57,22 @@ public class Main_GUI extends JFrame {
                 cards.put(name, content);
                 pnlContent.add(content, name);
             } catch (Exception e) {
+                System.err.println(">>> Main_GUI ERROR: Không thể nạp Card " + name);
                 e.printStackTrace();
+                
+                String errorMsg = e.getMessage();
+                if (e.getCause() != null) {
+                    errorMsg = e.getCause().getMessage();
+                }
+                if (errorMsg == null || errorMsg.isEmpty()) {
+                    errorMsg = e.toString();
+                }
+
+                JOptionPane.showMessageDialog(this, 
+                    "Lỗi khi khởi tạo màn hình " + name + ":\n" + errorMsg, 
+                    "Lỗi Hệ Thống", 
+                    JOptionPane.ERROR_MESSAGE);
+                return null;
             }
         }
         cardLayout.show(pnlContent, name);

@@ -50,7 +50,6 @@
     
         public ChonBan_GUI() {
             banAnCtr = BanAn_Ctr.getInstance(); // Sử dụng Singleton
-            phieuDatDAO = new PhieuDat_DAO();
             initializeComponents();
             setupLayout();
             setupEventHandlers();
@@ -301,7 +300,15 @@
         }
     
         private void timKiemBan(String tuKhoa) {
-            ArrayList<BanAn> tatCaBan = banAnCtr.layTatCaBan();
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_ALL_BAN", null);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            
+            ArrayList<BanAn> tatCaBan = new ArrayList<>();
+            if (res.getStatus().equals("SUCCESS")) {
+                tatCaBan = (ArrayList<BanAn>) res.getData();
+            }
             ArrayList<BanAn> danhSachBanTimThay = new ArrayList<>();
     
             // Tìm kiếm theo mã bàn hoặc số chỗ
@@ -372,10 +379,28 @@
         private void setupTableGrid(String loaiFilter) {
             tabKhuVuc.removeAll();
             
-            // Lấy danh sách bàn từ controller
-            banAnCtr.loadBanFromDB();
-            ArrayList<BanAn> tatCaBan = banAnCtr.layTatCaBan();
-            danhSachPhieuTheoNgay = phieuDatDAO.getPhieuDatByNgay(ngayDatDaChon);
+            // Lấy danh sách bàn từ Server qua Socket
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request reqBan = 
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_ALL_BAN", null);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response resBan = 
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(reqBan);
+            
+            ArrayList<BanAn> tatCaBan = new ArrayList<>();
+            if (resBan.getStatus().equals("SUCCESS")) {
+                tatCaBan = (ArrayList<BanAn>) resBan.getData();
+            }
+
+            // Lấy danh sách phiếu đặt theo ngày qua Socket
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request reqPhieu = 
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_PHIEU_DAT_BY_NGAY", ngayDatDaChon);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response resPhieu = 
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(reqPhieu);
+
+            if (resPhieu.getStatus().equals("SUCCESS")) {
+                danhSachPhieuTheoNgay = (ArrayList<PhieuDatBan>) resPhieu.getData();
+            } else {
+                danhSachPhieuTheoNgay = new ArrayList<>();
+            }
     
             // Phân loại bàn theo khu vực
             String[] khuVucs = {"Trong nhà", "Trên lầu", "Ngoài trời"};
@@ -434,18 +459,20 @@
             String thongTinBan = ban.getSoCho() + " chỗ";
             Color mauTrangThai;
     
-            ArrayList<PhieuDatBan> phieuTheoNgay = phieuDatDAO.getPhieuDatByNgay(ngayDatDaChon);
+            ArrayList<PhieuDatBan> phieuTheoNgay = danhSachPhieuTheoNgay;
             int soPhieuDat = 0;
             boolean dangSuDung = false;
             
-            for (PhieuDatBan phieu : phieuTheoNgay) {
-                // Chỉ tính các phiếu CHƯA thanh toán và CHƯA hủy
-                if (!"Đã hủy".equals(phieu.getTrangThai()) && !"Đã thanh toán".equals(phieu.getTrangThai())) {
-                    ArrayList<Integer> danhSachBanPhieu = (ArrayList<Integer>) phieu.getDanhSachBan();
-                    if (danhSachBanPhieu != null && danhSachBanPhieu.contains(ban.getMaBan())) {
-                        soPhieuDat++;
-                        if ("Đang sử dụng".equals(phieu.getTrangThai())) {
-                            dangSuDung = true;
+            if (phieuTheoNgay != null) {
+                for (PhieuDatBan phieu : phieuTheoNgay) {
+                    // Chỉ tính các phiếu CHƯA thanh toán và CHƯA hủy
+                    if (!"Đã hủy".equals(phieu.getTrangThai()) && !"Đã thanh toán".equals(phieu.getTrangThai())) {
+                        ArrayList<Integer> danhSachBanPhieu = (ArrayList<Integer>) phieu.getDanhSachBan();
+                        if (danhSachBanPhieu != null && danhSachBanPhieu.contains(ban.getMaBan())) {
+                            soPhieuDat++;
+                            if ("Đang sử dụng".equals(phieu.getTrangThai())) {
+                                dangSuDung = true;
+                            }
                         }
                     }
                 }

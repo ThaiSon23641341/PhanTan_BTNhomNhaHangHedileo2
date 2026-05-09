@@ -12,12 +12,12 @@ import java.time.LocalDate;
 /**
  * Lớp KhachHang (Customer) chứa thông tin cơ bản của một khách hàng.
  */
-@NoArgsConstructor
 @Builder
 @Entity
 @Table(name = "khach_hang_thanh_vien")
 
-public class KhachHangThanhVien {
+public class KhachHangThanhVien implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     @Id
     @Column(name = "ma_khach_hang", nullable = false, unique = true)
     private String maKhachHang;
@@ -28,6 +28,10 @@ public class KhachHangThanhVien {
     private String thanhVien;
     private int diemTichLuy;
     private LocalDate ngayDangKy;
+
+    public KhachHangThanhVien() {
+        // Constructor mặc định cho Hibernate
+    }
 
     public KhachHangThanhVien(String maKhachHang, String hoTen, String soDienThoai, String email, String gioiTinh,
             String thanhVien, int diemTichLuy, LocalDate ngayDangKy) {

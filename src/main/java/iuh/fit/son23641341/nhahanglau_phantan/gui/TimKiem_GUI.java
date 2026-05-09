@@ -216,7 +216,18 @@ public class TimKiem_GUI extends JPanel {
     private void timKiemHoaDon(String keyword) {
         foodGrid.removeAll();
         try {
-            List<HoaDon> ketQua = hoaDonDao.timKiemHoaDon(keyword);
+            List<HoaDon> ketQua;
+            if (hoaDonDao != null && hoaDonDao.isFunctional()) {
+                ketQua = hoaDonDao.timKiemHoaDon(keyword);
+            } else {
+                // Client side
+                iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+                    new iuh.fit.son23641341.nhahanglau_phantan.network.Request("SEARCH_HOA_DON", keyword);
+                iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+                    iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+                ketQua = (res.getStatus().equals("SUCCESS")) ? (List<HoaDon>) res.getData() : new ArrayList<>();
+            }
+
             if (ketQua == null || ketQua.isEmpty()) hienThiThongBaoRong("Không tìm thấy hóa đơn: " + keyword);
             else {
                 setupGridLayout(ketQua.size());
@@ -230,7 +241,17 @@ public class TimKiem_GUI extends JPanel {
 
     private void timKiemPhieuDat(String keyword) {
         foodGrid.removeAll();
-        List<PhieuDatBan> ketQua = phieuDatDao.timKiemPhieuDat(keyword);
+        List<PhieuDatBan> ketQua;
+        if (phieuDatDao != null && phieuDatDao.isFunctional()) {
+            ketQua = phieuDatDao.timKiemPhieuDat(keyword);
+        } else {
+            // Client side
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("SEARCH_PHIEU_DAT", keyword);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            ketQua = (res.getStatus().equals("SUCCESS")) ? (List<PhieuDatBan>) res.getData() : new ArrayList<>();
+        }
 
         if (ketQua == null || ketQua.isEmpty()) {
             hienThiThongBaoRong("Không tìm thấy phiếu đặt: " + keyword);
@@ -245,14 +266,38 @@ public class TimKiem_GUI extends JPanel {
 
     private void timKiemMonAnWithFilter(String keyword) {
         if (keyword.isEmpty() && !cbMaMon.isSelected() && !cbMaPhieu.isSelected() && !cbMaHoaDon.isSelected()) {
-            try { loadFoodDataToGrid(timKiemDao.getAllMonAn()); } catch (Exception ex) {}
+            try { 
+                List<MonAn> all;
+                if (timKiemDao != null && timKiemDao.isFunctional()) {
+                    all = timKiemDao.getAllMonAn();
+                } else {
+                    // Client side
+                    iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+                        new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_ALL_MONAN_TIMKIEM", null);
+                    iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+                        iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+                    all = (res.getStatus().equals("SUCCESS")) ? (List<MonAn>) res.getData() : new ArrayList<>();
+                }
+                loadFoodDataToGrid(all); 
+            } catch (Exception ex) {}
             return;
         }
         try {
-            // Tham số searchByTable đã set là false
-            List<MonAn> ketQua = timKiemDao.timKiemMonAn(
+            List<MonAn> ketQua;
+            if (timKiemDao != null && timKiemDao.isFunctional()) {
+                ketQua = timKiemDao.timKiemMonAn(
                     keyword, cbMaMon.isSelected(), cbMaPhieu.isSelected(), cbMaHoaDon.isSelected(), false, false
-            );
+                );
+            } else {
+                // Client side
+                iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+                    new iuh.fit.son23641341.nhahanglau_phantan.network.Request("SEARCH_MONAN_ADVANCED", new Object[]{
+                        keyword, cbMaMon.isSelected(), cbMaPhieu.isSelected(), cbMaHoaDon.isSelected(), false, false
+                    });
+                iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+                    iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+                ketQua = (res.getStatus().equals("SUCCESS")) ? (List<MonAn>) res.getData() : new ArrayList<>();
+            }
             loadFoodDataToGrid(ketQua);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Lỗi tìm kiếm món ăn: " + e.getMessage());
@@ -261,7 +306,18 @@ public class TimKiem_GUI extends JPanel {
 
     private void timKiemKhachHang(String keyword) {
         foodGrid.removeAll();
-        List<KhachHangThanhVien> ketQua = khachHangDao.timKhachHangTheoSDT(keyword);
+        List<KhachHangThanhVien> ketQua;
+        if (khachHangDao != null && khachHangDao.isFunctional()) {
+            ketQua = khachHangDao.timKhachHangTheoSDT(keyword);
+        } else {
+            // Client side
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("SEARCH_KHACH_HANG", keyword);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            ketQua = (res.getStatus().equals("SUCCESS")) ? (List<KhachHangThanhVien>) res.getData() : new ArrayList<>();
+        }
+
         if (ketQua.isEmpty()) hienThiThongBaoRong("Không tìm thấy khách hàng: " + keyword);
         else {
             setupGridLayout(ketQua.size());

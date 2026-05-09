@@ -23,7 +23,8 @@ import lombok.ToString;
 @ToString (exclude = {"khachHang", "nhanVien"} )
 
 @Table(name = "phieu_dat_ban")
-public class PhieuDatBan {
+public class PhieuDatBan implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     // Alias cho DAO: getDanhSachBan/setDanhSachBan (dùng chung cho mọi nơi)
     public List<Integer> getDanhSachBan() {
         if (this.danhSachBan != null && !this.danhSachBan.isEmpty()) {

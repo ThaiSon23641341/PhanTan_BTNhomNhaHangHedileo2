@@ -18,7 +18,8 @@ import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "hoa_don")
-public class HoaDon {
+public class HoaDon implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     @Id
     @Column(name = "ma_hoa_don")
     private String maHoaDon;

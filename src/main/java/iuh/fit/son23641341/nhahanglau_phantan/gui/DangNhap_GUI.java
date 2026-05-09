@@ -149,13 +149,20 @@ public class DangNhap_GUI extends JFrame {
             return;
         }
 
-        // ĐÃ SỬA: Hàm kiemTraDangNhap tự động lưu NhanVien vào User_Ctr nếu đăng nhập đúng
-        if (userCtr.kiemTraDangNhap(username, password)) {
-            // Lấy trực tiếp nhân viên hiện tại ra hiển thị (không cần gọi hàm từ DAO nữa)
-            NhanVien nhanVienLogin = userCtr.getNhanVienHienTai();
-            if (nhanVienLogin != null) {
-                System.out.println("Đăng nhập thành công! Xin chào: " + nhanVienLogin.getHoten());
-            }
+        // Gửi yêu cầu đăng nhập qua SOCKET
+        String[] loginData = {username, password};
+        iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+            new iuh.fit.son23641341.nhahanglau_phantan.network.Request("LOGIN", loginData);
+        iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+            iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+
+        if (res.getStatus().equals("SUCCESS")) {
+            NhanVien nhanVienLogin = (NhanVien) res.getData();
+            // Cập nhật thông tin vào User_Ctr cục bộ trên máy Client
+            userCtr.setNhanVienHienTai(nhanVienLogin);
+            userCtr.setUsernameHienTai(username);
+            
+            System.out.println("Đăng nhập thành công! Xin chào: " + nhanVienLogin.getHoten());
 
             // Chuyển sang khung giao diện chính (Single Frame)
             try {
@@ -165,7 +172,7 @@ public class DangNhap_GUI extends JFrame {
                 JOptionPane.showMessageDialog(this, "Lỗi khi khởi chạy giao diện chính!");
             }
         } else {
-            JOptionPane.showMessageDialog(this, "Tên đăng nhập hoặc mật khẩu không đúng!\n\n", "Đăng nhập thất bại", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Tên đăng nhập hoặc mật khẩu không đúng!", "Đăng nhập thất bại", JOptionPane.ERROR_MESSAGE);
             txtPass.setText("");
             txtUser.requestFocus();
         }

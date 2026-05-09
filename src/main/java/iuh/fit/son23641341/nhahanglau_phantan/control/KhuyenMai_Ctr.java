@@ -32,7 +32,18 @@ public class KhuyenMai_Ctr {
      * Làm mới danh sách từ cơ sở dữ liệu.
      */
     public void lamMoiDuLieu() {
-        this.danhSachKhuyenMai = new ArrayList<>(khuyenMaiDao.getAllKhuyenMai());
+        if (khuyenMaiDao != null && khuyenMaiDao.isFunctional()) {
+            this.danhSachKhuyenMai = new ArrayList<>(khuyenMaiDao.getAllKhuyenMai());
+        } else {
+            // Client side
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_ALL_KHUYEN_MAI", null);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            if (res.getStatus().equals("SUCCESS")) {
+                this.danhSachKhuyenMai = new ArrayList<>((List<KhuyenMai>) res.getData());
+            }
+        }
     }
 
     /**

@@ -25,9 +25,11 @@ public class User_Ctr {
         this.selectedMonth = now.getMonthValue();
         this.selectedYear = now.getYear();
 
-        // Khởi tạo EntityManager và truyền vào User_DAO
+        // Khởi tạo EntityManager (chỉ thành công ở Server)
         this.em = EntityManagerFactoryUtil.getEntityManager();
-        this.userDAO = new User_DAO(this.em);
+        if (this.em != null) {
+            this.userDAO = new User_DAO(this.em);
+        }
     }
 
     public static User_Ctr getInstance() {

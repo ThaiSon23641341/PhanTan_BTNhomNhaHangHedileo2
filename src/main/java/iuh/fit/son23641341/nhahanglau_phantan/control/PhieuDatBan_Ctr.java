@@ -36,7 +36,18 @@ public class PhieuDatBan_Ctr {
     }
 
     public void lamMoiDuLieu() {
-        this.danhSachPhieu = new ArrayList<>(phieuDatDao.getAllPhieuDat());
+        if (phieuDatDao != null && phieuDatDao.isFunctional()) {
+            this.danhSachPhieu = new ArrayList<>(phieuDatDao.getAllPhieuDat());
+        } else {
+            // Client side
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_ALL_PHIEU", null);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            if (res.getStatus().equals("SUCCESS")) {
+                this.danhSachPhieu = new ArrayList<>((List<PhieuDatBan>) res.getData());
+            }
+        }
     }
 
     public static String taoMaPhieu(String ngayDat, String gioDat, String sdt) {
@@ -56,9 +67,21 @@ public class PhieuDatBan_Ctr {
         if (phieu.getMaPhieu() == null || phieu.getMaPhieu().isEmpty()) {
             phieu.setMaPhieu(taoMaPhieu(phieu.getNgayDat(), phieu.getGioDat(), phieu.getSdtDat()));
         }
-        if (phieuDatDao.insertPhieuDat(phieu)) {
-            lamMoiDuLieu();
-            return true;
+        if (phieuDatDao != null && phieuDatDao.isFunctional()) {
+            if (phieuDatDao.insertPhieuDat(phieu)) {
+                lamMoiDuLieu();
+                return true;
+            }
+        } else {
+            // Client side
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("LUU_PHIEU_DAT", phieu);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            if (res.getStatus().equals("SUCCESS")) {
+                lamMoiDuLieu();
+                return true;
+            }
         }
         return false;
     }
@@ -96,9 +119,21 @@ public class PhieuDatBan_Ctr {
     }
 
     public boolean huyPhieuDat(String maPhieu) {
-        if (phieuDatDao.capNhatTrangThai(maPhieu, "Đã hủy")) {
-            lamMoiDuLieu();
-            return true;
+        if (phieuDatDao != null && phieuDatDao.isFunctional()) {
+            if (phieuDatDao.capNhatTrangThai(maPhieu, "Đã hủy")) {
+                lamMoiDuLieu();
+                return true;
+            }
+        } else {
+            // Client side
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("CAP_NHAT_TRANG_THAI_PHIEU", new Object[]{maPhieu, "Đã hủy"});
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            if (res.getStatus().equals("SUCCESS")) {
+                lamMoiDuLieu();
+                return true;
+            }
         }
         return false;
     }

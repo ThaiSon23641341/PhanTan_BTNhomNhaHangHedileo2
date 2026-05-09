@@ -13,8 +13,10 @@ public class BanAn_Ctr {
 
     private BanAn_Ctr() {
         this.em = EntityManagerFactoryUtil.getEntityManager();
-        this.banAnDAO = new BanAn_DAO(this.em);
-        initializeDefaultTables(); // Tự động khởi tạo 40 bàn với các khu vực khác nhau
+        if (this.em != null) {
+            this.banAnDAO = new BanAn_DAO(this.em);
+            initializeDefaultTables(); // Tự động khởi tạo 40 bàn với các khu vực khác nhau
+        }
     }
 
     private void initializeDefaultTables() {
@@ -62,11 +64,29 @@ public class BanAn_Ctr {
 
     // Lấy dữ liệu tươi từ Database
     public ArrayList<BanAn> layTatCaBan() {
-        return new ArrayList<>(banAnDAO.getAllBanAn());
+        if (em != null && banAnDAO != null) {
+            return new ArrayList<>(banAnDAO.getAllBanAn());
+        } else {
+            // Client side
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_ALL_BAN", null);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            return (res.getStatus().equals("SUCCESS")) ? (ArrayList<BanAn>) res.getData() : new ArrayList<>();
+        }
     }
 
     public BanAn timBanTheoMa(int maBan) {
-        return banAnDAO.findById(maBan);
+        if (em != null && banAnDAO != null) {
+            return banAnDAO.findById(maBan);
+        } else {
+            // Client side - often already have it in local list or fetch
+            ArrayList<BanAn> all = layTatCaBan();
+            for (BanAn b : all) {
+                if (b.getMaBan() == maBan) return b;
+            }
+            return null;
+        }
     }
 
     public boolean themBan(BanAn banMoi) {

@@ -7,7 +7,8 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "mon_an")
-public class MonAn {
+public class MonAn implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     @Id
     @Column(name = "ma_mon")
     private String maMon;    // Khóa chính

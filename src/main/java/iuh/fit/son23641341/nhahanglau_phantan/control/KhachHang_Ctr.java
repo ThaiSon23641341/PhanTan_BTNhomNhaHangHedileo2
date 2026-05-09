@@ -15,12 +15,28 @@ public class KhachHang_Ctr {
     private List<KhachHangThanhVien> danhSachKhachHangThanhVien;
 
     public KhachHang_Ctr() {
-        khachHangDAO = new KhachHang_DAO();
-        danhSachKhachHangThanhVien = khachHangDAO.getAllKhachHang();
+        try {
+            khachHangDAO = new KhachHang_DAO();
+            danhSachKhachHangThanhVien = khachHangDAO.getAllKhachHang();
+        } catch (Exception e) {
+            System.err.println("KhachHang_DAO initialization failed: " + e.getMessage());
+            danhSachKhachHangThanhVien = new java.util.ArrayList<>();
+        }
     }
 
     public List<KhachHangThanhVien> getDanhSachKhachHang() {
-        this.danhSachKhachHangThanhVien = khachHangDAO.getAllKhachHang();
+        if (khachHangDAO != null && khachHangDAO.isFunctional()) {
+            this.danhSachKhachHangThanhVien = khachHangDAO.getAllKhachHang();
+        } else {
+            // Client side - Use Socket
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_ALL_CUSTOMERS", null);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            if (res.getStatus().equals("SUCCESS")) {
+                this.danhSachKhachHangThanhVien = (List<KhachHangThanhVien>) res.getData();
+            }
+        }
         return danhSachKhachHangThanhVien;
     }
     
@@ -68,10 +84,19 @@ public class KhachHang_Ctr {
 
 
     public List<KhachHangThanhVien> timKhachHangTheoSDT(String query) {
-        if (query == null || query.trim().isEmpty()) {
-            return khachHangDAO.getAllKhachHang();
+        if (khachHangDAO != null && khachHangDAO.isFunctional()) {
+            if (query == null || query.trim().isEmpty()) {
+                return khachHangDAO.getAllKhachHang();
+            }
+            return khachHangDAO.timKhachHangTheoSDT(query);
+        } else {
+            // Client side
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("SEARCH_KHACH_HANG", query);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            return (res.getStatus().equals("SUCCESS")) ? (List<KhachHangThanhVien>) res.getData() : new java.util.ArrayList<>();
         }
-        return khachHangDAO.timKhachHangTheoSDT(query);
     }
     
     /**

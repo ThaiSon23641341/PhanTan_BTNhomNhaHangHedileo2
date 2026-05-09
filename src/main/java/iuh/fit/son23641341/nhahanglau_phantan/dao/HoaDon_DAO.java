@@ -15,6 +15,10 @@ public class HoaDon_DAO {
         this.em = iuh.fit.son23641341.nhahanglau_phantan.util.EntityManagerFactoryUtil.getEntityManager();
     }
 
+    public boolean isFunctional() {
+        return em != null;
+    }
+
     public HoaDon_DAO(EntityManager em) {
         this.em = em;
     }

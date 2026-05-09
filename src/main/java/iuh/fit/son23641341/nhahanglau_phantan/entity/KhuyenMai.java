@@ -14,7 +14,8 @@ import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "khuyen_mai")
-public class KhuyenMai {
+public class KhuyenMai implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     @Transient
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ROOT);
     @Id

@@ -11,7 +11,11 @@ public class KhuyenMai_DAO {
     private EntityManager em;
 
     public KhuyenMai_DAO() {
-        this.em = EntityManagerFactoryUtil.getEntityManager();
+        this.em = iuh.fit.son23641341.nhahanglau_phantan.util.EntityManagerFactoryUtil.getEntityManager();
+    }
+
+    public boolean isFunctional() {
+        return em != null;
     }
 
     public KhuyenMai_DAO(EntityManager em) {

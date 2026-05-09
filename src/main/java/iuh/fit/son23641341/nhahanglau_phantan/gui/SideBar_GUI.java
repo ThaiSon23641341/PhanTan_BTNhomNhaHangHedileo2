@@ -277,60 +277,48 @@ public class SideBar_GUI extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         Object source = e.getSource();
-
-        // Lấy JFrame cha hiện tại
         Window window = SwingUtilities.getWindowAncestor(this);
         GUIManager guiManager = GUIManager.getInstance();
 
-        // Ưu tiên sử dụng field mainGUI nếu đã được set, nếu không thì lấy từ window
-        Main_GUI targetMain = (this.mainGUI != null) ? this.mainGUI : 
-                             (window instanceof Main_GUI ? (Main_GUI) window : null);
+        // Xác định GUI class dựa trên nút bấm
+        Class<? extends Component> targetClass = null;
+        String actionName = "";
 
-        if (targetMain != null) {
-            if (source == btnTongQuan) {
-                guiManager.switchToGUI((Class<? extends Component>) TrangChuQL_GUI.class, window);
-            } else if (source == btnTrangChu) {
-                guiManager.switchToGUI((Class<? extends Component>) TrangChu_GUI.class, window);
-            } else if (source == btnTimKiem) {
-                guiManager.switchToGUI((Class<? extends Component>) TimKiem_GUI.class, window);
-            } else if (source == btnDatBan) {
-                guiManager.switchToGUI((Class<? extends Component>) ChonBan_GUI.class, window);
-            } else if (source == btnQuanLyMon) {
-                guiManager.switchToGUI((Class<? extends Component>) DanhSachMonAnQL_GUI.class, window);
-            } else if (source == btnKhachHang) {
-                guiManager.switchToGUI((Class<? extends Component>) QuanLyKhachHang_GUI.class, window);
-            } else if (source == btnThongKe) {
-                guiManager.switchToGUI((Class<? extends Component>) ThongKe_GUI.class, window);
-            } else if (source == btnQuanLyDuLieu) {
-                guiManager.switchToGUI((Class<? extends Component>) QuanLiDuLieu_GUI.class, window);
-            } else if (source == btnTroGiup) {
-                guiManager.switchToGUI((Class<? extends Component>) TroGiup_GUI.class, window);
-            } else {
-                xuLyDangXuat(window);
-            }
+        if (source == btnTongQuan) {
+            targetClass = TrangChuQL_GUI.class;
+            actionName = "Tổng Quan";
+        } else if (source == btnTrangChu) {
+            targetClass = TrangChu_GUI.class;
+            actionName = "Trang Chủ";
+        } else if (source == btnTimKiem) {
+            targetClass = TimKiem_GUI.class;
+            actionName = "Tìm Kiếm";
+        } else if (source == btnDatBan) {
+            targetClass = ChonBan_GUI.class;
+            actionName = "Đặt Bàn";
+        } else if (source == btnQuanLyMon) {
+            targetClass = DanhSachMonAnQL_GUI.class;
+            actionName = "Quản Lý Món";
+        } else if (source == btnKhachHang) {
+            targetClass = QuanLyKhachHang_GUI.class;
+            actionName = "Khách Hàng";
+        } else if (source == btnThongKe) {
+            targetClass = ThongKe_GUI.class;
+            actionName = "Thống Kê";
+        } else if (source == btnQuanLyDuLieu) {
+            targetClass = QuanLiDuLieu_GUI.class;
+            actionName = "Quản Lý Dữ Liệu";
+        } else if (source == btnTroGiup) {
+            targetClass = TroGiup_GUI.class;
+            actionName = "Trợ Giúp";
+        }
+
+        if (targetClass != null) {
+            System.out.println(">>> SideBar_GUI: Click nút " + actionName);
+            guiManager.switchToGUI(targetClass, window);
         } else {
-            // Fallback nếu không tìm thấy Main_GUI
-            if (source == btnTongQuan) {
-                guiManager.switchToGUI((Class<? extends Component>) TrangChuQL_GUI.class, window);
-            } else if (source == btnTrangChu) {
-                guiManager.switchToGUI((Class<? extends Component>) TrangChu_GUI.class, window);
-            } else if (source == btnTimKiem) {
-                guiManager.switchToGUI((Class<? extends Component>) TimKiem_GUI.class, window);
-            } else if (source == btnDatBan) {
-                guiManager.switchToGUI((Class<? extends Component>) ChonBan_GUI.class, window);
-            } else if (source == btnQuanLyMon) {
-                guiManager.switchToGUI((Class<? extends Component>) DanhSachMonAnQL_GUI.class, window);
-            } else if (source == btnKhachHang) {
-                guiManager.switchToGUI((Class<? extends Component>) QuanLyKhachHang_GUI.class, window);
-            } else if (source == btnThongKe) {
-                guiManager.switchToGUI((Class<? extends Component>) ThongKe_GUI.class, window);
-            } else if (source == btnQuanLyDuLieu) {
-                guiManager.switchToGUI((Class<? extends Component>) QuanLiDuLieu_GUI.class, window);
-            } else if (source == btnTroGiup) {
-                guiManager.switchToGUI((Class<? extends Component>) TroGiup_GUI.class, window);
-            } else {
-                xuLyDangXuat(window);
-            }
+            // Trường hợp Đăng Xuất (không có targetClass)
+            xuLyDangXuat(window);
         }
     }
 

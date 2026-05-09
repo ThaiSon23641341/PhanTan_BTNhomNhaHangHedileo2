@@ -12,7 +12,11 @@ public class MonAn_DAO {
     private EntityManager em;
 
     public MonAn_DAO() {
-        this.em = EntityManagerFactoryUtil.getEntityManager();
+        this.em = iuh.fit.son23641341.nhahanglau_phantan.util.EntityManagerFactoryUtil.getEntityManager();
+    }
+
+    public boolean isFunctional() {
+        return em != null;
     }
 
     public MonAn_DAO(EntityManager em) {

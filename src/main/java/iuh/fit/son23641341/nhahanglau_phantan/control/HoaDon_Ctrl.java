@@ -51,7 +51,20 @@ public class HoaDon_Ctrl {
             return false;
         }
         HoaDon hoaDonMoi = new HoaDon(phieuDat);
-        boolean luuThanhCong = new HoaDon_DAO().addHoaDon(hoaDonMoi);
+        boolean luuThanhCong;
+        
+        iuh.fit.son23641341.nhahanglau_phantan.dao.HoaDon_DAO dao = new iuh.fit.son23641341.nhahanglau_phantan.dao.HoaDon_DAO();
+        if (dao.isFunctional()) {
+            luuThanhCong = dao.addHoaDon(hoaDonMoi);
+        } else {
+            // Client side
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req = 
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("ADD_HOA_DON", hoaDonMoi);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res = 
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            luuThanhCong = (res != null && res.getStatus().equals("SUCCESS"));
+        }
+        
         return luuThanhCong && xuatPDF(hoaDonMoi, duongDanPDF);
     }
 
