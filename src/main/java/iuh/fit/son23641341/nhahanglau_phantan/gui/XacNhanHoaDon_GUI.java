@@ -6,12 +6,15 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import iuh.fit.son23641341.nhahanglau_phantan.control.KhuyenMai_Ctr;
 import iuh.fit.son23641341.nhahanglau_phantan.control.PhieuDatBan_Ctr;
-import iuh.fit.son23641341.nhahanglau_phantan.control.PrinterService; // Đảm bảo đã có class này
+// Đã xóa import PrinterService
 import iuh.fit.son23641341.nhahanglau_phantan.dao.KhachHang_DAO;
-import iuh.fit.son23641341.nhahanglau_phantan.dao.PhieuDat_DAO; 
+import iuh.fit.son23641341.nhahanglau_phantan.dao.PhieuDat_DAO;
 import iuh.fit.son23641341.nhahanglau_phantan.control.BanAn_Ctr;
 import iuh.fit.son23641341.nhahanglau_phantan.control.HoaDon_Ctrl;
 import iuh.fit.son23641341.nhahanglau_phantan.control.KhachHang_Ctr;
@@ -21,36 +24,36 @@ import iuh.fit.son23641341.nhahanglau_phantan.entity.KhuyenMai;
 import iuh.fit.son23641341.nhahanglau_phantan.entity.PhieuDatBan;
 
 public class XacNhanHoaDon_GUI extends JFrame {
-    
+
     private static final Color MAU_CHINH = new Color(0xDC4332);
     private static final Color MAU_XAC_NHAN = new Color(0x7AB750);
-    
-    private HoaDon hoaDonHienTai; 
-    private HoaDon_Ctrl hoaDonCtr; 
-    
-    private KhuyenMai khuyenMaiDaApDung; 
+
+    private HoaDon hoaDonHienTai;
+    private HoaDon_Ctrl hoaDonCtr;
+
+    private KhuyenMai khuyenMaiDaApDung;
     private ArrayList<KhuyenMai> danhSachKhuyenMai;
 
     private JComboBox<String> cboKhuyenMai;
     private JButton btnApDungKhuyenMai;
     private JLabel lblThongBaoKhuyenMai;
-    
+
     private JLabel lblSoBan;
     private JLabel lblTongTienMonAn;
     private JLabel lblTienGiam;
     private JLabel lblTienCoc;
-    
-    private JLabel lblThanhVien;      
-    private JLabel lblGiamGiaThanhVien; 
-    
+
+    private JLabel lblThanhVien;
+    private JLabel lblGiamGiaThanhVien;
+
     private JLabel lblTongThanhToan;
     private JPanel pnlDanhSachMonAn;
-	private JFrame frameCha;
-    
+    private JFrame frameCha;
+
     public XacNhanHoaDon_GUI(HoaDon hoaDon) {
         init(hoaDon);
     }
-    
+
     public XacNhanHoaDon_GUI() {
         PhieuDatBan phieu = new PhieuDatBan();
         phieu.setMaBan(1);
@@ -58,7 +61,7 @@ public class XacNhanHoaDon_GUI extends JFrame {
         hd.setPhieuDat(phieu);
         init(hd);
     }
-    
+
     public void setFrameCha(Component parent) {
         this.frameCha = (parent instanceof JFrame) ? (JFrame) parent : null;
     }
@@ -66,19 +69,18 @@ public class XacNhanHoaDon_GUI extends JFrame {
     private void init(HoaDon hoaDon) {
         this.hoaDonHienTai = hoaDon;
         this.hoaDonCtr = new HoaDon_Ctrl();
-        
+
         KhuyenMai_Ctr khuyenMaiCtr = new KhuyenMai_Ctr();
         this.danhSachKhuyenMai = khuyenMaiCtr.getDanhSachKhuyenMai();
-        
+
         khoiTaoGiaoDien();
         capNhatTinhToan();
     }
 
-    // ... (Giữ nguyên các hàm setKhuyenMai, taoNhan...)
     public void setKhuyenMaiDaApDung(KhuyenMai km) {
         this.khuyenMaiDaApDung = km;
         if (km != null && danhSachKhuyenMai != null) {
-             for (int i = 0; i < danhSachKhuyenMai.size(); i++) {
+            for (int i = 0; i < danhSachKhuyenMai.size(); i++) {
                 if (danhSachKhuyenMai.get(i).getMaKhuyenMai().equals(km.getMaKhuyenMai())) {
                     cboKhuyenMai.setSelectedIndex(i + 1);
                     lblThongBaoKhuyenMai.setText("Đã áp dụng từ phiếu đặt!");
@@ -103,7 +105,7 @@ public class XacNhanHoaDon_GUI extends JFrame {
         return l;
     }
 
-    // === GIAO DIỆN (Giữ nguyên) ===
+    // === GIAO DIỆN ===
     private void khoiTaoGiaoDien() {
         setTitle("HỆ DÌ LEO - Xác Nhận Thanh Toán");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -144,7 +146,7 @@ public class XacNhanHoaDon_GUI extends JFrame {
         pnlHoaDon.setLayout(new BoxLayout(pnlHoaDon, BoxLayout.Y_AXIS));
         pnlHoaDon.setBackground(Color.WHITE);
         pnlHoaDon.setBorder(new EmptyBorder(30, 40, 30, 40));
-        pnlHoaDon.setPreferredSize(new Dimension(600, 650)); 
+        pnlHoaDon.setPreferredSize(new Dimension(600, 650));
 
         JLabel lblTitleHD = new JLabel("XÁC NHẬN HÓA ĐƠN");
         lblTitleHD.setFont(new Font("Arial", Font.BOLD, 24));
@@ -160,7 +162,7 @@ public class XacNhanHoaDon_GUI extends JFrame {
         String tenKhach = (hoaDonHienTai.getPhieuDat() != null) ? hoaDonHienTai.getPhieuDat().getTenKhachHang() : "Khách vãng lai";
         JLabel lblKhachHang = new JLabel("Khách hàng: " + tenKhach);
         lblKhachHang.setFont(new Font("Arial", Font.PLAIN, 14));
-        
+
         String dsBanStr = "";
         if (hoaDonHienTai.getPhieuDat() != null) {
             List<Integer> list1 = hoaDonHienTai.getPhieuDat().getDanhSachBanDaChon();
@@ -208,14 +210,14 @@ public class XacNhanHoaDon_GUI extends JFrame {
 
         JPanel pnlTinhToan = new JPanel(new GridLayout(0, 2, 10, 5));
         pnlTinhToan.setBackground(Color.WHITE);
-        pnlTinhToan.setMaximumSize(new Dimension(520, 120)); 
+        pnlTinhToan.setMaximumSize(new Dimension(520, 120));
 
         lblTongTienMonAn = taoNhanGiaTri("0 VNĐ");
         lblTienGiam = taoNhanGiaTri("0 VNĐ");
         lblTienCoc = taoNhanGiaTri("0 VNĐ");
-        lblThanhVien = taoNhanChiTiet("Thành viên:"); 
+        lblThanhVien = taoNhanChiTiet("Thành viên:");
         lblGiamGiaThanhVien = taoNhanGiaTri("0 VNĐ");
-        
+
         pnlTinhToan.add(taoNhanChiTiet("Tổng tiền món:"));
         pnlTinhToan.add(lblTongTienMonAn);
         pnlTinhToan.add(taoNhanChiTiet("Giảm giá (Voucher):"));
@@ -226,42 +228,43 @@ public class XacNhanHoaDon_GUI extends JFrame {
         pnlTinhToan.add(lblGiamGiaThanhVien);
 
         JPanel pnlTongCong = new JPanel(new BorderLayout());
-        pnlTongCong.setBackground(new Color(240, 255, 240)); 
+        pnlTongCong.setBackground(new Color(240, 255, 240));
         pnlTongCong.setBorder(new EmptyBorder(10, 10, 10, 10));
         pnlTongCong.setMaximumSize(new Dimension(520, 50));
-        
+
         JLabel lblTextTong = new JLabel("TỔNG THANH TOÁN:");
         lblTextTong.setFont(new Font("Arial", Font.BOLD, 16));
         lblTongThanhToan = new JLabel("0 VNĐ");
         lblTongThanhToan.setFont(new Font("Arial", Font.BOLD, 20));
         lblTongThanhToan.setForeground(MAU_CHINH);
         lblTongThanhToan.setHorizontalAlignment(SwingConstants.RIGHT);
-        
+
         pnlTongCong.add(lblTextTong, BorderLayout.WEST);
         pnlTongCong.add(lblTongThanhToan, BorderLayout.EAST);
 
         JPanel pnlNutXacNhan = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         pnlNutXacNhan.setBackground(Color.WHITE);
 
-        JButton btnXacNhan = new JButton("XÁC NHẬN & IN HÓA ĐƠN");
+        // Đã đổi label nút bấm cho phù hợp
+        JButton btnXacNhan = new JButton("XÁC NHẬN & XUẤT PDF");
         btnXacNhan.setBackground(MAU_CHINH);
         btnXacNhan.setForeground(Color.WHITE);
         btnXacNhan.setFont(new Font("Arial", Font.BOLD, 14));
         btnXacNhan.setPreferredSize(new Dimension(250, 40));
         btnXacNhan.setFocusPainted(false);
         btnXacNhan.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
+
         JButton btnHuy = new JButton("Quay Lại");
-        btnHuy.setBackground(new Color(158, 158, 158)); 
+        btnHuy.setBackground(new Color(158, 158, 158));
         btnHuy.setForeground(Color.WHITE);
         btnHuy.setFont(new Font("Arial", Font.BOLD, 14));
         btnHuy.setPreferredSize(new Dimension(150, 40));
         btnHuy.setFocusPainted(false);
         btnHuy.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
+
         pnlNutXacNhan.add(btnXacNhan);
         pnlNutXacNhan.add(btnHuy);
-        
+
         pnlHoaDon.add(lblTitleHD);
         pnlHoaDon.add(Box.createRigidArea(new Dimension(0, 10)));
         pnlHoaDon.add(pnlInfo);
@@ -294,31 +297,31 @@ public class XacNhanHoaDon_GUI extends JFrame {
         });
 
         btnHuy.addActionListener(e -> {
-            dispose(); 
+            dispose();
         });
-        
+
         btnXacNhan.addActionListener(e -> {
             double tongMon = hoaDonCtr.tinhTongTienMonAn(hoaDonHienTai);
             double giamGiaVoucher = hoaDonCtr.tinhTienGiamGia(tongMon, khuyenMaiDaApDung);
             double giamGiaThanhVien = tinhGiamGiaHangThanhVien(tongMon);
             double tienCoc = (hoaDonHienTai.getPhieuDat() != null) ? hoaDonHienTai.getPhieuDat().getTienCoc() : 0;
             double thanhToanCuoiCung = Math.max(0, tongMon - giamGiaVoucher - giamGiaThanhVien - tienCoc);
-            
+
             String thongTinKM = (khuyenMaiDaApDung != null) ? String.format("<br>Khuyến mãi: -%,.0f VNĐ", giamGiaVoucher) : "";
             String thongTinTV = (giamGiaThanhVien > 0) ? String.format("<br>Thành viên: -%,.0f VNĐ", giamGiaThanhVien) : "";
             String thongTinCoc = (tienCoc > 0) ? String.format("<br>Đã đặt cọc: -%,.0f VNĐ", tienCoc) : "";
-            
+
             List<Integer> dsBanP = hoaDonHienTai.getPhieuDat().getDanhSachBanDaChon();
             ArrayList<Integer> maBans = (dsBanP != null) ? new ArrayList<>(dsBanP) : new ArrayList<>();
             int maBanChinh = !maBans.isEmpty() ? maBans.get(0) : (hoaDonHienTai.getPhieuDat() != null ? hoaDonHienTai.getPhieuDat().getMaBan() : 0);
-            
+
             List<ChiTietDatMon> dsMonP = hoaDonHienTai.getPhieuDat().getDanhSachMonAn();
             ArrayList<ChiTietDatMon> dsMonAn = (dsMonP != null) ? new ArrayList<>(dsMonP) : new ArrayList<>();
 
             String noiDungDialog = String.format("<html><body style='width: 300px;'>"
-                    + "<h3>XÁC NHẬN THANH TOÁN</h3>"
-                    + "<b>Tổng tiền món:</b> %,.0f VNĐ%s%s%s<hr>"
-                    + "<b>CẦN THANH TOÁN: <font color='red' size='5'>%,.0f VNĐ</font></b></body></html>",
+                            + "<h3>XÁC NHẬN THANH TOÁN</h3>"
+                            + "<b>Tổng tiền món:</b> %,.0f VNĐ%s%s%s<hr>"
+                            + "<b>CẦN THANH TOÁN: <font color='red' size='5'>%,.0f VNĐ</font></b></body></html>",
                     tongMon, thongTinKM, thongTinTV, thongTinCoc, thanhToanCuoiCung);
 
             ThanhToan_Dialog dialog = new ThanhToan_Dialog(this, noiDungDialog, thanhToanCuoiCung, maBanChinh, dsMonAn);
@@ -328,32 +331,32 @@ public class XacNhanHoaDon_GUI extends JFrame {
             if (luaChon == ThanhToan_Dialog.TIEN_MAT || luaChon == ThanhToan_Dialog.DA_CHUYEN_KHOAN) {
                 hoaDonCtr.capNhatTongTienHoaDon(hoaDonHienTai, thanhToanCuoiCung);
                 if (hoaDonHienTai.getPhieuDat() != null) {
-                     hoaDonHienTai.getPhieuDat().setGiamGia(giamGiaVoucher + giamGiaThanhVien); 
+                    hoaDonHienTai.getPhieuDat().setGiamGia(giamGiaVoucher + giamGiaThanhVien);
                 }
                 thucHienThanhToanVaXoaDuLieu(thanhToanCuoiCung);
             }
         });
         return pnlChinh;
     }
-    
-    // === XỬ LÝ THANH TOÁN VÀ IN BILL ===
+
+    // === XỬ LÝ THANH TOÁN VÀ IN BILL TẠI ĐÂY ===
     private void thucHienThanhToanVaXoaDuLieu(double tongThanhToan) {
         PhieuDatBan_Ctr phieuDatCtr = PhieuDatBan_Ctr.getInstance();
         BanAn_Ctr banAnCtr = BanAn_Ctr.getInstance();
-        
+
         int maBanChinh = 0;
         ArrayList<Integer> dsBanCanXoa = new ArrayList<>();
-        
+
         if (hoaDonHienTai.getPhieuDat() != null) {
             maBanChinh = hoaDonHienTai.getPhieuDat().getMaBan();
             List<Integer> list1 = hoaDonHienTai.getPhieuDat().getDanhSachBanDaChon();
             List<Integer> list2 = hoaDonHienTai.getPhieuDat().getDanhSachMaBan();
-            
+
             if (list1 != null && !list1.isEmpty()) dsBanCanXoa.addAll(list1);
             else if (list2 != null && !list2.isEmpty()) dsBanCanXoa.addAll(list2);
             else dsBanCanXoa.add(maBanChinh);
         }
-        
+
         // 1. Cập nhật Database
         if (hoaDonHienTai.getPhieuDat() != null && hoaDonHienTai.getPhieuDat().getMaPhieu() != null) {
             PhieuDat_DAO phieuDAO = new PhieuDat_DAO();
@@ -362,60 +365,59 @@ public class XacNhanHoaDon_GUI extends JFrame {
 
         // 2. Xóa bộ nhớ tạm
         phieuDatCtr.xoaPhieuDat(maBanChinh);
-        
-        // 3. Cập nhật Bàn ăn -> Trống
+
+        // 3. Cập nhật Bàn ăn -> Trống (Giả lập cập nhật thành công ở DB)
         boolean capNhatThanhCong = true;
 
         if (capNhatThanhCong) {
-            String thongBaoIn = "";
-            
             // Xử lý điểm tích lũy
             try {
                 KhachHang_Ctr khCtr = new KhachHang_Ctr();
                 khCtr.xuLyCongDiemChoKhach(hoaDonHienTai.getPhieuDat());
             } catch (Exception e) { e.printStackTrace(); }
 
-            // === TẠO VÀ IN HÓA ĐƠN ===
+            // === TẠO VÀ XUẤT FILE PDF BẰNG ĐƯỜNG DẪN TƯƠNG ĐỐI ===
             try {
-                String pathFolder = "src/HoaDon_ThanhToan_PDF"; 
-                File folder = new File(pathFolder);
-                if (!folder.exists()) folder.mkdirs();
+                // Đường dẫn tương đối tính từ thư mục gốc của Project
+                String pathFolder = "src/main/java/iuh/fit/son23641341/nhahanglau_phantan/HoaDon_ThanhToan_PDF";
+                Path path = Paths.get(pathFolder);
 
-                String tenFile = "HoaDon_" + maBanChinh + "_" + System.currentTimeMillis() + ".pdf";
+                // Tự động tạo thư mục nếu chưa tồn tại
+                if (!Files.exists(path)) {
+                    Files.createDirectories(path);
+                }
+
+                String tenFile = "HoaDon_Ban" + maBanChinh + "_" + System.currentTimeMillis() + ".pdf";
+
+                // Gắn thẳng tên file vào đường dẫn tương đối (không dùng toAbsolutePath nữa)
                 String fullPath = pathFolder + "/" + tenFile;
-                
-                // 1. Tạo file PDF
+
+                // Tạo file PDF
                 boolean kqXuLy = hoaDonCtr.taoHoaDonVaXuatPDF(hoaDonHienTai.getPhieuDat(), fullPath);
-                
+
                 if (kqXuLy) {
-                    // thongBaoIn = "\n(Đã lưu hóa đơn tại: " + fullPath + ")";
-                    
-                    String tenMayIn = "XP-58"; // Tên chính xác từ ảnh bạn gửi
-                    boolean inThanhCong = PrinterService.printPDF(fullPath, tenMayIn);
-                    
-                    if (inThanhCong) {
-                        thongBaoIn += "\n(Đã gửi lệnh in tới " + tenMayIn + ")";
-                    } else {
-                        thongBaoIn += "\n(Lỗi: Không tìm thấy máy in " + tenMayIn + " hoặc in thất bại)";
-                        // Fallback: Mở file PDF lên nếu in tự động thất bại
-                        // if (Desktop.isDesktopSupported()) {
-                        //     Desktop.getDesktop().open(new File(fullPath));
-                        // }
-                    }
+                    // Thông báo giờ sẽ chỉ hiện: src/main/java/...
+                    String thongBaoDialog = "<html><body style='width: 350px'>"
+                            + "<h3 style='color: #007E33;'>THANH TOÁN & XUẤT PDF THÀNH CÔNG!</h3>"
+                            + "<p>Đã lưu hóa đơn tại:</p>"
+                            + "<p><b>" + fullPath + "</b></p>"
+                            + "</body></html>";
+
+                    JOptionPane.showMessageDialog(this, thongBaoDialog, "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Lỗi: Tạo file PDF thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                thongBaoIn = "\n(Lỗi hệ thống khi in bill)";
+                JOptionPane.showMessageDialog(this, "Lỗi hệ thống khi xuất PDF: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
 
-            JOptionPane.showMessageDialog(this, "THANH TOÁN THÀNH CÔNG!\n" + thongBaoIn, "Thành công", JOptionPane.INFORMATION_MESSAGE);
-            
             // Dispose frame cha nếu có
             if (this.frameCha != null) {
                 this.frameCha.dispose();
             }
             this.dispose();
-            
+
             // Sử dụng GUIManager để chuyển mượt mà sang ChonBan_GUI
             GUIManager.getInstance().switchToGUI(ChonBan_GUI.class, this);
         } else {
@@ -439,7 +441,7 @@ public class XacNhanHoaDon_GUI extends JFrame {
         }
         pnlDanhSachMonAn.revalidate(); pnlDanhSachMonAn.repaint();
     }
-    
+
     private double tinhGiamGiaHangThanhVien(double tongTienMon) {
         if (hoaDonHienTai.getPhieuDat() != null && hoaDonHienTai.getPhieuDat().getMaKhachHang() != null) {
             String rank = new KhachHang_DAO().getHang(hoaDonHienTai.getPhieuDat());
@@ -464,13 +466,13 @@ public class XacNhanHoaDon_GUI extends JFrame {
         double km = hoaDonCtr.tinhTienGiamGia(tong, khuyenMaiDaApDung);
         double tv = tinhGiamGiaHangThanhVien(tong);
         double coc = (hoaDonHienTai.getPhieuDat() != null) ? hoaDonHienTai.getPhieuDat().getTienCoc() : 0;
-        
+
         lblTongTienMonAn.setText(String.format("%,.0f VNĐ", tong));
         lblTienGiam.setText(km > 0 ? String.format("- %,.0f VNĐ", km) : "0 VNĐ");
         lblGiamGiaThanhVien.setText(tv > 0 ? String.format("- %,.0f VNĐ", tv) : "0 VNĐ");
         lblTienCoc.setText(coc > 0 ? String.format("- %,.0f VNĐ", coc) : "0 VNĐ");
         lblTongThanhToan.setText(String.format("%,.0f VNĐ", Math.max(0, tong - km - tv - coc)));
-        
+
         if(tv > 0) lblGiamGiaThanhVien.setForeground(new Color(0, 102, 204));
         if(km > 0) lblTienGiam.setForeground(new Color(0, 128, 0));
     }
