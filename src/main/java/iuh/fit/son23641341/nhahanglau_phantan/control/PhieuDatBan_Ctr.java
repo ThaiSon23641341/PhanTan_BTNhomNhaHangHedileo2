@@ -124,7 +124,7 @@ public class PhieuDatBan_Ctr {
 
         PhieuDatBan phieu = new PhieuDatBan(maPhieu, maKhachHang, tenKH, sdt, emailDat, "Đặt trước",
                 nvHienTai != null ? nvHienTai.getManv() : "NV001", ngayDat, gioDat,
-                new Timestamp(System.currentTimeMillis()), giamGia, danhSachMonCopy, danhSachBan);
+                new Timestamp(System.currentTimeMillis()), phuongThuc, giamGia, danhSachMonCopy, danhSachBan);
 
         double tongTienMonAn = phieu.tinhTongTienMonAn();
         int soLuongBan = (danhSachBan != null) ? danhSachBan.size() : 1;

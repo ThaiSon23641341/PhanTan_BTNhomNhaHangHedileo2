@@ -134,7 +134,7 @@ public class PhieuDatBan {
     // Construtor khởi tạo của t đâu???? học hướng đối tượng chưa z ??? 
 	public PhieuDatBan(String maPhieu, String maKhachHang, String tenKhachDat, String sdtDat,
 			String emailDat, String trangThai, String maNhanVien, String ngayDat, String gioDat, Timestamp thoiGianDat,
-			 double giamGia, ArrayList<ChiTietDatMon> danhSachMonAn,
+			String phuongThucThanhToan, double giamGia, ArrayList<ChiTietDatMon> danhSachMonAn,
 			ArrayList<Integer> danhSachBanDaChon) {
 		
 		
@@ -148,11 +148,18 @@ public class PhieuDatBan {
 		setNgayDat(ngayDat); // Sử dụng setter để parse String -> java.sql.Date
 		this.gioDat = gioDat;
 		this.thoiGianDat = thoiGianDat;
+		this.phuongThucThanhToan = phuongThucThanhToan;
 		this.giamGia = giamGia;
-		if ("Đặt trước".equalsIgnoreCase(trangThai)) {
-		this.tienCoc = tinhTienCoc();
-		}
+		
 		this.danhSachMonAn = danhSachMonAn != null ? danhSachMonAn : new ArrayList<>();
+		// Gán tham chiếu phiếu đặt cho từng chi tiết món ăn
+		for (ChiTietDatMon ct : this.danhSachMonAn) {
+			ct.setPhieuDatBan(this);
+		}
+		
+		if ("Đặt trước".equalsIgnoreCase(trangThai)) {
+			this.tienCoc = tinhTienCoc();
+		}
 		this.danhSachBanDaChon = danhSachBanDaChon != null ? danhSachBanDaChon : new ArrayList<>();
 	}
 
@@ -406,7 +413,10 @@ public class PhieuDatBan {
     }
 
     public void setDanhSachMonAn(List<ChiTietDatMon> danhSachMonAn) {
-        this.danhSachMonAn = danhSachMonAn;
+        this.danhSachMonAn = danhSachMonAn != null ? danhSachMonAn : new ArrayList<>();
+        for (ChiTietDatMon ct : this.danhSachMonAn) {
+            ct.setPhieuDatBan(this);
+        }
     }
 
     // ================= BUSINESS LOGIC =================
