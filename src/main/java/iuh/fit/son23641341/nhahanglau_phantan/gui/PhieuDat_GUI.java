@@ -1466,6 +1466,16 @@ public class PhieuDat_GUI extends JPanel {
                 phieuHienTai.setDanhSachMonAn(this.danhSachMonDaChon);
                 phieuHienTai.setTenKhachHang(txtTenKhachHang.getText());
                 phieuHienTai.setSoDienThoai(txtSoDienThoai.getText());
+                
+                // Bổ sung: Ghi nhận Khách hàng thành viên nếu thu ngân nhập SDT lúc thanh toán
+                String sdtTV = txtSoDienThoaiThanhVien.getText().trim();
+                if (!sdtTV.isEmpty() && !sdtTV.equals("Nhập số điện thoại") && !sdtTV.equals("Nhập SĐT thành viên")) {
+                    KhachHang_DAO khDao = new KhachHang_DAO();
+                    String maKhachHang = khDao.getmaKhachHangbySDT(sdtTV);
+                    if (maKhachHang != null) {
+                        phieuHienTai.setMaKhachHang(maKhachHang);
+                    }
+                }
 
                 HoaDon hoaDonMoi = new HoaDon();
                 hoaDonMoi.setPhieuDat(this.phieuHienTai);

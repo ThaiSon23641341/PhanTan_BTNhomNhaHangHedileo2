@@ -5,7 +5,7 @@ import iuh.fit.son23641341.nhahanglau_phantan.util.EntityManagerFactoryUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 
-public class ChiTietDatMon_Dao {
+public class    ChiTietDatMon_Dao {
     private EntityManager em;
 
     public ChiTietDatMon_Dao() {

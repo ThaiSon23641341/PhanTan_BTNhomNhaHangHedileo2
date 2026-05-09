@@ -115,6 +115,14 @@ public class HoaDon {
         } else {
             this.loaiHoaDon = "Tại chỗ";
         }
+        
+        // 7. Ghi nhận Khách hàng thành viên
+        if (phieuDat.getKhachHang() != null) {
+            this.khachHangThanhVien = phieuDat.getKhachHang();
+        } else if (phieuDat.getMaKhachHang() != null && !phieuDat.getMaKhachHang().trim().isEmpty()) {
+            this.khachHangThanhVien = new KhachHangThanhVien();
+            this.khachHangThanhVien.setMaKhachHang(phieuDat.getMaKhachHang());
+        }
     }
 
     // ================= GETTERS & SETTERS =================

@@ -95,7 +95,7 @@ public class PhieuDatBan {
     private double tongTien; // Tổng tiền cuối cùng (để lưu DB)
 
     // --- CÁC DANH SÁCH ---
-    @OneToMany(mappedBy = "phieuDatBan", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "phieuDatBan", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<ChiTietDatMon> danhSachMonAn;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -139,7 +139,7 @@ public class PhieuDatBan {
 		
 		
 		this.maPhieu = maPhieu;
-		this.maKhachHang = maKhachHang;
+		setMaKhachHang(maKhachHang);
 		this.tenKhachDat = tenKhachDat;
 		this.sdtDat = sdtDat;
 		this.emailDat = emailDat;
@@ -151,10 +151,13 @@ public class PhieuDatBan {
 		this.phuongThucThanhToan = phuongThucThanhToan;
 		this.giamGia = giamGia;
 		
-		this.danhSachMonAn = danhSachMonAn != null ? danhSachMonAn : new ArrayList<>();
-		// Gán tham chiếu phiếu đặt cho từng chi tiết món ăn
-		for (ChiTietDatMon ct : this.danhSachMonAn) {
-			ct.setPhieuDatBan(this);
+		this.danhSachMonAn = new ArrayList<>();
+		if (danhSachMonAn != null) {
+			for (ChiTietDatMon ct : danhSachMonAn) {
+				ChiTietDatMon newCt = new ChiTietDatMon(ct.getMonAn(), ct.getSoLuong());
+				newCt.setPhieuDatBan(this);
+				this.danhSachMonAn.add(newCt);
+			}
 		}
 		
 		if ("Đặt trước".equalsIgnoreCase(trangThai)) {
@@ -184,11 +187,22 @@ public class PhieuDatBan {
     }
 
     public String getMaKhachHang() {
+        if (this.khachHang != null) {
+            return this.khachHang.getMaKhachHang();
+        }
         return maKhachHang;
     }
 
     public void setMaKhachHang(String maKhachHang) {
         this.maKhachHang = maKhachHang;
+        if (maKhachHang != null && !maKhachHang.trim().isEmpty()) {
+            if (this.khachHang == null) {
+                this.khachHang = new KhachHangThanhVien();
+            }
+            this.khachHang.setMaKhachHang(maKhachHang);
+        } else {
+            this.khachHang = null;
+        }
     }
 
     public int getMaBan() {
@@ -413,9 +427,16 @@ public class PhieuDatBan {
     }
 
     public void setDanhSachMonAn(List<ChiTietDatMon> danhSachMonAn) {
-        this.danhSachMonAn = danhSachMonAn != null ? danhSachMonAn : new ArrayList<>();
-        for (ChiTietDatMon ct : this.danhSachMonAn) {
-            ct.setPhieuDatBan(this);
+        if (this.danhSachMonAn == null) {
+            this.danhSachMonAn = new ArrayList<>();
+        }
+        this.danhSachMonAn.clear();
+        if (danhSachMonAn != null) {
+            for (ChiTietDatMon ct : danhSachMonAn) {
+                ChiTietDatMon newCt = new ChiTietDatMon(ct.getMonAn(), ct.getSoLuong());
+                newCt.setPhieuDatBan(this);
+                this.danhSachMonAn.add(newCt);
+            }
         }
     }
 
