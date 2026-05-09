@@ -1368,7 +1368,7 @@ public class PhieuDat_GUI extends JPanel {
 
                     phieuVangLai.setTrangThai("Đang sử dụng");
                     phieuVangLai.setTienCoc(0);
-                    phieuVangLai.setPhuongThucThanhToan(null); // Khách vãng lai chưa chọn phương thức
+                    phieuVangLai.setPhuongThucThanhToan((String) cboPhuongThucThanhToan.getSelectedItem());
 
                     // Lấy mã nhân viên hiện tại
                     if (User_Ctr.getInstance().getNhanVienHienTai() != null) {

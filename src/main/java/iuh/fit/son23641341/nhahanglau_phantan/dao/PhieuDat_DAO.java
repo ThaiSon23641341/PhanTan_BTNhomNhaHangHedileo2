@@ -139,7 +139,11 @@ public class PhieuDat_DAO {
             tx.begin();
             PhieuDatBan p = em.find(PhieuDatBan.class, maPhieu);
             if (p != null) {
-                p.setDanhSachMonAn(new ArrayList<>(danhSachMon));
+                List<ChiTietDatMon> newDishes = new ArrayList<>(danhSachMon);
+                for (ChiTietDatMon ct : newDishes) {
+                    ct.setPhieuDatBan(p);
+                }
+                p.setDanhSachMonAn(newDishes);
                 em.merge(p);
             }
             tx.commit();
