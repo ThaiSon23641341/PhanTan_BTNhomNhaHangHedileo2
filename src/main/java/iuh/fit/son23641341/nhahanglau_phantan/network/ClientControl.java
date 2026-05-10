@@ -10,8 +10,11 @@ public class ClientControl {
     private Socket socket;
     private ObjectOutputStream out;
     private ObjectInputStream in;
-    private String serverIp = "localhost"; // Có thể đổi thành IP LAN
-    private int port = 6789;
+
+    // Đọc IP từ system property, nếu không có thì dùng "localhost"
+    // Để chạy với máy khác: truyền -DserverIp=192.168.x.x khi khởi động
+    private String serverIp = System.getProperty("serverIp", "localhost");
+    private int port = Integer.parseInt(System.getProperty("serverPort", "6789"));
 
     private ClientControl() {
         try {

@@ -96,15 +96,10 @@ public class HoaDon_Ctrl {
             PdfWriter.getInstance(document, new java.io.FileOutputStream(filePath));
             document.open();
 
-            String fontPath = "src/main/resources/fonts/arial.ttf";
 
-            // Khởi tạo BaseFont hỗ trợ Tiếng Việt
-            BaseFont bf = BaseFont.createFont(fontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-
-            // Font
-            Font boldFont = new Font(bf, 14, Font.BOLD);
-            Font regularFont = new Font(bf, 10, Font.NORMAL);
-            Font titleFont = new Font(bf, 16, Font.BOLD);
+            Font boldFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14);
+            Font regularFont = FontFactory.getFont(FontFactory.HELVETICA, 10);
+            Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16);
 
             // Tiêu đề
             Paragraph title = new Paragraph("HỆ DÌ LEO - NHÀ HÀNG LẨU", titleFont);
