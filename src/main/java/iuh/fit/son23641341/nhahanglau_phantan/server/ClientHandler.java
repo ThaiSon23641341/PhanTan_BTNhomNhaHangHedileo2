@@ -210,6 +210,54 @@ public class ClientHandler implements Runnable {
                 case "GET_AVG_HOA_DON_NGAY":
                     return new Response("SUCCESS", ThongKe_Ctr.getInstance().TinhDoanhSoTrungBinhHoaDonTheoNgay((java.time.LocalDate) data), "Success");
 
+                // Aliases để tương thích với PhieuDatBan_Ctr client-side calls
+                case "TIM_PHIEU_THEO_BAN": {
+                    int mb = (data instanceof Integer) ? (Integer) data : Integer.parseInt(data.toString());
+                    PhieuDatBan_Ctr ctr = PhieuDatBan_Ctr.getInstance();
+                    iuh.fit.son23641341.nhahanglau_phantan.entity.PhieuDatBan p = ctr.layPhieuDangSuDungTheoMaBan(mb);
+                    if (p == null) {
+                        String ngayHom = new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date());
+                        java.util.ArrayList<iuh.fit.son23641341.nhahanglau_phantan.entity.PhieuDatBan> ds = ctr.layPhieuDatTheoBanVaNgay(mb, ngayHom);
+                        for (iuh.fit.son23641341.nhahanglau_phantan.entity.PhieuDatBan pb : ds) {
+                            if ("Đặt trước".equals(pb.getTrangThai()) || "Đã xác nhận".equals(pb.getTrangThai())) {
+                                p = pb; break;
+                            }
+                        }
+                    }
+                    return new Response("SUCCESS", p, "Success");
+                }
+
+                case "TIM_PHIEU_THEO_MA":
+                    return new Response("SUCCESS", new iuh.fit.son23641341.nhahanglau_phantan.dao.PhieuDat_DAO().timPhieuDatBangMa((String) data), "Success");
+
+                case "CAP_NHAT_PHIEU_DAT": {
+                    iuh.fit.son23641341.nhahanglau_phantan.entity.PhieuDatBan ph = (iuh.fit.son23641341.nhahanglau_phantan.entity.PhieuDatBan) data;
+                    boolean ok = new iuh.fit.son23641341.nhahanglau_phantan.dao.PhieuDat_DAO()
+                        .capNhatThongTinKhachHang(ph.getMaPhieu(), ph.getTenKhachDat(), ph.getSdtDat(), ph.getEmailDat());
+                    return new Response(ok ? "SUCCESS" : "ERROR", ok, ok ? "Updated" : "Failed");
+                }
+
+                case "GET_PHIEU_THEO_NGAY":
+                    return new Response("SUCCESS", new iuh.fit.son23641341.nhahanglau_phantan.dao.PhieuDat_DAO().getPhieuDatByNgay((String) data), "Success");
+
+                case "GET_PHIEU_THEO_BAN_VA_NGAY": {
+                    Object[] p2 = (Object[]) data;
+                    return new Response("SUCCESS", new iuh.fit.son23641341.nhahanglau_phantan.dao.PhieuDat_DAO()
+                        .getPhieuDatByBanVaNgay((int) p2[0], (String) p2[1]), "Success");
+                }
+
+                case "GET_PHIEU_DANG_SU_DUNG":
+                    return new Response("SUCCESS", new iuh.fit.son23641341.nhahanglau_phantan.dao.PhieuDat_DAO()
+                        .getPhieuDangSuDungTheoMaBan((int) data), "Success");
+
+                case "CAP_NHAT_MON_AN_PHIEU": {
+                    Object[] mp = (Object[]) data;
+                    boolean ok2 = new iuh.fit.son23641341.nhahanglau_phantan.dao.PhieuDat_DAO()
+                        .capNhatMonAnCuaPhieu((String) mp[0],
+                            (java.util.List<iuh.fit.son23641341.nhahanglau_phantan.entity.ChiTietDatMon>) mp[1]);
+                    return new Response(ok2 ? "SUCCESS" : "ERROR", ok2, ok2 ? "Updated" : "Failed");
+                }
+
                 default:
                     return new Response("ERROR", null, "Unknown action: " + action);
             }

@@ -23,9 +23,16 @@ public class PhieuDatBan_Ctr {
 
     private PhieuDatBan_Ctr() {
         this.phieuDatDao = new PhieuDat_DAO();
-        this.danhSachPhieu = new ArrayList<>(phieuDatDao.getAllPhieuDat());
         this.gioHangTamThoi = new HashMap<>();
         this.khuyenMaiTamThoi = new HashMap<>();
+        // Chỉ tải dữ liệu nếu đang ở Server side (có kết nối CSDL)
+        if (phieuDatDao.isFunctional()) {
+            this.danhSachPhieu = new ArrayList<>(phieuDatDao.getAllPhieuDat());
+        } else {
+            this.danhSachPhieu = new ArrayList<>();
+            // Client side: tải dữ liệu qua mạng
+            lamMoiDuLieu();
+        }
     }
 
     public static PhieuDatBan_Ctr getInstance() {
@@ -87,33 +94,62 @@ public class PhieuDatBan_Ctr {
     }
 
     public PhieuDatBan timPhieuTheoMaBan(int maBan) {
-        // Ưu tiên tìm phiếu đang sử dụng
-        PhieuDatBan p = phieuDatDao.getPhieuDangSuDungTheoMaBan(maBan);
-        if (p != null)
-            return p;
-
-        // Nếu không có, tìm phiếu đặt trước trong ngày hôm nay
-        String ngayHômNay = new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date());
-        ArrayList<PhieuDatBan> list = phieuDatDao.getPhieuDatByBanVaNgay(maBan, ngayHômNay);
-        for (PhieuDatBan phieu : list) {
-            if ("Đặt trước".equals(phieu.getTrangThai()) || "Đã xác nhận".equals(phieu.getTrangThai())) {
-                return phieu;
+        if (phieuDatDao != null && phieuDatDao.isFunctional()) {
+            // Server side: tìm trực tiếp qua DAO
+            PhieuDatBan p = phieuDatDao.getPhieuDangSuDungTheoMaBan(maBan);
+            if (p != null) return p;
+            String ngayHômNay = new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date());
+            ArrayList<PhieuDatBan> list = phieuDatDao.getPhieuDatByBanVaNgay(maBan, ngayHômNay);
+            for (PhieuDatBan phieu : list) {
+                if ("Đặt trước".equals(phieu.getTrangThai()) || "Đã xác nhận".equals(phieu.getTrangThai())) {
+                    return phieu;
+                }
             }
+            return null;
+        } else {
+            // Client side: gửi request qua mạng
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req =
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("TIM_PHIEU_THEO_BAN", maBan);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res =
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            if (res != null && "SUCCESS".equals(res.getStatus())) {
+                return (PhieuDatBan) res.getData();
+            }
+            return null;
         }
-        return null;
     }
 
     public PhieuDatBan timPhieuTheoMaPhieu(String maPhieu) {
-        return phieuDatDao.timPhieuDatBangMa(maPhieu);
+        if (phieuDatDao != null && phieuDatDao.isFunctional()) {
+            return phieuDatDao.timPhieuDatBangMa(maPhieu);
+        } else {
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req =
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("TIM_PHIEU_THEO_MA", maPhieu);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res =
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            if (res != null && "SUCCESS".equals(res.getStatus())) {
+                return (PhieuDatBan) res.getData();
+            }
+            return null;
+        }
     }
 
     public boolean capNhatPhieuDat(PhieuDatBan phieuCapNhat) {
-        // Sử dụng logic cập nhật thông tin khách hàng trong DAO hoặc merge
-        // Ở đây ta có thể dùng merge nếu DAO hỗ trợ hoặc viết hàm riêng
-        if (phieuDatDao.capNhatThongTinKhachHang(phieuCapNhat.getMaPhieu(), phieuCapNhat.getTenKhachDat(),
-                phieuCapNhat.getSdtDat(), phieuCapNhat.getEmailDat())) {
-            lamMoiDuLieu();
-            return true;
+        if (phieuDatDao != null && phieuDatDao.isFunctional()) {
+            if (phieuDatDao.capNhatThongTinKhachHang(phieuCapNhat.getMaPhieu(), phieuCapNhat.getTenKhachDat(),
+                    phieuCapNhat.getSdtDat(), phieuCapNhat.getEmailDat())) {
+                lamMoiDuLieu();
+                return true;
+            }
+        } else {
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req =
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("CAP_NHAT_PHIEU_DAT", phieuCapNhat);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res =
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            if (res != null && "SUCCESS".equals(res.getStatus())) {
+                lamMoiDuLieu();
+                return true;
+            }
         }
         return false;
     }
@@ -149,7 +185,10 @@ public class PhieuDatBan_Ctr {
         String maPhieu = taoMaPhieu(ngayDat, gioDat, sdt);
         String maKhachHang = null;
         if (sdt != null && !sdt.trim().isEmpty()) {
-            maKhachHang = new KhachHang_DAO().getMaKhachHangBySDT(sdt);
+            // Chỉ tra cứu KH qua DAO khi ở Server side
+            if (phieuDatDao != null && phieuDatDao.isFunctional()) {
+                maKhachHang = new KhachHang_DAO().getMaKhachHangBySDT(sdt);
+            }
         }
 
         NhanVien nvHienTai = User_Ctr.getInstance().getNhanVienHienTai();
@@ -168,8 +207,7 @@ public class PhieuDatBan_Ctr {
         phieu.setTienCoc(tienCoc);
         phieu.setTongTien(tongTienMonAn + tienCoc - giamGia);
 
-        if (phieuDatDao.insertPhieuDat(phieu)) {
-            lamMoiDuLieu();
+        if (themPhieuDat(phieu)) {
             return phieu;
         }
         return null;
@@ -203,7 +241,12 @@ public class PhieuDatBan_Ctr {
     }
 
     public boolean kiemTraTrungLich(int maBan, String ngayDat, String gioDat) {
-        ArrayList<PhieuDatBan> phieus = phieuDatDao.getPhieuDatByBanVaNgay(maBan, ngayDat);
+        ArrayList<PhieuDatBan> phieus;
+        if (phieuDatDao != null && phieuDatDao.isFunctional()) {
+            phieus = phieuDatDao.getPhieuDatByBanVaNgay(maBan, ngayDat);
+        } else {
+            phieus = layPhieuDatTheoBanVaNgay(maBan, ngayDat);
+        }
         for (PhieuDatBan p : phieus) {
             if (!p.getTrangThai().equals("Đã hủy"))
                 return true;
@@ -227,15 +270,37 @@ public class PhieuDatBan_Ctr {
     }
 
     public boolean capNhatTrangThaiPhieu(String maPhieu, String trangThai) {
-        if (phieuDatDao.capNhatTrangThai(maPhieu, trangThai)) {
-            lamMoiDuLieu();
-            return true;
+        if (phieuDatDao != null && phieuDatDao.isFunctional()) {
+            if (phieuDatDao.capNhatTrangThai(maPhieu, trangThai)) {
+                lamMoiDuLieu();
+                return true;
+            }
+        } else {
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req =
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("CAP_NHAT_TRANG_THAI_PHIEU", new Object[]{maPhieu, trangThai});
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res =
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            if (res != null && "SUCCESS".equals(res.getStatus())) {
+                lamMoiDuLieu();
+                return true;
+            }
         }
         return false;
     }
 
     public ArrayList<PhieuDatBan> layPhieuDatTheoNgay(String ngay) {
-        return phieuDatDao.getPhieuDatByNgay(ngay);
+        if (phieuDatDao != null && phieuDatDao.isFunctional()) {
+            return phieuDatDao.getPhieuDatByNgay(ngay);
+        } else {
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req =
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_PHIEU_THEO_NGAY", ngay);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res =
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            if (res != null && "SUCCESS".equals(res.getStatus())) {
+                return new ArrayList<>((List<PhieuDatBan>) res.getData());
+            }
+            return new ArrayList<>();
+        }
     }
 
     public ArrayList<Integer> layDanhSachBanTrungLich(ArrayList<Integer> danhSachMaBan, String ngayDat, String gioDat) {
@@ -260,18 +325,53 @@ public class PhieuDatBan_Ctr {
     }
 
     public boolean capNhatMonAnCuaPhieu(String maPhieu, ArrayList<ChiTietDatMon> danhSachMon) {
-        if (phieuDatDao.capNhatMonAnCuaPhieu(maPhieu, danhSachMon)) {
-            lamMoiDuLieu();
-            return true;
+        if (phieuDatDao != null && phieuDatDao.isFunctional()) {
+            if (phieuDatDao.capNhatMonAnCuaPhieu(maPhieu, danhSachMon)) {
+                lamMoiDuLieu();
+                return true;
+            }
+        } else {
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req =
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("CAP_NHAT_MON_AN_PHIEU",
+                    new Object[]{maPhieu, danhSachMon});
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res =
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            if (res != null && "SUCCESS".equals(res.getStatus())) {
+                lamMoiDuLieu();
+                return true;
+            }
         }
         return false;
     }
 
     public ArrayList<PhieuDatBan> layPhieuDatTheoBanVaNgay(int maBan, String ngay) {
-        return phieuDatDao.getPhieuDatByBanVaNgay(maBan, ngay);
+        if (phieuDatDao != null && phieuDatDao.isFunctional()) {
+            return phieuDatDao.getPhieuDatByBanVaNgay(maBan, ngay);
+        } else {
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req =
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_PHIEU_THEO_BAN_VA_NGAY",
+                    new Object[]{maBan, ngay});
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res =
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            if (res != null && "SUCCESS".equals(res.getStatus())) {
+                return new ArrayList<>((List<PhieuDatBan>) res.getData());
+            }
+            return new ArrayList<>();
+        }
     }
 
     public PhieuDatBan layPhieuDangSuDungTheoMaBan(int maBan) {
-        return phieuDatDao.getPhieuDangSuDungTheoMaBan(maBan);
+        if (phieuDatDao != null && phieuDatDao.isFunctional()) {
+            return phieuDatDao.getPhieuDangSuDungTheoMaBan(maBan);
+        } else {
+            iuh.fit.son23641341.nhahanglau_phantan.network.Request req =
+                new iuh.fit.son23641341.nhahanglau_phantan.network.Request("GET_PHIEU_DANG_SU_DUNG", maBan);
+            iuh.fit.son23641341.nhahanglau_phantan.network.Response res =
+                iuh.fit.son23641341.nhahanglau_phantan.network.ClientControl.getInstance().sendRequest(req);
+            if (res != null && "SUCCESS".equals(res.getStatus())) {
+                return (PhieuDatBan) res.getData();
+            }
+            return null;
+        }
     }
 }
